@@ -144,6 +144,7 @@ class WorkiomCollectionsClient {
     ownerEmail: string;
     ownerName: string;
     coverImageUrl?: string;
+    visibility?: 'Private' | 'Public';
   }): Promise<Collection> {
     const shareToken = crypto.randomUUID();
     // create_record DOES return the full record in result.data
@@ -155,7 +156,7 @@ class WorkiomCollectionsClient {
         'Asset IDs': '[]',
         'Owner Email': data.ownerEmail,
         'Owner Name': data.ownerName,
-        Visibility: 'Private',
+        Visibility: data.visibility ?? 'Private',
         'Share Token': shareToken,
         'Cover Image URL': data.coverImageUrl ?? '',
         'Created At': new Date().toISOString(),

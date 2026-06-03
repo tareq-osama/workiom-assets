@@ -32,12 +32,19 @@ export async function POST(request: Request) {
   }
 
   try {
-    const { name, description } = await request.json() as { name?: string; description?: string };
+    const { name, description, coverImageUrl, visibility } = await request.json() as {
+      name?: string;
+      description?: string;
+      coverImageUrl?: string;
+      visibility?: 'Private' | 'Public';
+    };
     if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
 
     const collection = await workiomCollections.create({
       name: name.trim(),
       description: description?.trim(),
+      coverImageUrl: coverImageUrl?.trim() || undefined,
+      visibility: visibility === 'Public' ? 'Public' : 'Private',
       ownerEmail: user.email,
       ownerName: user.name,
     });
