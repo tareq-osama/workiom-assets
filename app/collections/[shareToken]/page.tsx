@@ -8,6 +8,8 @@ import { getAsset } from '@/lib/workiom';
 import type { Asset } from '@/types/asset';
 import AssetCard from '@/components/asset-card';
 
+export const dynamic = 'force-dynamic';
+
 export default async function SharedCollectionPage({
   params,
 }: {

@@ -51,6 +51,8 @@ const CATEGORY_COLORS: Record<AssetCategory, string> = {
   Documents: 'bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100',
 };
 
+export const dynamic = 'force-dynamic';
+
 export default async function HomePage() {
   const listIdSet = !!process.env.WORKIOM_LIST_ID;
 
