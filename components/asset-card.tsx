@@ -171,10 +171,9 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             </div>
           )}
 
-          {/* Hover overlay — quick actions only, stop propagation so dialog doesn't open */}
+          {/* Hover overlay — quick actions only, pointer-events-none when invisible so full card remains clickable */}
           <div
-            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2"
-            onClick={(e) => e.stopPropagation()}
+            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto"
           >
             <Tooltip>
               <TooltipTrigger

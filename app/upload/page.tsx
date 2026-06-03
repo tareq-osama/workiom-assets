@@ -60,13 +60,15 @@ export default function UploadPage() {
 
   useEffect(() => {
     fetch('/api/auth/me')
-      .then((res) => (res.ok ? res.json() : null))
+      .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
       .then((data) => {
         if (data?.user?.role) setUserRole(data.user.role as UserRole);
       })
-      .catch(() => {})
+      .catch((statusOrErr) => {
+        if (statusOrErr === 401) router.replace('/login');
+      })
       .finally(() => setAuthChecked(true));
-  }, []);
+  }, [router]);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep>('idle');

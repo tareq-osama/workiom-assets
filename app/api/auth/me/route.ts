@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { verifyToken } from '@/lib/auth'
+import { workiomUsers } from '@/lib/workiom-users'
 
 export async function GET() {
   try {
@@ -16,13 +17,27 @@ export async function GET() {
       return NextResponse.json({ error: 'Invalid or expired token' }, { status: 401 })
     }
 
+    // Fetch live user data so role changes in Workiom take effect without re-login.
+    // Falls back to JWT data if Workiom is unavailable.
+    let role = payload.role
+    let status = payload.status
+    try {
+      const liveUser = await workiomUsers.findById(payload.id)
+      if (liveUser) {
+        role = liveUser.role
+        status = liveUser.status
+      }
+    } catch {
+      // Workiom unavailable — use JWT values
+    }
+
     return NextResponse.json({
       user: {
         id: payload.id,
         name: payload.name,
         email: payload.email,
-        role: payload.role,
-        status: payload.status,
+        role,
+        status,
       },
     })
   } catch (err) {
