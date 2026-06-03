@@ -114,27 +114,19 @@ class WorkiomUsersClient {
   }
 
   async findByEmail(email: string): Promise<User | null> {
-    const result = (await this.callTool('get_records', {
-      listId: this.listId,
-      limit: 1,
-      offset: 0,
-      search: email,
-    })) as { success?: boolean; data?: { items?: WorkiomUserRecord[] } } | null
-
-    if (!result?.data?.items?.length) return null
-
-    const match = result.data.items.find(
-      (r) => (r.Email ?? '').toLowerCase() === email.toLowerCase()
-    )
-    return match ? mapRecord(match) : null
+    const raw = await this.findRawByEmail(email)
+    return raw ? mapRecord(raw) : null
   }
 
   async findRawByEmail(email: string): Promise<WorkiomUserRecord | null> {
+    // Use filters for a precise field-level match instead of full-text search.
+    // search: email with limit:1 is unreliable — Workiom searches across all
+    // text fields and the first result may not be the right user.
     const result = (await this.callTool('get_records', {
       listId: this.listId,
-      limit: 1,
+      limit: 10,
       offset: 0,
-      search: email,
+      filters: [{ field: 'Email', operator: 'eq', value: email.toLowerCase() }],
     })) as { success?: boolean; data?: { items?: WorkiomUserRecord[] } } | null
 
     if (!result?.data?.items?.length) return null
