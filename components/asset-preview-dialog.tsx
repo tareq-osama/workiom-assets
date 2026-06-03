@@ -4,25 +4,14 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import {
-  Download,
-  ExternalLink,
-  File,
-  FileImage,
-  FileSpreadsheet,
-  FileText,
-  Film,
-  Link2,
-  ImageIcon,
-  Code,
-  Check,
-  TrendingDown,
-  ChevronDown,
-  ChevronUp,
+  Download, ExternalLink, File, FileImage, FileSpreadsheet,
+  FileText, Film, Link2, ImageIcon, Code, Check, TrendingDown, Tag, User, HardDrive,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
-import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import StatusBadge from '@/components/status-badge';
 import CollectionsPopover from '@/components/collections-popover';
 import type { Asset } from '@/types/asset';
 import { cn } from '@/lib/utils';
@@ -70,17 +59,36 @@ async function triggerDownload(asset: Asset) {
   }
 }
 
-function CopyIconButton({ value, icon, tooltip }: { value: string; icon: React.ReactNode; tooltip: string }) {
+function CopyIconButton({ value, icon, tooltip, label }: {
+  value: string; icon: React.ReactNode; tooltip: string; label?: string;
+}) {
   const [copied, setCopied] = useState(false);
   async function copy() {
     try { await navigator.clipboard.writeText(value); } catch { return; }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
+  if (label) {
+    return (
+      <button
+        onClick={copy}
+        className={cn(
+          'flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors',
+          copied && 'border-emerald-200 text-emerald-700 bg-emerald-50'
+        )}
+      >
+        {copied ? <Check className="h-4 w-4" /> : icon}
+        {copied ? 'Copied!' : label}
+      </button>
+    );
+  }
   return (
     <Tooltip>
       <TooltipTrigger
-        className={cn('inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer', copied && 'text-emerald-600')}
+        className={cn(
+          'inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer',
+          copied && 'text-emerald-600 bg-emerald-50'
+        )}
         onClick={copy}
       >
         {copied ? <Check className="h-4 w-4" /> : icon}
@@ -91,181 +99,229 @@ function CopyIconButton({ value, icon, tooltip }: { value: string; icon: React.R
 }
 
 export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetPreviewDialogProps) {
-  const [infoExpanded, setInfoExpanded] = useState(false);
-
   if (!asset) return null;
 
   const previewUrl = asset.thumbnailUrl || (isImage(asset.fileType) ? asset.fileUrl : null);
   const isSvg = asset.fileType.toUpperCase() === 'SVG';
   const size = formatSize(asset.fileSize);
   const assetPageUrl = typeof window !== 'undefined' ? `${window.location.origin}/assets/${asset.id}` : `/assets/${asset.id}`;
-  const hasInfo = asset.description || asset.tags.length > 0 || (asset.status === 'Deprecated' && asset.deprecationReason);
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="max-w-[96vw] w-[1200px] h-[92vh] p-0 overflow-hidden bg-white rounded-2xl flex flex-col gap-0 shadow-2xl">
+      <DialogContent
+        showCloseButton={false}
+        className="!max-w-[92vw] w-[1400px] h-[88vh] p-0 overflow-hidden bg-white rounded-2xl shadow-2xl ring-0 flex flex-col gap-0"
+      >
         <DialogTitle className="sr-only">{asset.name}</DialogTitle>
 
         {/* ── TOPBAR ── */}
-        <div className="h-14 flex-shrink-0 flex items-center gap-2 px-3 border-b border-slate-100 bg-white">
-
-          {/* Left: name + meta chips */}
-          <div className="flex items-center gap-2 min-w-0 flex-1 overflow-hidden">
-            <h2 className="font-semibold text-slate-900 text-sm truncate max-w-[180px] sm:max-w-xs">
-              {asset.name}
-            </h2>
+        <div className="flex-shrink-0 flex items-center gap-3 px-4 h-14 border-b border-slate-100 bg-white">
+          {/* Name + chips */}
+          <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
+            <span className="font-semibold text-slate-900 text-sm truncate">{asset.name}</span>
             {asset.category && (
               <Badge variant="secondary" className="flex-shrink-0 text-xs bg-blue-50 text-blue-700 border-blue-100 hidden sm:inline-flex">
                 {asset.category}
               </Badge>
             )}
             {asset.fileType && (
-              <span className="text-xs text-slate-400 flex-shrink-0 hidden sm:inline">{asset.fileType}</span>
+              <span className="text-xs font-medium text-slate-400 flex-shrink-0 hidden sm:inline bg-slate-100 px-1.5 py-0.5 rounded">
+                {asset.fileType}
+              </span>
             )}
-            {size && (
-              <span className="text-xs text-slate-400 flex-shrink-0 hidden md:inline">{size}</span>
-            )}
-            {asset.owner && (
-              <span className="text-xs text-slate-400 flex-shrink-0 hidden lg:inline">by {asset.owner}</span>
-            )}
-            {/* Tags – overflow hidden */}
-            {asset.tags.length > 0 && (
-              <div className="hidden xl:flex items-center gap-1 overflow-hidden">
-                {asset.tags.slice(0, 4).map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="text-xs bg-slate-100 text-slate-500 flex-shrink-0 cursor-pointer hover:bg-slate-200"
-                    onClick={() => { onOpenChange(false); window.location.href = `/browse?search=${encodeURIComponent(tag)}`; }}
-                  >
-                    {tag}
-                  </Badge>
-                ))}
-              </div>
+            {size && <span className="text-xs text-slate-400 flex-shrink-0 hidden md:inline">{size}</span>}
+            {asset.status === 'Deprecated' && (
+              <Badge variant="outline" className="flex-shrink-0 text-xs text-red-600 border-red-200 bg-red-50 hidden sm:inline-flex">
+                Deprecated
+              </Badge>
             )}
           </div>
 
-          {/* Right: actions */}
-          <div className="flex items-center gap-0.5 flex-shrink-0">
-            {/* Collections */}
+          {/* Actions */}
+          <div className="flex items-center gap-1 flex-shrink-0">
             <CollectionsPopover asset={asset} />
-
-            <div className="w-px h-5 bg-slate-200 mx-1" />
-
-            {/* Download */}
+            <div className="w-px h-5 bg-slate-200 mx-1 hidden sm:block" />
             <Tooltip>
               <TooltipTrigger
-                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer disabled:opacity-40"
+                className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
                 onClick={() => asset.fileUrl && triggerDownload(asset)}
               >
                 <Download className="h-4 w-4" />
               </TooltipTrigger>
-              <TooltipContent>Download {asset.fileType}</TooltipContent>
+              <TooltipContent>Download</TooltipContent>
             </Tooltip>
-
-            {/* Copy link */}
             <CopyIconButton value={assetPageUrl} icon={<Link2 className="h-4 w-4" />} tooltip="Copy Link" />
-
-            {/* Copy file URL (images only) */}
             {isImage(asset.fileType) && asset.fileUrl && (
               <CopyIconButton value={asset.fileUrl} icon={<ImageIcon className="h-4 w-4" />} tooltip="Copy File URL" />
             )}
-
-            {/* Copy SVG */}
             {isSvg && asset.fileUrl && (
               <CopyIconButton value={asset.fileUrl} icon={<Code className="h-4 w-4" />} tooltip="Copy as SVG" />
             )}
-
-            <div className="w-px h-5 bg-slate-200 mx-1" />
-
-            {/* Open full page */}
+            <div className="w-px h-5 bg-slate-200 mx-1 hidden sm:block" />
             <Tooltip>
-              <TooltipTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-600 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
+              <TooltipTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
                 <Link href={`/assets/${asset.id}`} onClick={() => onOpenChange(false)}>
                   <ExternalLink className="h-4 w-4" />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent>Open full page</TooltipContent>
+              <TooltipContent>Full page</TooltipContent>
             </Tooltip>
           </div>
         </div>
 
-        {/* ── PREVIEW (fills remaining space) ── */}
-        <div className="flex-1 min-h-0 relative bg-slate-900 flex items-center justify-center overflow-hidden">
-          {previewUrl ? (
-            <Image
-              src={previewUrl}
-              alt={asset.name}
-              fill
-              sizes="96vw"
-              className="object-contain"
-              unoptimized
-              priority
-            />
-          ) : (
-            <div className="flex flex-col items-center gap-4 text-slate-600">
-              <FileTypeIcon fileType={asset.fileType} className="w-24 h-24 text-slate-600" />
-              <p className="text-sm font-medium text-slate-400 uppercase tracking-widest">
-                {asset.fileType || 'No preview'}
-              </p>
-            </div>
-          )}
+        {/* ── BODY: preview left + details right ── */}
+        <div className="flex flex-1 min-h-0 overflow-hidden">
 
-          {/* Deprecated banner */}
-          {asset.status === 'Deprecated' && (
-            <div className="absolute top-3 left-3 flex items-center gap-1.5 bg-red-500/90 text-white text-xs font-medium px-3 py-1.5 rounded-full backdrop-blur-sm">
-              <TrendingDown className="h-3 w-3" />
-              Deprecated
-            </div>
-          )}
-
-          {/* Bottom info overlay — expandable */}
-          {hasInfo && (
-            <div className={cn(
-              'absolute bottom-0 left-0 right-0 transition-all duration-300',
-              infoExpanded ? 'bg-black/80 backdrop-blur-sm' : 'bg-gradient-to-t from-black/70 via-black/30 to-transparent'
-            )}>
-              {/* Toggle row */}
-              <button
-                className="w-full flex items-center justify-between px-5 py-3 text-white/80 hover:text-white transition-colors"
-                onClick={() => setInfoExpanded((v) => !v)}
-              >
-                <span className="text-xs font-medium">
-                  {infoExpanded ? 'Hide details' : 'Show details'}
+          {/* Left — preview on light checkerboard bg */}
+          <div
+            className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden"
+            style={{
+              background: `
+                linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
+                linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
+                linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)
+              `,
+              backgroundSize: '20px 20px',
+              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+              backgroundColor: '#fafafa',
+            }}
+          >
+            {previewUrl ? (
+              <Image
+                src={previewUrl}
+                alt={asset.name}
+                fill
+                sizes="70vw"
+                className="object-contain p-8"
+                unoptimized
+                priority
+              />
+            ) : (
+              <div className="flex flex-col items-center gap-4 text-slate-400">
+                <FileTypeIcon fileType={asset.fileType} className="w-20 h-20 text-slate-300" />
+                <span className="text-sm font-medium text-slate-400 uppercase tracking-widest">
+                  {asset.fileType || 'No preview'}
                 </span>
-                {infoExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronUp className="h-4 w-4" />}
-              </button>
+              </div>
+            )}
+          </div>
 
-              {/* Expanded content */}
-              {infoExpanded && (
-                <div className="px-5 pb-5 space-y-3">
-                  {asset.description && (
-                    <p className="text-sm text-white/90 leading-relaxed">{asset.description}</p>
-                  )}
-                  {asset.status === 'Deprecated' && asset.deprecationReason && (
-                    <div className="flex items-start gap-2 bg-red-500/20 border border-red-400/30 rounded-lg p-3">
-                      <TrendingDown className="h-4 w-4 text-red-300 flex-shrink-0 mt-0.5" />
-                      <p className="text-sm text-red-200">{asset.deprecationReason}</p>
-                    </div>
-                  )}
-                  {asset.tags.length > 0 && (
-                    <div className="flex flex-wrap gap-1.5">
-                      {asset.tags.map((tag) => (
-                        <Badge
-                          key={tag}
-                          variant="secondary"
-                          className="text-xs bg-white/10 text-white border-white/20 hover:bg-white/20 cursor-pointer"
-                          onClick={() => { onOpenChange(false); window.location.href = `/browse?search=${encodeURIComponent(tag)}`; }}
-                        >
-                          {tag}
-                        </Badge>
-                      ))}
-                    </div>
+          {/* Right — details panel */}
+          <div className="w-80 flex-shrink-0 border-l border-slate-100 bg-white flex flex-col overflow-hidden">
+            <div className="flex-1 overflow-y-auto p-5 space-y-5">
+
+              {/* Name + status */}
+              <div>
+                <h2 className="font-semibold text-slate-900 text-base leading-snug mb-2">{asset.name}</h2>
+                <div className="flex items-center gap-2 flex-wrap">
+                  <StatusBadge status={asset.status} />
+                  {asset.category && (
+                    <Badge variant="secondary" className="text-xs bg-blue-50 text-blue-700 border-blue-100">
+                      {asset.category}
+                    </Badge>
                   )}
                 </div>
+              </div>
+
+              {/* Description */}
+              {asset.description && (
+                <div>
+                  <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Description</p>
+                  <p className="text-sm text-slate-600 leading-relaxed">{asset.description}</p>
+                </div>
               )}
+
+              {/* Deprecation */}
+              {asset.status === 'Deprecated' && asset.deprecationReason && (
+                <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded-xl">
+                  <TrendingDown className="h-4 w-4 text-red-500 flex-shrink-0 mt-0.5" />
+                  <div>
+                    <p className="text-xs font-semibold text-red-700 mb-0.5">Reason</p>
+                    <p className="text-xs text-red-600">{asset.deprecationReason}</p>
+                  </div>
+                </div>
+              )}
+
+              {/* Tags */}
+              {asset.tags.length > 0 && (
+                <div>
+                  <p className="flex items-center gap-1 text-xs font-semibold text-slate-400 uppercase tracking-wider mb-2">
+                    <Tag className="h-3 w-3" /> Tags
+                  </p>
+                  <div className="flex flex-wrap gap-1.5">
+                    {asset.tags.map((tag) => (
+                      <Badge
+                        key={tag}
+                        variant="secondary"
+                        className="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer transition-colors"
+                        onClick={() => { onOpenChange(false); window.location.href = `/browse?search=${encodeURIComponent(tag)}`; }}
+                      >
+                        {tag}
+                      </Badge>
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              <Separator />
+
+              {/* Metadata */}
+              <div className="grid grid-cols-2 gap-y-4 gap-x-3 text-sm">
+                {asset.fileType && (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5">Type</p>
+                    <p className="font-medium text-slate-800 text-xs">{asset.fileType}</p>
+                  </div>
+                )}
+                {size && (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5 flex items-center gap-1"><HardDrive className="h-3 w-3" />Size</p>
+                    <p className="font-medium text-slate-800 text-xs">{size}</p>
+                  </div>
+                )}
+                {asset.owner && (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5 flex items-center gap-1"><User className="h-3 w-3" />Owner</p>
+                    <p className="font-medium text-slate-800 text-xs truncate">{asset.owner}</p>
+                  </div>
+                )}
+                {asset.downloadCount > 0 && (
+                  <div>
+                    <p className="text-xs text-slate-400 mb-0.5">Downloads</p>
+                    <p className="font-medium text-slate-800 text-xs">{asset.downloadCount.toLocaleString()}</p>
+                  </div>
+                )}
+              </div>
+
+              <Separator />
+
+              {/* Download action */}
+              <div className="space-y-2">
+                {asset.fileUrl ? (
+                  <button
+                    onClick={() => triggerDownload(asset)}
+                    className="flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg bg-[#4E86F7] hover:bg-[#3a72e3] text-white transition-colors font-medium justify-center"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download {asset.fileType}
+                  </button>
+                ) : (
+                  <div className="flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg bg-slate-100 text-slate-400 justify-center">
+                    <Download className="h-4 w-4" />
+                    No file attached
+                  </div>
+                )}
+                <CopyIconButton value={assetPageUrl} icon={<Link2 className="h-4 w-4" />} tooltip="Copy Link" label="Copy Link" />
+                {isImage(asset.fileType) && asset.fileUrl && (
+                  <CopyIconButton value={asset.fileUrl} icon={<ImageIcon className="h-4 w-4" />} tooltip="Copy File URL" label="Copy File URL" />
+                )}
+                {isSvg && asset.fileUrl && (
+                  <CopyIconButton value={asset.fileUrl} icon={<Code className="h-4 w-4" />} tooltip="Copy as SVG" label="Copy as SVG" />
+                )}
+              </div>
             </div>
-          )}
+          </div>
         </div>
       </DialogContent>
     </Dialog>
