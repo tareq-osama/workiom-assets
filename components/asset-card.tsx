@@ -199,11 +199,10 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
 
         {/* Card footer */}
         <div className="p-3">
-          <div className="flex items-start justify-between gap-2 mb-1">
+          <div className="flex items-start gap-2 mb-1">
             <h3 className="font-medium text-sm text-slate-900 truncate leading-snug flex-1 min-w-0">
               {asset.name}
             </h3>
-            <StatusBadge status={asset.status} className="flex-shrink-0 text-xs" />
           </div>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-slate-500 truncate">{asset.category}</span>
