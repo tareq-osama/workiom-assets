@@ -1,10 +1,10 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, Search, Upload, X, LayoutGrid } from 'lucide-react';
+import { Menu, Search, Upload, X, LayoutGrid, LogOut, ChevronDown } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -14,7 +14,24 @@ import {
   SheetTitle,
   SheetTrigger,
 } from '@/components/ui/sheet';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/ui/dropdown-menu';
 import { cn } from '@/lib/utils';
+import type { UserRole } from '@/types/user';
+
+interface AuthUser {
+  id: string;
+  name: string;
+  email: string;
+  role: UserRole;
+  status: string;
+  avatarUrl?: string;
+}
 
 const navLinks = [
   { href: '/', label: 'Home' },
@@ -22,12 +39,74 @@ const navLinks = [
   { href: '/upload', label: 'Upload', icon: Upload },
 ];
 
+function getInitials(name: string): string {
+  return name
+    .split(' ')
+    .map((n) => n[0])
+    .slice(0, 2)
+    .join('')
+    .toUpperCase();
+}
+
+function RoleBadge({ role }: { role: UserRole }) {
+  if (role === 'Admin' || role === 'Marketing Team') {
+    return (
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-blue-100 text-blue-700">
+        Admin
+      </span>
+    );
+  }
+  if (role === 'Design Team') {
+    return (
+      <span className="inline-flex items-center px-1.5 py-0.5 rounded text-xs font-medium bg-purple-100 text-purple-700">
+        Design
+      </span>
+    );
+  }
+  return null;
+}
+
+function UserAvatar({ user }: { user: AuthUser }) {
+  if (user.avatarUrl) {
+    return (
+      <Image
+        src={user.avatarUrl}
+        alt={user.name}
+        width={32}
+        height={32}
+        className="h-8 w-8 rounded-full object-cover"
+      />
+    );
+  }
+  return (
+    <div className="h-8 w-8 rounded-full bg-[#4E86F7] flex items-center justify-center text-white text-xs font-semibold flex-shrink-0">
+      {getInitials(user.name)}
+    </div>
+  );
+}
+
 export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user) setCurrentUser(data.user);
+      })
+      .catch(() => {});
+  }, []);
+
+  async function handleSignOut() {
+    await fetch('/api/auth/logout', { method: 'POST' });
+    setCurrentUser(null);
+    router.push('/login');
+  }
 
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
@@ -127,6 +206,40 @@ export default function Navbar() {
               </Button>
             </Link>
 
+            {/* User menu */}
+            {currentUser && (
+              <DropdownMenu>
+                <DropdownMenuTrigger
+                  className="hidden md:flex items-center gap-2 pl-2 pr-2.5 py-1.5 rounded-lg hover:bg-slate-100 transition-colors focus:outline-none cursor-pointer border-0 bg-transparent"
+                  aria-label="User menu"
+                >
+                  <UserAvatar user={currentUser} />
+                  <div className="flex flex-col items-start">
+                    <div className="flex items-center gap-1.5">
+                      <span className="text-sm font-medium text-slate-800 max-w-[120px] truncate leading-tight">
+                        {currentUser.name}
+                      </span>
+                      <RoleBadge role={currentUser.role} />
+                    </div>
+                  </div>
+                  <ChevronDown className="h-3.5 w-3.5 text-slate-400 ml-0.5" />
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-48">
+                  <DropdownMenuItem disabled className="text-slate-500 cursor-default">
+                    My Account
+                  </DropdownMenuItem>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem
+                    onClick={handleSignOut}
+                    className="text-red-600 focus:text-red-600 focus:bg-red-50 cursor-pointer gap-2"
+                  >
+                    <LogOut className="h-4 w-4" />
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            )}
+
             {/* Mobile hamburger */}
             <Sheet open={mobileOpen} onOpenChange={setMobileOpen}>
               <SheetTrigger
@@ -150,6 +263,19 @@ export default function Navbar() {
                     </div>
                   </SheetTitle>
                 </SheetHeader>
+
+                {/* Mobile user info */}
+                {currentUser && (
+                  <div className="flex items-center gap-3 px-1 mb-4 pb-4 border-b border-slate-100">
+                    <UserAvatar user={currentUser} />
+                    <div className="flex-1 min-w-0">
+                      <p className="text-sm font-medium text-slate-900 truncate">{currentUser.name}</p>
+                      <p className="text-xs text-slate-500 truncate">{currentUser.email}</p>
+                    </div>
+                    <RoleBadge role={currentUser.role} />
+                  </div>
+                )}
+
                 <nav className="flex flex-col gap-1">
                   {navLinks.map((link) => (
                     <Link
@@ -167,6 +293,18 @@ export default function Navbar() {
                       {link.label}
                     </Link>
                   ))}
+                  {currentUser && (
+                    <button
+                      onClick={() => {
+                        setMobileOpen(false);
+                        handleSignOut();
+                      }}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-red-600 hover:bg-red-50 mt-1"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign out
+                    </button>
+                  )}
                 </nav>
               </SheetContent>
             </Sheet>

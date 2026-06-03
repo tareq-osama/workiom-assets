@@ -1,8 +1,10 @@
 'use client';
 
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
+import { CONTRIBUTOR_ROLES } from '@/lib/auth';
+import type { UserRole } from '@/types/user';
 import {
   Upload,
   X,
@@ -53,6 +55,18 @@ export default function UploadPage() {
   const router = useRouter();
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
+  const [userRole, setUserRole] = useState<UserRole | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((res) => (res.ok ? res.json() : null))
+      .then((data) => {
+        if (data?.user?.role) setUserRole(data.user.role as UserRole);
+      })
+      .catch(() => {})
+      .finally(() => setAuthChecked(true));
+  }, []);
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [step, setStep] = useState<UploadStep>('idle');
@@ -199,6 +213,39 @@ export default function UploadPage() {
   }
 
   const isUploading = ['uploading', 'confirming', 'creating'].includes(step);
+
+  // Show nothing while auth is being checked
+  if (!authChecked) {
+    return (
+      <div className="flex-1 bg-slate-50 flex items-center justify-center">
+        <div className="text-slate-400 text-sm">Loading...</div>
+      </div>
+    );
+  }
+
+  // Access denied for non-contributors
+  if (!userRole || !CONTRIBUTOR_ROLES.includes(userRole)) {
+    return (
+      <div className="flex-1 bg-slate-50 flex items-center justify-center px-4">
+        <div className="bg-white border border-slate-200 rounded-2xl p-10 max-w-md w-full text-center">
+          <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
+            <Upload className="h-6 w-6 text-slate-400" />
+          </div>
+          <h2 className="text-lg font-semibold text-slate-900 mb-2">Access Denied</h2>
+          <p className="text-slate-500 text-sm">
+            Upload is restricted to Design Team, Marketing Team, and Admin roles.
+          </p>
+          <Button
+            variant="outline"
+            className="mt-6"
+            onClick={() => router.push('/browse')}
+          >
+            Browse Assets
+          </Button>
+        </div>
+      </div>
+    );
+  }
 
   const stepLabel: Record<string, string> = {
     uploading: 'Uploading file...',
