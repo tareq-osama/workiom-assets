@@ -106,33 +106,47 @@ class WorkiomCollectionsClient {
     return parseSSE(await res.text());
   }
 
-  async getByOwner(ownerEmail: string): Promise<Collection[]> {
+  // Fetch all records and filter in JS — Workiom's `search` only targets the
+  // primary Name field, so we cannot rely on it to search Owner Email or Share Token.
+  private async fetchAll(): Promise<WorkiomCollectionRecord[]> {
     const result = (await this.callTool('get_records', {
-      listId: this.listId, limit: 50, offset: 0, search: ownerEmail,
+      listId: this.listId,
+      limit: 200,
+      offset: 0,
     })) as { data?: { items?: WorkiomCollectionRecord[] } } | null;
-    const items = result?.data?.items ?? [];
-    return items.filter(r => (r['Owner Email'] ?? '').toLowerCase() === ownerEmail.toLowerCase()).map(mapRecord);
+    return result?.data?.items ?? [];
+  }
+
+  async getByOwner(ownerEmail: string): Promise<Collection[]> {
+    const items = await this.fetchAll();
+    return items
+      .filter(r => (r['Owner Email'] ?? '').toLowerCase() === ownerEmail.toLowerCase())
+      .map(mapRecord);
   }
 
   async getByShareToken(token: string): Promise<Collection | null> {
-    const result = (await this.callTool('get_records', {
-      listId: this.listId, limit: 1, offset: 0, search: token,
-    })) as { data?: { items?: WorkiomCollectionRecord[] } } | null;
-    const items = result?.data?.items ?? [];
+    const items = await this.fetchAll();
     const match = items.find(r => r['Share Token'] === token);
     return match ? mapRecord(match) : null;
   }
 
+  // Get a single collection by its Workiom _id.
+  // Filters by _id are not reliably supported via MCP, so we fetch all and find.
   async getById(id: string): Promise<Collection | null> {
-    const result = (await this.callTool('get_records', {
-      listId: this.listId, limit: 1, filters: [{ field: '_id', operator: 'eq', value: id }],
-    })) as { data?: { items?: WorkiomCollectionRecord[] } } | null;
-    const items = result?.data?.items ?? [];
-    return items.length ? mapRecord(items[0]) : null;
+    const items = await this.fetchAll();
+    const match = items.find(r => r._id === id);
+    return match ? mapRecord(match) : null;
   }
 
-  async create(data: { name: string; description?: string; ownerEmail: string; ownerName: string; coverImageUrl?: string }): Promise<Collection> {
+  async create(data: {
+    name: string;
+    description?: string;
+    ownerEmail: string;
+    ownerName: string;
+    coverImageUrl?: string;
+  }): Promise<Collection> {
     const shareToken = crypto.randomUUID();
+    // create_record DOES return the full record in result.data
     const result = (await this.callTool('create_record', {
       listId: this.listId,
       recordData: {
@@ -147,43 +161,51 @@ class WorkiomCollectionsClient {
         'Created At': new Date().toISOString(),
       },
     })) as { data?: WorkiomCollectionRecord } | null;
-    if (!result?.data) throw new Error('Failed to create collection');
+    if (!result?.data?._id) throw new Error('Failed to create collection');
     return mapRecord(result.data);
   }
 
-  async addAsset(collectionId: string, asset: Asset): Promise<Collection> {
+  // update_record only returns { data: { recordId } } — NOT the full record.
+  // We build and return the updated collection locally to avoid a second fetch.
+  async addAsset(collectionId: string, assetId: string, assetMeta: { thumbnailUrl?: string; fileUrl?: string }): Promise<Collection> {
     const coll = await this.getById(collectionId);
     if (!coll) throw new Error('Collection not found');
-    const newIds = Array.from(new Set([...coll.assetIds, asset.id]));
-    const coverImageUrl = coll.coverImageUrl || asset.thumbnailUrl || asset.fileUrl || '';
-    const result = (await this.callTool('update_record', {
+
+    const newIds = Array.from(new Set([...coll.assetIds, assetId]));
+    const coverImageUrl = coll.coverImageUrl || assetMeta.thumbnailUrl || assetMeta.fileUrl || '';
+
+    await this.callTool('update_record', {
       listId: this.listId,
       recordId: collectionId,
       updateData: {
         'Asset IDs': JSON.stringify(newIds),
         'Cover Image URL': coverImageUrl,
       },
-    })) as { data?: WorkiomCollectionRecord } | null;
-    if (!result?.data) throw new Error('Failed to update collection');
-    return mapRecord(result.data);
+    });
+
+    return { ...coll, assetIds: newIds, coverImageUrl };
   }
 
   async removeAsset(collectionId: string, assetId: string): Promise<Collection> {
     const coll = await this.getById(collectionId);
     if (!coll) throw new Error('Collection not found');
+
     const newIds = coll.assetIds.filter(id => id !== assetId);
-    const result = (await this.callTool('update_record', {
+
+    await this.callTool('update_record', {
       listId: this.listId,
       recordId: collectionId,
       updateData: { 'Asset IDs': JSON.stringify(newIds) },
-    })) as { data?: WorkiomCollectionRecord } | null;
-    if (!result?.data) throw new Error('Failed to update collection');
-    return mapRecord(result.data);
+    });
+
+    return { ...coll, assetIds: newIds };
   }
 
   async setVisibility(collectionId: string, visibility: 'Private' | 'Public'): Promise<void> {
     await this.callTool('update_record', {
-      listId: this.listId, recordId: collectionId, updateData: { Visibility: visibility },
+      listId: this.listId,
+      recordId: collectionId,
+      updateData: { Visibility: visibility },
     });
   }
 

@@ -49,7 +49,11 @@ export default function CollectionsPopover({ asset }: CollectionsPopoverProps) {
       const res = await fetch(`/api/collections/${collection.id}/assets`, {
         method: inCollection ? 'DELETE' : 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ assetId: asset.id }),
+        body: JSON.stringify({
+          assetId: asset.id,
+          thumbnailUrl: asset.thumbnailUrl,
+          fileUrl: asset.fileUrl,
+        }),
       });
       if (res.ok) {
         const data = await res.json() as { collection?: Collection };
