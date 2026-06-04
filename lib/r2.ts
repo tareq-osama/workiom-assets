@@ -1,55 +1,59 @@
-import { S3Client, PutObjectCommand, DeleteObjectCommand, GetObjectCommand } from '@aws-sdk/client-s3';
+// Cloudflare R2 via the native CF REST API — no S3 SDK needed.
+// Slashes in object keys are sent literally per the R2 API spec.
+// All file serves go through /api/file/r2/[...key] (Next.js proxy).
 
-export const R2_BUCKET = process.env.R2_BUCKET ?? 'workiom-assets';
-export const R2_ACCOUNT_ID = process.env.R2_ACCOUNT_ID ?? '989f6a7887fd7b0570d1effb5000ce74';
+const CF_API = 'https://api.cloudflare.com/client/v4';
 
-// R2 S3-compatible endpoint — credentials come from env vars set after
-// enabling R2 in the Cloudflare dashboard and creating an R2 API token.
-function r2Client() {
-  return new S3Client({
-    region: 'auto',
-    endpoint: `https://${R2_ACCOUNT_ID}.r2.cloudflarestorage.com`,
-    credentials: {
-      accessKeyId: process.env.R2_ACCESS_KEY_ID ?? '',
-      secretAccessKey: process.env.R2_SECRET_ACCESS_KEY ?? '',
-    },
-  });
+function cfg() {
+  return {
+    token:     process.env.CLOUDFLARE_API_TOKEN ?? '',
+    accountId: process.env.R2_ACCOUNT_ID ?? '989f6a7887fd7b0570d1effb5000ce74',
+    bucket:    process.env.R2_BUCKET ?? 'workiom-assets',
+  };
 }
 
+function objectUrl(key: string): string {
+  const { accountId, bucket } = cfg();
+  return `${CF_API}/accounts/${accountId}/r2/buckets/${bucket}/objects/${key}`;
+}
+
+// true once R2 bucket exists and R2_ENABLED=true is set in .env.local
 export function r2Configured(): boolean {
-  return !!(process.env.R2_ACCESS_KEY_ID && process.env.R2_SECRET_ACCESS_KEY);
+  return process.env.R2_ENABLED === 'true' && !!process.env.CLOUDFLARE_API_TOKEN;
 }
 
-export async function r2Upload(
-  key: string,
-  body: Buffer,
-  contentType: string
-): Promise<void> {
-  await r2Client().send(
-    new PutObjectCommand({
-      Bucket: R2_BUCKET,
-      Key: key,
-      Body: body,
-      ContentType: contentType,
-    })
-  );
-}
-
-export async function r2Download(key: string): Promise<{ body: ReadableStream; contentType: string } | null> {
-  try {
-    const res = await r2Client().send(
-      new GetObjectCommand({ Bucket: R2_BUCKET, Key: key })
-    );
-    if (!res.Body) return null;
-    return {
-      body: res.Body.transformToWebStream(),
-      contentType: res.ContentType ?? 'application/octet-stream',
-    };
-  } catch {
-    return null;
+export async function r2Upload(key: string, body: Buffer, contentType: string): Promise<void> {
+  const res = await fetch(objectUrl(key), {
+    method: 'PUT',
+    headers: {
+      Authorization: `Bearer ${cfg().token}`,
+      'Content-Type': contentType,
+      'Content-Length': String(body.byteLength),
+    },
+    body,
+  });
+  if (!res.ok) {
+    const text = await res.text().catch(() => '');
+    throw new Error(`R2 upload failed: ${res.status} ${text}`);
   }
 }
 
+export async function r2Download(
+  key: string
+): Promise<{ body: ReadableStream; contentType: string } | null> {
+  const res = await fetch(objectUrl(key), {
+    headers: { Authorization: `Bearer ${cfg().token}` },
+  });
+  if (!res.ok) return null;
+  return {
+    body: res.body!,
+    contentType: res.headers.get('content-type') ?? 'application/octet-stream',
+  };
+}
+
 export async function r2Delete(key: string): Promise<void> {
-  await r2Client().send(new DeleteObjectCommand({ Bucket: R2_BUCKET, Key: key }));
+  await fetch(objectUrl(key), {
+    method: 'DELETE',
+    headers: { Authorization: `Bearer ${cfg().token}` },
+  });
 }
