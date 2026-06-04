@@ -233,9 +233,9 @@ export default function UploadPage() {
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const svgSlot = slots.find((s) => s.format === 'SVG');
-    if (!svgSlot?.file) {
-      setErrorMessage('Please upload at least an SVG file.');
+    const hasAnyFile = slots.some((s) => s.file !== null);
+    if (!hasAnyFile) {
+      setErrorMessage('Please upload at least one file (SVG, PNG, or JPG).');
       return;
     }
     if (!formData.name.trim()) {
@@ -275,7 +275,7 @@ export default function UploadPage() {
           svgFileId: svgFileId ?? undefined,
           pngFileId: pngFileId ?? undefined,
           jpgFileId: jpgFileId ?? undefined,
-          fileSize: svgSlot.file.size,
+          fileSize: slots.find((s) => s.file)?.file?.size ?? 0,
         }),
       });
 
@@ -293,7 +293,7 @@ export default function UploadPage() {
   }
 
   const isUploading = step === 'uploading' || step === 'creating';
-  const hasSvg = !!slots.find((s) => s.format === 'SVG')?.file;
+  const hasAnyFile = slots.some((s) => s.file !== null);
 
   const stepLabel: Record<string, string> = {
     uploading: 'Uploading files...',
@@ -331,7 +331,7 @@ export default function UploadPage() {
               <div>
                 <Label className="text-sm font-semibold text-slate-700 mb-4 block">
                   Files <span className="text-red-500">*</span>
-                  <span className="font-normal text-slate-400 ml-1">(SVG required, PNG & JPG optional)</span>
+                  <span className="font-normal text-slate-400 ml-1">(at least one required)</span>
                 </Label>
                 <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                   {slots.map((slot) => (
@@ -460,7 +460,7 @@ export default function UploadPage() {
               <div className="flex items-center gap-3 pt-2">
                 <Button
                   type="submit"
-                  disabled={!hasSvg || isUploading}
+                  disabled={!hasAnyFile || isUploading}
                   className="h-11 px-8 bg-[#4E86F7] hover:bg-[#3a72e3] text-white font-medium gap-2"
                 >
                   {isUploading ? (

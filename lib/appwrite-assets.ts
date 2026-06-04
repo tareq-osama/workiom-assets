@@ -1,4 +1,4 @@
-import { ID, Query } from 'node-appwrite';
+import { ID, Query, Permission, Role } from 'node-appwrite';
 import { InputFile } from 'node-appwrite/file';
 import {
   createAdminClient,
@@ -230,7 +230,8 @@ export async function uploadAssetFile(
   const file = await storage.createFile(
     APPWRITE_BUCKET_ID,
     ID.unique(),
-    InputFile.fromBuffer(buffer, fileName)
+    InputFile.fromBuffer(buffer, fileName),
+    [Permission.read(Role.any())]
   );
   return { fileId: file.$id, fileUrl: getFileViewUrl(file.$id) };
 }
