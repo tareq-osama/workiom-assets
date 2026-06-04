@@ -7,6 +7,7 @@ import {
   APPWRITE_BUCKET_ID,
   getFileViewUrl,
 } from './appwrite';
+import { r2Configured, r2Upload } from './r2';
 import type { Asset, AssetCategory, AssetFormat, AssetStatus } from '@/types/asset';
 
 interface AppwriteAssetDoc {
@@ -226,6 +227,14 @@ export async function uploadAssetFile(
   fileName: string,
   mimeType: string
 ): Promise<{ fileId: string; fileUrl: string }> {
+  // Use R2 when configured; fall back to Appwrite Storage otherwise
+  if (r2Configured()) {
+    const key = `${ID.unique()}/${fileName}`;
+    await r2Upload(key, buffer, mimeType || 'application/octet-stream');
+    const fileId = `r2/${key}`;
+    return { fileId, fileUrl: getFileViewUrl(fileId) };
+  }
+
   const { storage } = createAdminClient();
   const file = await storage.createFile(
     APPWRITE_BUCKET_ID,

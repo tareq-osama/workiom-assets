@@ -23,6 +23,9 @@ export function createAdminClient() {
   };
 }
 
+// All files are served through our proxy — hides the backend URL and
+// fixes SVG display (same-origin, admin key used server-side).
 export function getFileViewUrl(fileId: string): string {
-  return `${APPWRITE_ENDPOINT}/storage/buckets/${APPWRITE_BUCKET_ID}/files/${fileId}/view?project=${APPWRITE_PROJECT_ID}`;
+  // fileId is either "r2/{key}" (Cloudflare R2) or a bare Appwrite file ID
+  return `/api/file/${fileId}`;
 }
