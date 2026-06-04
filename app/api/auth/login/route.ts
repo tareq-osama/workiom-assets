@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { comparePassword, signToken } from '@/lib/auth'
-import { workiomUsers } from '@/lib/workiom-users'
+import { findRawUserByEmail, findUserByEmail, updateUserLastLogin } from '@/lib/appwrite-users'
 import type { JWTPayload } from '@/types/user'
 
 export async function POST(request: Request) {
@@ -13,19 +13,12 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Email and password are required' }, { status: 400 })
     }
 
-    if (!email.toLowerCase().endsWith('@workiom.com')) {
-      return NextResponse.json(
-        { error: 'Only @workiom.com email addresses are allowed' },
-        { status: 400 }
-      )
-    }
-
-    const rawRecord = await workiomUsers.findRawByEmail(email)
+    const rawRecord = await findRawUserByEmail(email)
     if (!rawRecord) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    const user = await workiomUsers.findByEmail(email)
+    const user = await findUserByEmail(email)
     if (!user) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
@@ -34,14 +27,13 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'Account is not active' }, { status: 403 })
     }
 
-    const passwordHash = rawRecord['Password Hash'] ?? ''
+    const passwordHash = rawRecord.passwordHash ?? ''
     const passwordValid = await comparePassword(password, passwordHash)
     if (!passwordValid) {
       return NextResponse.json({ error: 'Invalid email or password' }, { status: 401 })
     }
 
-    // Update last login without blocking the response
-    workiomUsers.updateLastLogin(user.id).catch(() => {})
+    updateUserLastLogin(user.id).catch(() => {})
 
     const jwtPayload: JWTPayload = {
       id: user.id,
@@ -58,7 +50,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     })
 

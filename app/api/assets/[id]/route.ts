@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAsset, updateAsset, deleteAsset } from '@/lib/workiom';
+import { getAsset, updateAsset, deleteAsset } from '@/lib/appwrite-assets';
 
 export async function GET(
   _req: NextRequest,
@@ -11,10 +11,8 @@ export async function GET(
     if (!asset) {
       return Response.json({ error: 'Asset not found' }, { status: 404 });
     }
-
-    // Increment download count asynchronously (fire and forget)
-    updateAsset(id, { 'Download Count': (asset.downloadCount ?? 0) + 1 }).catch(() => {});
-
+    // Increment download count asynchronously
+    updateAsset(id, { downloadCount: (asset.downloadCount ?? 0) + 1 }).catch(() => {});
     return Response.json(asset);
   } catch (error) {
     console.error('GET /api/assets/[id] error:', error);

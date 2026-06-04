@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server'
 import { cookies } from 'next/headers'
 import { hashPassword, signToken } from '@/lib/auth'
-import { workiomUsers } from '@/lib/workiom-users'
+import { findUserByEmail, createUser } from '@/lib/appwrite-users'
 import type { JWTPayload } from '@/types/user'
 
 export async function POST(request: Request) {
@@ -18,13 +18,6 @@ export async function POST(request: Request) {
       return NextResponse.json({ error: 'All fields are required' }, { status: 400 })
     }
 
-    if (!email.toLowerCase().endsWith('@workiom.com')) {
-      return NextResponse.json(
-        { error: 'Only @workiom.com email addresses are allowed' },
-        { status: 400 }
-      )
-    }
-
     if (password !== confirmPassword) {
       return NextResponse.json({ error: 'Passwords do not match' }, { status: 400 })
     }
@@ -36,7 +29,7 @@ export async function POST(request: Request) {
       )
     }
 
-    const existing = await workiomUsers.findByEmail(email)
+    const existing = await findUserByEmail(email)
     if (existing) {
       return NextResponse.json(
         { error: 'An account with this email already exists' },
@@ -46,7 +39,7 @@ export async function POST(request: Request) {
 
     const passwordHash = await hashPassword(password)
 
-    const user = await workiomUsers.create({
+    const user = await createUser({
       name: name.trim(),
       email: email.toLowerCase().trim(),
       passwordHash,
@@ -69,7 +62,7 @@ export async function POST(request: Request) {
       httpOnly: true,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 60 * 60 * 24 * 7, // 7 days
+      maxAge: 60 * 60 * 24 * 7,
       path: '/',
     })
 

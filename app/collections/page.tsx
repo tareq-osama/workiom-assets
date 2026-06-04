@@ -18,7 +18,7 @@ import {
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
-import type { Collection } from '@/lib/workiom-collections';
+import type { Collection } from '@/lib/appwrite-collections';
 import { cn } from '@/lib/utils';
 
 type SortKey = 'date' | 'name' | 'assets';
@@ -86,7 +86,7 @@ function formatDate(iso?: string): string {
 export default function CollectionsPage() {
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(true);
-  const [configured, setConfigured] = useState(true);
+  const [configured] = useState(true);
   const [search, setSearch] = useState('');
   const [sort, setSort] = useState<SortKey>('date');
   const [visFilter, setVisFilter] = useState<VisibilityFilter>('all');
@@ -108,8 +108,7 @@ export default function CollectionsPage() {
     try {
       const res = await fetch('/api/collections');
       if (!res.ok) return;
-      const data = await res.json() as { collections?: Collection[]; configured?: boolean };
-      setConfigured(data.configured ?? true);
+      const data = await res.json() as { collections?: Collection[] };
       setCollections(data.collections ?? []);
     } finally {
       setLoading(false);

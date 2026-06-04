@@ -1,106 +1,95 @@
 import type { AssetCategory, AssetStatus } from '@/types/asset';
 
 export const CATEGORIES: AssetCategory[] = [
+  'Brand Items',
   'Logos',
-  'Brand Guidelines',
-  'Templates',
-  'Campaign Materials',
-  'Icons & Illustrations',
-  'Photography',
-  'Videos',
-  'Documents',
+  'Client Logos',
+  'Brand Icons',
+  'Brand Illustrations',
+  'Canva Templates',
+  'Ready to Design Brochures',
 ];
 
-export const CATEGORY_META: Record<AssetCategory, {
-  icon: string;
-  color: string;
-  bgColor: string;
-  textColor: string;
-  borderColor: string;
-  description: string;
-  subcategories: string[];
-}> = {
-  'Logos': {
-    icon: 'Layers',
+export const CATEGORY_META: Record<
+  AssetCategory,
+  {
+    icon: string;
+    color: string;
+    bgColor: string;
+    textColor: string;
+    borderColor: string;
+    description: string;
+  }
+> = {
+  'Brand Items': {
+    icon: 'Star',
     color: 'blue',
     bgColor: 'bg-blue-50',
     textColor: 'text-blue-700',
     borderColor: 'border-blue-100',
-    description: 'Official logo files in all formats and variants',
-    subcategories: ['Primary Logo', 'Secondary Logo', 'Logomark', 'Wordmark', 'Logo on Dark', 'Logo on Light', 'Logo Variants'],
+    description: 'Core brand assets including primary marks and identity elements',
   },
-  'Brand Guidelines': {
-    icon: 'BookOpen',
-    color: 'purple',
-    bgColor: 'bg-purple-50',
-    textColor: 'text-purple-700',
-    borderColor: 'border-purple-100',
-    description: 'Brand standards, style guides, and visual identity rules',
-    subcategories: ['Color Palette', 'Typography', 'Spacing & Grid', 'Icon Style', 'Photography Style', 'Brand Voice', 'Do & Don\'t'],
+  Logos: {
+    icon: 'Layers',
+    color: 'indigo',
+    bgColor: 'bg-indigo-50',
+    textColor: 'text-indigo-700',
+    borderColor: 'border-indigo-100',
+    description: 'Official logo files in all variants and color modes',
   },
-  'Templates': {
-    icon: 'LayoutTemplate',
-    color: 'green',
-    bgColor: 'bg-green-50',
-    textColor: 'text-green-700',
-    borderColor: 'border-green-100',
-    description: 'Ready-to-use templates for common documents and designs',
-    subcategories: ['Presentations', 'Word Documents', 'Social Media', 'Email Templates', 'Proposals', 'Reports', 'Pitch Decks'],
+  'Client Logos': {
+    icon: 'Building2',
+    color: 'slate',
+    bgColor: 'bg-slate-50',
+    textColor: 'text-slate-700',
+    borderColor: 'border-slate-200',
+    description: "Approved logos from clients and partner organizations",
   },
-  'Campaign Materials': {
-    icon: 'Megaphone',
-    color: 'orange',
-    bgColor: 'bg-orange-50',
-    textColor: 'text-orange-700',
-    borderColor: 'border-orange-100',
-    description: 'Marketing and campaign assets for all channels',
-    subcategories: ['Digital Ads', 'Print Materials', 'Banners', 'Social Posts', 'Landing Pages', 'Email Campaigns', 'OOH'],
+  'Brand Icons': {
+    icon: 'Shapes',
+    color: 'violet',
+    bgColor: 'bg-violet-50',
+    textColor: 'text-violet-700',
+    borderColor: 'border-violet-100',
+    description: 'Icon sets and custom UI icons that follow brand guidelines',
   },
-  'Icons & Illustrations': {
+  'Brand Illustrations': {
     icon: 'Pen',
     color: 'pink',
     bgColor: 'bg-pink-50',
     textColor: 'text-pink-700',
     borderColor: 'border-pink-100',
-    description: 'Icon sets and custom illustrations for product and marketing',
-    subcategories: ['UI Icons', 'Brand Icons', 'Spot Illustrations', 'Infographics', 'Diagrams', 'Avatars', 'Stickers'],
+    description: 'Spot illustrations and decorative graphics in brand style',
   },
-  'Photography': {
-    icon: 'Camera',
-    color: 'cyan',
-    bgColor: 'bg-cyan-50',
-    textColor: 'text-cyan-700',
-    borderColor: 'border-cyan-100',
-    description: 'Approved photography for marketing, PR, and internal use',
-    subcategories: ['Team Photos', 'Office & Culture', 'Product Shots', 'Event Photography', 'Stock Photos', 'Headshots'],
+  'Canva Templates': {
+    icon: 'LayoutTemplate',
+    color: 'teal',
+    bgColor: 'bg-teal-50',
+    textColor: 'text-teal-700',
+    borderColor: 'border-teal-100',
+    description: 'Ready-to-use Canva templates for social, presentations, and more',
   },
-  'Videos': {
-    icon: 'Video',
-    color: 'red',
-    bgColor: 'bg-red-50',
-    textColor: 'text-red-700',
-    borderColor: 'border-red-100',
-    description: 'Video content for all platforms and use cases',
-    subcategories: ['Brand Films', 'Product Demos', 'Social Media Videos', 'Tutorials', 'Event Recordings', 'Animations', 'Ads'],
-  },
-  'Documents': {
-    icon: 'FileText',
-    color: 'slate',
-    bgColor: 'bg-slate-50',
-    textColor: 'text-slate-700',
-    borderColor: 'border-slate-200',
-    description: 'Official documents, reports, and company materials',
-    subcategories: ['One-Pagers', 'Case Studies', 'White Papers', 'Guides & Playbooks', 'Contracts', 'Company Info', 'Press Kits'],
+  'Ready to Design Brochures': {
+    icon: 'BookOpen',
+    color: 'orange',
+    bgColor: 'bg-orange-50',
+    textColor: 'text-orange-700',
+    borderColor: 'border-orange-100',
+    description: 'Pre-structured brochure layouts ready to populate with content',
   },
 };
 
-export const FILE_TYPES: string[] = [
-  'PNG', 'SVG', 'JPG', 'JPEG', 'GIF', 'WebP',
-  'PDF', 'AI', 'EPS', 'PSD', 'Figma',
-  'MP4', 'MOV', 'WEBM',
-  'DOCX', 'PPTX', 'XLSX',
-  'ZIP', 'TTF', 'OTF', 'WOFF',
-];
+export const CATEGORY_ICONS: Record<AssetCategory, string> = {
+  'Brand Items': 'Star',
+  Logos: 'Layers',
+  'Client Logos': 'Building2',
+  'Brand Icons': 'Shapes',
+  'Brand Illustrations': 'Pen',
+  'Canva Templates': 'LayoutTemplate',
+  'Ready to Design Brochures': 'BookOpen',
+};
+
+export const FILE_TYPES = ['SVG', 'PNG', 'JPG'];
 
 export const STATUS_OPTIONS: AssetStatus[] = ['Active', 'Draft', 'Deprecated'];
 
@@ -108,15 +97,4 @@ export const STATUS_COLORS: Record<AssetStatus, string> = {
   Active: 'bg-green-100 text-green-800 border-green-200',
   Draft: 'bg-amber-100 text-amber-800 border-amber-200',
   Deprecated: 'bg-red-100 text-red-800 border-red-200',
-};
-
-export const CATEGORY_ICONS: Record<AssetCategory, string> = {
-  Logos: 'Layers',
-  'Brand Guidelines': 'BookOpen',
-  Templates: 'LayoutTemplate',
-  'Campaign Materials': 'Megaphone',
-  'Icons & Illustrations': 'Pen',
-  Photography: 'Camera',
-  Videos: 'Video',
-  Documents: 'FileText',
 };

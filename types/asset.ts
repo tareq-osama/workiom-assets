@@ -1,13 +1,13 @@
+export type AssetFormat = 'SVG' | 'PNG' | 'JPG';
 export type AssetStatus = 'Active' | 'Deprecated' | 'Draft';
 export type AssetCategory =
+  | 'Brand Items'
   | 'Logos'
-  | 'Brand Guidelines'
-  | 'Templates'
-  | 'Campaign Materials'
-  | 'Icons & Illustrations'
-  | 'Photography'
-  | 'Videos'
-  | 'Documents';
+  | 'Client Logos'
+  | 'Brand Icons'
+  | 'Brand Illustrations'
+  | 'Canva Templates'
+  | 'Ready to Design Brochures';
 
 export interface Asset {
   id: string;
@@ -15,13 +15,29 @@ export interface Asset {
   description?: string;
   category: AssetCategory;
   tags: string[];
-  fileUrl: string;
-  thumbnailUrl?: string;
   status: AssetStatus;
   owner: string;
-  fileType: string;
-  fileSize: number;
   downloadCount: number;
   deprecationReason?: string;
   createdAt?: string;
+
+  // Available download formats for this asset
+  formats: AssetFormat[];
+
+  // Appwrite Storage file IDs per format
+  svgFileId?: string;
+  pngFileId?: string;
+  jpgFileId?: string;
+  thumbnailFileId?: string;
+
+  // Resolved view URLs (derived from fileIds)
+  svgUrl?: string;
+  pngUrl?: string;
+  jpgUrl?: string;
+  thumbnailUrl?: string;
+
+  // Convenience fields (primary format)
+  fileUrl: string;
+  fileType: string;
+  fileSize: number;
 }

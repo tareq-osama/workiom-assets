@@ -1,5 +1,5 @@
 import { NextRequest } from 'next/server';
-import { getAssets, createAsset } from '@/lib/workiom';
+import { getAssets, createAsset } from '@/lib/appwrite-assets';
 
 export async function GET(request: NextRequest) {
   try {
@@ -12,7 +12,6 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get('limit') ?? '24', 10);
 
     const result = await getAssets({ search, category, status, fileType, page, limit });
-
     return Response.json(result);
   } catch (error) {
     console.error('GET /api/assets error:', error);

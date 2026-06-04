@@ -4,8 +4,8 @@ import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
 import { ArrowLeft, FolderOpen, Lock, Globe, Layers } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
-import { workiomCollections } from '@/lib/workiom-collections';
-import { getAssets } from '@/lib/workiom';
+import { getCollectionByShareToken } from '@/lib/appwrite-collections';
+import { getAssets } from '@/lib/appwrite-assets';
 import { verifyToken } from '@/lib/auth';
 import type { Asset } from '@/types/asset';
 import CollectionView from '@/components/collection-view';
@@ -62,9 +62,7 @@ export default async function SharedCollectionPage({
 }) {
   const { shareToken } = await params;
 
-  if (!workiomCollections.configured) notFound();
-
-  const collection = await workiomCollections.getByShareToken(shareToken);
+  const collection = await getCollectionByShareToken(shareToken);
   if (!collection) notFound();
 
   const cookieStore = await cookies();
@@ -89,15 +87,11 @@ export default async function SharedCollectionPage({
     );
   }
 
-  // Fetch assets — MCP doesn't support ID-based filtering so we cross-reference from a batch
   let assets: Asset[] = [];
   if (collection.assetIds.length > 0) {
     const { assets: allAssets } = await getAssets({ limit: 200 });
-    const idSet = new Set(collection.assetIds);
-    const assetMap = new Map(allAssets.map(a => [a.id, a]));
-    assets = collection.assetIds.map(id => assetMap.get(id)).filter((a): a is Asset => !!a);
-    const unmapped = allAssets.filter(a => idSet.has(a.id) && !assetMap.has(a.id));
-    assets = [...assets, ...unmapped];
+    const assetMap = new Map(allAssets.map((a) => [a.id, a]));
+    assets = collection.assetIds.map((id) => assetMap.get(id)).filter((a): a is Asset => !!a);
   }
 
   const shareUrl = `${process.env.NEXT_PUBLIC_APP_URL ?? ''}/collections/${shareToken}`;
@@ -107,8 +101,6 @@ export default async function SharedCollectionPage({
       {/* Banner */}
       <div className="relative">
         <CollectionBanner coverUrl={collection.coverImageUrl} name={collection.name} />
-
-        {/* Back link overlaid */}
         <div className="absolute top-4 left-0 right-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link
@@ -126,10 +118,7 @@ export default async function SharedCollectionPage({
       <div className="bg-white border-b border-slate-200 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
           <div className="flex items-start gap-4">
-            {/* Cover thumbnail — always show */}
-            <div
-              className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm -mt-10 sm:-mt-12 bg-white ring-4 ring-white"
-            >
+            <div className="w-16 h-16 sm:w-20 sm:h-20 rounded-2xl overflow-hidden flex-shrink-0 border border-slate-200 shadow-sm -mt-10 sm:-mt-12 bg-white ring-4 ring-white">
               {collection.coverImageUrl ? (
                 <Image
                   src={collection.coverImageUrl}
@@ -151,7 +140,6 @@ export default async function SharedCollectionPage({
               )}
             </div>
 
-            {/* Meta */}
             <div className="flex-1 min-w-0 pt-1">
               <div className="flex items-center gap-2 mb-1 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-bold text-slate-900 leading-tight">{collection.name}</h1>
@@ -170,7 +158,6 @@ export default async function SharedCollectionPage({
                 <p className="text-slate-500 text-sm mb-3 max-w-2xl leading-relaxed">{collection.description}</p>
               )}
 
-              {/* Stats row */}
               <div className="flex items-center gap-4 text-xs text-slate-500 flex-wrap">
                 <span className="flex items-center gap-1.5">
                   <Layers className="h-3.5 w-3.5 text-slate-400" />
@@ -188,15 +175,11 @@ export default async function SharedCollectionPage({
               </div>
             </div>
 
-            {/* Share button — public only */}
-            {collection.visibility === 'Public' && (
-              <CopyShareButton url={shareUrl} />
-            )}
+            {collection.visibility === 'Public' && <CopyShareButton url={shareUrl} />}
           </div>
         </div>
       </div>
 
-      {/* Assets grid */}
       <CollectionView
         assets={assets}
         collectionId={collection.id}

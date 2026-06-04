@@ -4,8 +4,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { useState } from 'react';
 import {
-  Download, ExternalLink, File, FileImage, FileSpreadsheet,
-  FileText, Film, Link2, ImageIcon, Code, Check, TrendingDown, Tag, User, HardDrive,
+  Download, ExternalLink, FileImage, Link2, Check, TrendingDown, Tag, User,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -13,7 +12,7 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import StatusBadge from '@/components/status-badge';
 import CollectionsPopover from '@/components/collections-popover';
-import type { Asset } from '@/types/asset';
+import type { Asset, AssetFormat } from '@/types/asset';
 import { cn } from '@/lib/utils';
 
 interface AssetPreviewDialogProps {
@@ -22,89 +21,63 @@ interface AssetPreviewDialogProps {
   onOpenChange: (open: boolean) => void;
 }
 
-function FileTypeIcon({ fileType, className }: { fileType: string; className?: string }) {
-  const t = fileType.toUpperCase();
-  if (['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(t)) return <FileImage className={className} />;
-  if (['MP4', 'MOV', 'AVI', 'WEBM'].includes(t)) return <Film className={className} />;
-  if (['PDF', 'DOC', 'DOCX'].includes(t)) return <FileText className={className} />;
-  if (['XLS', 'XLSX', 'CSV'].includes(t)) return <FileSpreadsheet className={className} />;
-  return <File className={className} />;
+function getFormatUrl(asset: Asset, format: AssetFormat): string | undefined {
+  if (format === 'SVG') return asset.svgUrl;
+  if (format === 'PNG') return asset.pngUrl;
+  if (format === 'JPG') return asset.jpgUrl;
 }
 
-function isImage(ft: string) {
-  return ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(ft.toUpperCase());
-}
-
-function formatSize(bytes: number) {
-  if (!bytes) return null;
-  if (bytes < 1024) return `${bytes} B`;
-  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
-  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
-}
-
-async function triggerDownload(asset: Asset) {
+async function triggerDownload(url: string, name: string, format: AssetFormat) {
   try {
-    const res = await fetch(asset.fileUrl);
+    const res = await fetch(url);
     const blob = await res.blob();
-    const url = URL.createObjectURL(blob);
+    const blobUrl = URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${asset.name}.${asset.fileType.toLowerCase()}`;
+    a.href = blobUrl;
+    a.download = `${name}.${format.toLowerCase()}`;
     document.body.appendChild(a);
     a.click();
-    URL.revokeObjectURL(url);
+    URL.revokeObjectURL(blobUrl);
     document.body.removeChild(a);
   } catch {
-    window.open(asset.fileUrl, '_blank');
+    window.open(url, '_blank');
   }
 }
 
-function CopyIconButton({ value, icon, tooltip, label }: {
-  value: string; icon: React.ReactNode; tooltip: string; label?: string;
-}) {
+const FORMAT_COLORS: Record<AssetFormat, string> = {
+  SVG: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100',
+  PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+  JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+};
+
+function CopyLinkButton({ value }: { value: string }) {
   const [copied, setCopied] = useState(false);
   async function copy() {
     try { await navigator.clipboard.writeText(value); } catch { return; }
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   }
-  if (label) {
-    return (
-      <button
-        onClick={copy}
-        className={cn(
-          'flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors',
-          copied && 'border-emerald-200 text-emerald-700 bg-emerald-50'
-        )}
-      >
-        {copied ? <Check className="h-4 w-4" /> : icon}
-        {copied ? 'Copied!' : label}
-      </button>
-    );
-  }
   return (
-    <Tooltip>
-      <TooltipTrigger
-        className={cn(
-          'inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer',
-          copied && 'text-emerald-600 bg-emerald-50'
-        )}
-        onClick={copy}
-      >
-        {copied ? <Check className="h-4 w-4" /> : icon}
-      </TooltipTrigger>
-      <TooltipContent>{copied ? 'Copied!' : tooltip}</TooltipContent>
-    </Tooltip>
+    <button
+      onClick={copy}
+      className={cn(
+        'flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 transition-colors',
+        copied && 'border-emerald-200 text-emerald-700 bg-emerald-50'
+      )}
+    >
+      {copied ? <Check className="h-4 w-4" /> : <Link2 className="h-4 w-4" />}
+      {copied ? 'Copied!' : 'Copy Link'}
+    </button>
   );
 }
 
 export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetPreviewDialogProps) {
   if (!asset) return null;
 
-  const previewUrl = asset.thumbnailUrl || (isImage(asset.fileType) ? asset.fileUrl : null);
-  const isSvg = asset.fileType.toUpperCase() === 'SVG';
-  const size = formatSize(asset.fileSize);
-  const assetPageUrl = typeof window !== 'undefined' ? `${window.location.origin}/assets/${asset.id}` : `/assets/${asset.id}`;
+  const previewUrl = asset.thumbnailUrl ?? asset.svgUrl ?? asset.pngUrl ?? asset.jpgUrl;
+  const assetPageUrl = typeof window !== 'undefined'
+    ? `${window.location.origin}/assets/${asset.id}`
+    : `/assets/${asset.id}`;
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
@@ -114,9 +87,8 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
       >
         <DialogTitle className="sr-only">{asset.name}</DialogTitle>
 
-        {/* ── TOPBAR ── */}
+        {/* TOPBAR */}
         <div className="flex-shrink-0 flex items-center gap-3 px-4 h-14 border-b border-slate-100 bg-white">
-          {/* Name + chips */}
           <div className="flex items-center gap-2.5 flex-1 min-w-0 overflow-hidden">
             <span className="font-semibold text-slate-900 text-sm truncate">{asset.name}</span>
             {asset.category && (
@@ -124,12 +96,14 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
                 {asset.category}
               </Badge>
             )}
-            {asset.fileType && (
-              <span className="text-xs font-medium text-slate-400 flex-shrink-0 hidden sm:inline bg-slate-100 px-1.5 py-0.5 rounded">
-                {asset.fileType}
+            {asset.formats.map((fmt) => (
+              <span
+                key={fmt}
+                className={`text-xs font-semibold flex-shrink-0 hidden sm:inline px-1.5 py-0.5 rounded border ${FORMAT_COLORS[fmt]}`}
+              >
+                {fmt}
               </span>
-            )}
-            {size && <span className="text-xs text-slate-400 flex-shrink-0 hidden md:inline">{size}</span>}
+            ))}
             {asset.status === 'Deprecated' && (
               <Badge variant="outline" className="flex-shrink-0 text-xs text-red-600 border-red-200 bg-red-50 hidden sm:inline-flex">
                 Deprecated
@@ -137,26 +111,22 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
             )}
           </div>
 
-          {/* Actions */}
           <div className="flex items-center gap-1 flex-shrink-0">
             <CollectionsPopover asset={asset} />
             <div className="w-px h-5 bg-slate-200 mx-1 hidden sm:block" />
             <Tooltip>
               <TooltipTrigger
                 className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer"
-                onClick={() => asset.fileUrl && triggerDownload(asset)}
+                onClick={() => {
+                  const url = asset.svgUrl ?? asset.pngUrl ?? asset.jpgUrl;
+                  const fmt = asset.formats[0];
+                  if (url && fmt) triggerDownload(url, asset.name, fmt);
+                }}
               >
                 <Download className="h-4 w-4" />
               </TooltipTrigger>
-              <TooltipContent>Download</TooltipContent>
+              <TooltipContent>Download primary</TooltipContent>
             </Tooltip>
-            <CopyIconButton value={assetPageUrl} icon={<Link2 className="h-4 w-4" />} tooltip="Copy Link" />
-            {isImage(asset.fileType) && asset.fileUrl && (
-              <CopyIconButton value={asset.fileUrl} icon={<ImageIcon className="h-4 w-4" />} tooltip="Copy File URL" />
-            )}
-            {isSvg && asset.fileUrl && (
-              <CopyIconButton value={asset.fileUrl} icon={<Code className="h-4 w-4" />} tooltip="Copy as SVG" />
-            )}
             <div className="w-px h-5 bg-slate-200 mx-1 hidden sm:block" />
             <Tooltip>
               <TooltipTrigger className="inline-flex items-center justify-center h-8 w-8 rounded-lg text-slate-500 hover:text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
@@ -169,10 +139,9 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
           </div>
         </div>
 
-        {/* ── BODY: preview left + details right ── */}
+        {/* BODY */}
         <div className="flex flex-1 min-h-0 overflow-hidden">
-
-          {/* Left — preview on light checkerboard bg */}
+          {/* Preview */}
           <div
             className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden"
             style={{
@@ -199,18 +168,17 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
               />
             ) : (
               <div className="flex flex-col items-center gap-4 text-slate-400">
-                <FileTypeIcon fileType={asset.fileType} className="w-20 h-20 text-slate-300" />
+                <FileImage className="w-20 h-20 text-slate-300" />
                 <span className="text-sm font-medium text-slate-400 uppercase tracking-widest">
-                  {asset.fileType || 'No preview'}
+                  No preview
                 </span>
               </div>
             )}
           </div>
 
-          {/* Right — details panel */}
+          {/* Details panel */}
           <div className="w-80 flex-shrink-0 border-l border-slate-100 bg-white flex flex-col overflow-hidden">
             <div className="flex-1 overflow-y-auto p-5 space-y-5">
-
               {/* Name + status */}
               <div>
                 <h2 className="font-semibold text-slate-900 text-base leading-snug mb-2">{asset.name}</h2>
@@ -267,21 +235,9 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
               <Separator />
 
               {/* Metadata */}
-              <div className="grid grid-cols-2 gap-y-4 gap-x-3 text-sm">
-                {asset.fileType && (
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5">Type</p>
-                    <p className="font-medium text-slate-800 text-xs">{asset.fileType}</p>
-                  </div>
-                )}
-                {size && (
-                  <div>
-                    <p className="text-xs text-slate-400 mb-0.5 flex items-center gap-1"><HardDrive className="h-3 w-3" />Size</p>
-                    <p className="font-medium text-slate-800 text-xs">{size}</p>
-                  </div>
-                )}
+              <div className="grid grid-cols-2 gap-y-3 gap-x-3 text-sm">
                 {asset.owner && (
-                  <div>
+                  <div className="col-span-2">
                     <p className="text-xs text-slate-400 mb-0.5 flex items-center gap-1"><User className="h-3 w-3" />Owner</p>
                     <p className="font-medium text-slate-800 text-xs truncate">{asset.owner}</p>
                   </div>
@@ -296,29 +252,33 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
 
               <Separator />
 
-              {/* Download action */}
+              {/* Download per format */}
               <div className="space-y-2">
-                {asset.fileUrl ? (
-                  <button
-                    onClick={() => triggerDownload(asset)}
-                    className="flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg bg-[#4E86F7] hover:bg-[#3a72e3] text-white transition-colors font-medium justify-center"
-                  >
-                    <Download className="h-4 w-4" />
-                    Download {asset.fileType}
-                  </button>
-                ) : (
+                <p className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Download</p>
+                {asset.formats.map((fmt) => {
+                  const url = getFormatUrl(asset, fmt);
+                  return (
+                    <button
+                      key={fmt}
+                      onClick={() => url && triggerDownload(url, asset.name, fmt)}
+                      disabled={!url}
+                      className={cn(
+                        'flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg border font-medium transition-colors justify-center',
+                        url ? FORMAT_COLORS[fmt] : 'border-slate-200 text-slate-400 bg-slate-50 cursor-not-allowed'
+                      )}
+                    >
+                      <Download className="h-4 w-4" />
+                      Download {fmt}
+                    </button>
+                  );
+                })}
+                {asset.formats.length === 0 && (
                   <div className="flex items-center gap-2 w-full px-3 py-2.5 text-sm rounded-lg bg-slate-100 text-slate-400 justify-center">
                     <Download className="h-4 w-4" />
-                    No file attached
+                    No files attached
                   </div>
                 )}
-                <CopyIconButton value={assetPageUrl} icon={<Link2 className="h-4 w-4" />} tooltip="Copy Link" label="Copy Link" />
-                {isImage(asset.fileType) && asset.fileUrl && (
-                  <CopyIconButton value={asset.fileUrl} icon={<ImageIcon className="h-4 w-4" />} tooltip="Copy File URL" label="Copy File URL" />
-                )}
-                {isSvg && asset.fileUrl && (
-                  <CopyIconButton value={asset.fileUrl} icon={<Code className="h-4 w-4" />} tooltip="Copy as SVG" label="Copy as SVG" />
-                )}
+                <CopyLinkButton value={assetPageUrl} />
               </div>
             </div>
           </div>

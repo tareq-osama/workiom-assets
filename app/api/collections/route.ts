@@ -1,7 +1,10 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { workiomCollections } from '@/lib/workiom-collections';
+import {
+  getCollectionsByOwner,
+  createCollection,
+} from '@/lib/appwrite-collections';
 
 export async function GET() {
   const cookieStore = await cookies();
@@ -9,13 +12,9 @@ export async function GET() {
   const user = token ? await verifyToken(token) : null;
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  if (!workiomCollections.configured) {
-    return NextResponse.json({ collections: [], configured: false });
-  }
-
   try {
-    const collections = await workiomCollections.getByOwner(user.email);
-    return NextResponse.json({ collections, configured: true });
+    const collections = await getCollectionsByOwner(user.email);
+    return NextResponse.json({ collections });
   } catch {
     return NextResponse.json({ error: 'Failed to fetch collections' }, { status: 500 });
   }
@@ -27,12 +26,8 @@ export async function POST(request: Request) {
   const user = token ? await verifyToken(token) : null;
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
-  if (!workiomCollections.configured) {
-    return NextResponse.json({ error: 'Collections not configured' }, { status: 503 });
-  }
-
   try {
-    const { name, description, coverImageUrl, visibility } = await request.json() as {
+    const { name, description, coverImageUrl, visibility } = (await request.json()) as {
       name?: string;
       description?: string;
       coverImageUrl?: string;
@@ -40,7 +35,7 @@ export async function POST(request: Request) {
     };
     if (!name?.trim()) return NextResponse.json({ error: 'Name is required' }, { status: 400 });
 
-    const collection = await workiomCollections.create({
+    const collection = await createCollection({
       name: name.trim(),
       description: description?.trim(),
       coverImageUrl: coverImageUrl?.trim() || undefined,

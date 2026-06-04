@@ -7,7 +7,7 @@ import { Input } from '@/components/ui/input';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Separator } from '@/components/ui/separator';
 import type { Asset } from '@/types/asset';
-import type { Collection } from '@/lib/workiom-collections';
+import type { Collection } from '@/lib/appwrite-collections';
 
 interface CollectionsPopoverProps {
   asset: Asset;
@@ -17,7 +17,7 @@ export default function CollectionsPopover({ asset }: CollectionsPopoverProps) {
   const [open, setOpen] = useState(false);
   const [collections, setCollections] = useState<Collection[]>([]);
   const [loading, setLoading] = useState(false);
-  const [configured, setConfigured] = useState(true);
+  const [configured] = useState(true);
   const [saving, setSaving] = useState<string | null>(null);
   const [creating, setCreating] = useState(false);
   const [newName, setNewName] = useState('');
@@ -28,8 +28,7 @@ export default function CollectionsPopover({ asset }: CollectionsPopoverProps) {
     try {
       const res = await fetch('/api/collections');
       if (res.status === 401) return;
-      const data = await res.json() as { collections?: Collection[]; configured?: boolean };
-      setConfigured(data.configured ?? true);
+      const data = await res.json() as { collections?: Collection[] };
       setCollections(data.collections ?? []);
     } catch {
       // ignore

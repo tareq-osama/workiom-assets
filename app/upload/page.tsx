@@ -5,14 +5,15 @@ import { useRouter } from 'next/navigation';
 import Image from 'next/image';
 import { CONTRIBUTOR_ROLES } from '@/lib/auth';
 import type { UserRole } from '@/types/user';
+import type { AssetFormat } from '@/types/asset';
 import {
   Upload,
   X,
-  File,
   CheckCircle,
   AlertCircle,
   Loader2,
   CloudUpload,
+  FileImage,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -29,15 +30,24 @@ import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import { CATEGORIES, STATUS_OPTIONS } from '@/lib/constants';
 
-type UploadStep = 'idle' | 'uploading' | 'confirming' | 'creating' | 'done' | 'error';
+type UploadStep = 'idle' | 'uploading' | 'creating' | 'done' | 'error';
 
-interface FormData {
-  name: string;
-  description: string;
-  category: string;
-  tags: string;
-  owner: string;
-  status: string;
+const FORMAT_ACCEPT: Record<AssetFormat, string> = {
+  SVG: '.svg,image/svg+xml',
+  PNG: '.png,image/png',
+  JPG: '.jpg,.jpeg,image/jpeg',
+};
+
+const FORMAT_MIME: Record<AssetFormat, string> = {
+  SVG: 'image/svg+xml',
+  PNG: 'image/png',
+  JPG: 'image/jpeg',
+};
+
+interface FormatSlot {
+  format: AssetFormat;
+  file: File | null;
+  previewUrl: string | null;
 }
 
 function formatFileSize(bytes: number): string {
@@ -46,15 +56,116 @@ function formatFileSize(bytes: number): string {
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-function getFileType(file: File): string {
-  const ext = file.name.split('.').pop()?.toUpperCase() ?? '';
-  return (ext || (file.type.split('/')[1]?.toUpperCase() ?? 'Unknown'));
+function FormatDropZone({
+  slot,
+  onFileSelect,
+  onRemove,
+}: {
+  slot: FormatSlot;
+  onFileSelect: (format: AssetFormat, file: File) => void;
+  onRemove: (format: AssetFormat) => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onFileSelect(slot.format, file);
+  }
+
+  const formatColors: Record<AssetFormat, string> = {
+    SVG: 'border-violet-200 bg-violet-50 text-violet-700',
+    PNG: 'border-blue-200 bg-blue-50 text-blue-700',
+    JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  };
+
+  const labelColor = formatColors[slot.format];
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Badge
+          variant="outline"
+          className={`text-xs font-semibold px-2 py-0.5 ${labelColor}`}
+        >
+          {slot.format}
+        </Badge>
+        {slot.format === 'SVG' && (
+          <span className="text-xs text-slate-400">Required</span>
+        )}
+        {slot.format !== 'SVG' && (
+          <span className="text-xs text-slate-400">Optional</span>
+        )}
+      </div>
+
+      {slot.file ? (
+        <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3 bg-slate-50">
+          {slot.previewUrl ? (
+            <div className="w-12 h-12 flex-shrink-0 rounded-lg overflow-hidden border border-slate-100 bg-white flex items-center justify-center">
+              <Image
+                src={slot.previewUrl}
+                alt={slot.format}
+                width={48}
+                height={48}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-12 h-12 flex-shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
+              <FileImage className="h-5 w-5 text-slate-400" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate">{slot.file.name}</p>
+            <p className="text-xs text-slate-400">{formatFileSize(slot.file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={() => onRemove(slot.format)}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-xl p-5 text-center cursor-pointer transition-colors ${
+            dragging ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+        >
+          <CloudUpload className="h-7 w-7 text-slate-300 mx-auto mb-1.5" />
+          <p className="text-xs text-slate-500">
+            Drop {slot.format} file or <span className="text-blue-600 font-medium">browse</span>
+          </p>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept={FORMAT_ACCEPT[slot.format]}
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onFileSelect(slot.format, file);
+          e.target.value = '';
+        }}
+      />
+    </div>
+  );
 }
 
 export default function UploadPage() {
   const router = useRouter();
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [dragging, setDragging] = useState(false);
   const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
 
@@ -69,11 +180,16 @@ export default function UploadPage() {
       })
       .finally(() => setAuthChecked(true));
   }, [router]);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null);
-  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+
+  const [slots, setSlots] = useState<FormatSlot[]>([
+    { format: 'SVG', file: null, previewUrl: null },
+    { format: 'PNG', file: null, previewUrl: null },
+    { format: 'JPG', file: null, previewUrl: null },
+  ]);
+
   const [step, setStep] = useState<UploadStep>('idle');
   const [errorMessage, setErrorMessage] = useState('');
-  const [formData, setFormData] = useState<FormData>({
+  const [formData, setFormData] = useState({
     name: '',
     description: '',
     category: '',
@@ -82,54 +198,52 @@ export default function UploadPage() {
     status: 'Active',
   });
 
-  const handleFileSelect = useCallback((file: File) => {
-    setSelectedFile(file);
+  const handleFileSelect = useCallback((format: AssetFormat, file: File) => {
+    const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+    setSlots((prev) =>
+      prev.map((s) => {
+        if (s.format !== format) return s;
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return { ...s, file, previewUrl };
+      })
+    );
     setFormData((prev) => ({
       ...prev,
       name: prev.name || file.name.replace(/\.[^.]+$/, ''),
     }));
-
-    // Generate preview for images
-    const type = file.type;
-    if (type.startsWith('image/')) {
-      const url = URL.createObjectURL(file);
-      setPreviewUrl(url);
-    } else {
-      setPreviewUrl(null);
-    }
   }, []);
 
-  function handleDrop(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(false);
-    const file = e.dataTransfer.files[0];
-    if (file) handleFileSelect(file);
+  function handleRemove(format: AssetFormat) {
+    setSlots((prev) =>
+      prev.map((s) => {
+        if (s.format !== format) return s;
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return { ...s, file: null, previewUrl: null };
+      })
+    );
   }
 
-  function handleDragOver(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(true);
-  }
-
-  function handleDragLeave(e: React.DragEvent) {
-    e.preventDefault();
-    setDragging(false);
-  }
-
-  function handleInputChange(field: keyof FormData, value: string) {
+  function handleInputChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  function removeFile() {
-    setSelectedFile(null);
-    if (previewUrl) URL.revokeObjectURL(previewUrl);
-    setPreviewUrl(null);
-    if (fileInputRef.current) fileInputRef.current.value = '';
+  async function uploadFormat(slot: FormatSlot): Promise<string | null> {
+    if (!slot.file) return null;
+    const form = new FormData();
+    form.append('file', slot.file, slot.file.name);
+    const res = await fetch('/api/upload', { method: 'POST', body: form });
+    if (!res.ok) throw new Error(`Failed to upload ${slot.format} file`);
+    const { fileId } = await res.json();
+    return fileId as string;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    if (!selectedFile) return;
+    const svgSlot = slots.find((s) => s.format === 'SVG');
+    if (!svgSlot?.file) {
+      setErrorMessage('Please upload at least an SVG file.');
+      return;
+    }
     if (!formData.name.trim()) {
       setErrorMessage('Please enter a name for this asset.');
       return;
@@ -143,43 +257,13 @@ export default function UploadPage() {
     setStep('uploading');
 
     try {
-      // Step 1: Get pre-signed upload URL
-      const uploadRes = await fetch('/api/upload', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          fileName: selectedFile.name,
-          contentType: selectedFile.type,
-          fileSize: selectedFile.size,
-        }),
-      });
+      const [svgFileId, pngFileId, jpgFileId] = await Promise.all(
+        slots.map((s) => uploadFormat(s))
+      );
 
-      if (!uploadRes.ok) throw new Error('Failed to get upload URL');
-      const { uploadUrl, fileToken } = await uploadRes.json();
-
-      // Step 2: Upload file to S3
-      const s3Res = await fetch(uploadUrl, {
-        method: 'PUT',
-        headers: { 'Content-Type': selectedFile.type },
-        body: selectedFile,
-      });
-
-      if (!s3Res.ok) throw new Error('Failed to upload file to storage');
-
-      // Step 3: Confirm upload
-      setStep('confirming');
-      const confirmRes = await fetch('/api/upload', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ fileToken }),
-      });
-
-      if (!confirmRes.ok) throw new Error('Failed to confirm upload');
-      const { url: fileUrl } = await confirmRes.json();
-
-      // Step 4: Create asset record
       setStep('creating');
-      const tagsArray = formData.tags
+
+      const tags = formData.tags
         .split(',')
         .map((t) => t.trim())
         .filter(Boolean);
@@ -188,16 +272,16 @@ export default function UploadPage() {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          Name: formData.name.trim(),
-          Description: formData.description.trim() || undefined,
-          Category: formData.category,
-          Tags: tagsArray.join(', '),
-          'File URL': fileUrl,
-          Status: formData.status,
-          Owner: formData.owner.trim() || undefined,
-          'File Type': getFileType(selectedFile),
-          'File Size': selectedFile.size,
-          'Download Count': 0,
+          name: formData.name.trim(),
+          description: formData.description.trim() || undefined,
+          category: formData.category,
+          tags,
+          status: formData.status,
+          owner: formData.owner.trim() || undefined,
+          svgFileId: svgFileId ?? undefined,
+          pngFileId: pngFileId ?? undefined,
+          jpgFileId: jpgFileId ?? undefined,
+          fileSize: svgSlot.file.size,
         }),
       });
 
@@ -214,9 +298,14 @@ export default function UploadPage() {
     }
   }
 
-  const isUploading = ['uploading', 'confirming', 'creating'].includes(step);
+  const isUploading = step === 'uploading' || step === 'creating';
+  const hasSvg = !!slots.find((s) => s.format === 'SVG')?.file;
 
-  // Show nothing while auth is being checked
+  const stepLabel: Record<string, string> = {
+    uploading: 'Uploading files...',
+    creating: 'Creating asset record...',
+  };
+
   if (!authChecked) {
     return (
       <div className="flex-1 bg-slate-50 flex items-center justify-center">
@@ -225,7 +314,6 @@ export default function UploadPage() {
     );
   }
 
-  // Access denied for non-contributors
   if (!userRole || !CONTRIBUTOR_ROLES.includes(userRole)) {
     return (
       <div className="flex-1 bg-slate-50 flex items-center justify-center px-4">
@@ -237,11 +325,7 @@ export default function UploadPage() {
           <p className="text-slate-500 text-sm">
             Upload is restricted to Design Team, Marketing Team, and Admin roles.
           </p>
-          <Button
-            variant="outline"
-            className="mt-6"
-            onClick={() => router.push('/browse')}
-          >
+          <Button variant="outline" className="mt-6" onClick={() => router.push('/browse')}>
             Browse Assets
           </Button>
         </div>
@@ -249,19 +333,13 @@ export default function UploadPage() {
     );
   }
 
-  const stepLabel: Record<string, string> = {
-    uploading: 'Uploading file...',
-    confirming: 'Confirming upload...',
-    creating: 'Creating asset record...',
-  };
-
   return (
     <div className="flex-1 bg-slate-50">
       <div className="max-w-3xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Upload Asset</h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Add a new file to the Workiom Assets Library.
+            Add a new brand asset. Upload SVG (required) plus PNG and JPG variants.
           </p>
         </div>
 
@@ -274,102 +352,28 @@ export default function UploadPage() {
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-              {/* Drop zone */}
+              {/* Format upload slots */}
               <div>
-                <Label className="text-sm font-semibold text-slate-700 mb-3 block">
-                  File <span className="text-red-500">*</span>
+                <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                  Files <span className="text-red-500">*</span>
+                  <span className="font-normal text-slate-400 ml-1">(SVG required, PNG & JPG optional)</span>
                 </Label>
-                {selectedFile ? (
-                  <div className="border border-slate-200 rounded-xl p-4 flex items-center gap-4 bg-slate-50">
-                    {previewUrl ? (
-                      <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-slate-100">
-                        <Image
-                          src={previewUrl}
-                          alt="Preview"
-                          width={64}
-                          height={64}
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    ) : (
-                      <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
-                        <File className="h-7 w-7 text-slate-400" />
-                      </div>
-                    )}
-                    <div className="flex-1 min-w-0">
-                      <p className="font-medium text-slate-900 text-sm truncate">
-                        {selectedFile.name}
-                      </p>
-                      <div className="flex items-center gap-2 mt-1">
-                        <Badge
-                          variant="outline"
-                          className="text-xs px-1.5 py-0 h-4 bg-white"
-                        >
-                          {getFileType(selectedFile)}
-                        </Badge>
-                        <span className="text-xs text-slate-400">
-                          {formatFileSize(selectedFile.size)}
-                        </span>
-                      </div>
-                    </div>
-                    <Button
-                      type="button"
-                      variant="ghost"
-                      size="icon"
-                      className="h-8 w-8 flex-shrink-0 text-slate-400 hover:text-red-500"
-                      onClick={removeFile}
-                    >
-                      <X className="h-4 w-4" />
-                    </Button>
-                  </div>
-                ) : (
-                  <div
-                    className={`border-2 border-dashed rounded-xl p-10 text-center cursor-pointer transition-colors ${
-                      dragging
-                        ? 'border-blue-400 bg-blue-50'
-                        : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
-                    }`}
-                    onDrop={handleDrop}
-                    onDragOver={handleDragOver}
-                    onDragLeave={handleDragLeave}
-                    onClick={() => fileInputRef.current?.click()}
-                    role="button"
-                    tabIndex={0}
-                    onKeyDown={(e) => e.key === 'Enter' && fileInputRef.current?.click()}
-                    aria-label="Upload file"
-                  >
-                    <CloudUpload className="h-10 w-10 text-slate-300 mx-auto mb-3" />
-                    <p className="text-slate-600 font-medium mb-1">
-                      Drag & drop your file here
-                    </p>
-                    <p className="text-slate-400 text-sm mb-4">or click to browse</p>
-                    <Button
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      className="pointer-events-none"
-                    >
-                      <Upload className="h-3.5 w-3.5 mr-1.5" />
-                      Choose File
-                    </Button>
-                  </div>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="hidden"
-                  onChange={(e) => {
-                    const file = e.target.files?.[0];
-                    if (file) handleFileSelect(file);
-                  }}
-                />
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {slots.map((slot) => (
+                    <FormatDropZone
+                      key={slot.format}
+                      slot={slot}
+                      onFileSelect={handleFileSelect}
+                      onRemove={handleRemove}
+                    />
+                  ))}
+                </div>
               </div>
 
               <Separator />
 
               {/* Form fields */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-5">
-                {/* Name */}
                 <div className="sm:col-span-2">
                   <Label htmlFor="name" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Name <span className="text-red-500">*</span>
@@ -378,18 +382,14 @@ export default function UploadPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="e.g. Workiom Logo 2024"
+                    placeholder="e.g. Primary Logo"
                     required
                     className="h-10"
                   />
                 </div>
 
-                {/* Description */}
                 <div className="sm:col-span-2">
-                  <Label
-                    htmlFor="description"
-                    className="text-sm font-medium text-slate-700 mb-1.5 block"
-                  >
+                  <Label htmlFor="description" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Description
                   </Label>
                   <Textarea
@@ -402,12 +402,8 @@ export default function UploadPage() {
                   />
                 </div>
 
-                {/* Category */}
                 <div>
-                  <Label
-                    htmlFor="category"
-                    className="text-sm font-medium text-slate-700 mb-1.5 block"
-                  >
+                  <Label htmlFor="category" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Category <span className="text-red-500">*</span>
                   </Label>
                   <Select
@@ -428,12 +424,8 @@ export default function UploadPage() {
                   </Select>
                 </div>
 
-                {/* Status */}
                 <div>
-                  <Label
-                    htmlFor="status"
-                    className="text-sm font-medium text-slate-700 mb-1.5 block"
-                  >
+                  <Label htmlFor="status" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Status
                   </Label>
                   <Select
@@ -453,12 +445,8 @@ export default function UploadPage() {
                   </Select>
                 </div>
 
-                {/* Owner */}
                 <div>
-                  <Label
-                    htmlFor="owner"
-                    className="text-sm font-medium text-slate-700 mb-1.5 block"
-                  >
+                  <Label htmlFor="owner" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Owner
                   </Label>
                   <Input
@@ -470,12 +458,8 @@ export default function UploadPage() {
                   />
                 </div>
 
-                {/* Tags */}
                 <div>
-                  <Label
-                    htmlFor="tags"
-                    className="text-sm font-medium text-slate-700 mb-1.5 block"
-                  >
+                  <Label htmlFor="tags" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Tags
                     <span className="text-slate-400 font-normal ml-1 text-xs">(comma-separated)</span>
                   </Label>
@@ -490,14 +474,8 @@ export default function UploadPage() {
               </div>
 
               {/* Error */}
-              {step === 'error' && errorMessage && (
+              {errorMessage && (
                 <div className="flex items-center gap-2 p-3 bg-red-50 border border-red-100 rounded-lg text-sm text-red-700">
-                  <AlertCircle className="h-4 w-4 flex-shrink-0" />
-                  {errorMessage}
-                </div>
-              )}
-              {errorMessage && step === 'idle' && (
-                <div className="flex items-center gap-2 p-3 bg-amber-50 border border-amber-100 rounded-lg text-sm text-amber-700">
                   <AlertCircle className="h-4 w-4 flex-shrink-0" />
                   {errorMessage}
                 </div>
@@ -507,7 +485,7 @@ export default function UploadPage() {
               <div className="flex items-center gap-3 pt-2">
                 <Button
                   type="submit"
-                  disabled={!selectedFile || isUploading}
+                  disabled={!hasSvg || isUploading}
                   className="h-11 px-8 bg-[#4E86F7] hover:bg-[#3a72e3] text-white font-medium gap-2"
                 >
                   {isUploading ? (

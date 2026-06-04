@@ -1,110 +1,75 @@
-import Image from 'next/image';
 import Link from 'next/link';
 import {
+  Star,
   Layers,
-  BookOpen,
-  LayoutTemplate,
-  Megaphone,
+  Building2,
+  Shapes,
   Pen,
-  Camera,
-  Video,
-  FileText,
-  AlertTriangle,
+  LayoutTemplate,
+  BookOpen,
   ArrowRight,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import AssetCard from '@/components/asset-card';
 import HeroSearch from '@/components/hero-search';
-import { getAssets } from '@/lib/workiom';
+import { getAssets } from '@/lib/appwrite-assets';
 import type { AssetCategory } from '@/types/asset';
 
 const CATEGORY_ICONS: Record<AssetCategory, React.ElementType> = {
+  'Brand Items': Star,
   Logos: Layers,
-  'Brand Guidelines': BookOpen,
-  Templates: LayoutTemplate,
-  'Campaign Materials': Megaphone,
-  'Icons & Illustrations': Pen,
-  Photography: Camera,
-  Videos: Video,
-  Documents: FileText,
+  'Client Logos': Building2,
+  'Brand Icons': Shapes,
+  'Brand Illustrations': Pen,
+  'Canva Templates': LayoutTemplate,
+  'Ready to Design Brochures': BookOpen,
 };
 
 const CATEGORIES: AssetCategory[] = [
+  'Brand Items',
   'Logos',
-  'Brand Guidelines',
-  'Templates',
-  'Campaign Materials',
-  'Icons & Illustrations',
-  'Photography',
-  'Videos',
-  'Documents',
+  'Client Logos',
+  'Brand Icons',
+  'Brand Illustrations',
+  'Canva Templates',
+  'Ready to Design Brochures',
 ];
 
 const CATEGORY_COLORS: Record<AssetCategory, string> = {
-  Logos: 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100',
-  'Brand Guidelines': 'bg-purple-50 text-purple-600 border-purple-100 hover:bg-purple-100',
-  Templates: 'bg-green-50 text-green-600 border-green-100 hover:bg-green-100',
-  'Campaign Materials': 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100',
-  'Icons & Illustrations': 'bg-pink-50 text-pink-600 border-pink-100 hover:bg-pink-100',
-  Photography: 'bg-cyan-50 text-cyan-600 border-cyan-100 hover:bg-cyan-100',
-  Videos: 'bg-red-50 text-red-600 border-red-100 hover:bg-red-100',
-  Documents: 'bg-slate-50 text-slate-600 border-slate-100 hover:bg-slate-100',
+  'Brand Items': 'bg-blue-50 text-blue-600 border-blue-100 hover:bg-blue-100',
+  Logos: 'bg-indigo-50 text-indigo-600 border-indigo-100 hover:bg-indigo-100',
+  'Client Logos': 'bg-slate-50 text-slate-600 border-slate-200 hover:bg-slate-100',
+  'Brand Icons': 'bg-violet-50 text-violet-600 border-violet-100 hover:bg-violet-100',
+  'Brand Illustrations': 'bg-pink-50 text-pink-600 border-pink-100 hover:bg-pink-100',
+  'Canva Templates': 'bg-teal-50 text-teal-600 border-teal-100 hover:bg-teal-100',
+  'Ready to Design Brochures': 'bg-orange-50 text-orange-600 border-orange-100 hover:bg-orange-100',
 };
 
 export const dynamic = 'force-dynamic';
 
 export default async function HomePage() {
-  const listIdSet = !!process.env.WORKIOM_LIST_ID;
-
   let recentAssets: Awaited<ReturnType<typeof getAssets>>['assets'] = [];
   let topAssets: Awaited<ReturnType<typeof getAssets>>['assets'] = [];
 
-  if (listIdSet) {
-    const [recentResult, topResult] = await Promise.allSettled([
-      getAssets({ limit: 8, sort: [{ field: 'createdAt', direction: 'desc' }] }),
-      getAssets({ limit: 8, sort: [{ field: 'Download Count', direction: 'desc' }] }),
-    ]);
+  const [recentResult, topResult] = await Promise.allSettled([
+    getAssets({ limit: 8 }),
+    getAssets({ limit: 8 }),
+  ]);
 
-    if (recentResult.status === 'fulfilled') recentAssets = recentResult.value.assets;
-    if (topResult.status === 'fulfilled') topAssets = topResult.value.assets;
-  }
+  if (recentResult.status === 'fulfilled') recentAssets = recentResult.value.assets;
+  if (topResult.status === 'fulfilled') topAssets = topResult.value.assets;
 
   return (
     <div className="flex flex-col">
-      {/* Setup banner */}
-      {!listIdSet && (
-        <div className="bg-amber-50 border-b border-amber-200 px-4 py-3">
-          <div className="max-w-7xl mx-auto flex items-center gap-3">
-            <AlertTriangle className="h-4 w-4 text-amber-600 flex-shrink-0" />
-            <p className="text-sm text-amber-800">
-              <strong>Setup required:</strong> Set{' '}
-              <code className="bg-amber-100 px-1 rounded font-mono text-xs">WORKIOM_LIST_ID</code>{' '}
-              in your <code className="bg-amber-100 px-1 rounded font-mono text-xs">.env.local</code>{' '}
-              to connect to your Workiom assets list.
-            </p>
-          </div>
-        </div>
-      )}
-
       {/* Hero */}
       <section className="bg-gradient-to-br from-slate-50 via-white to-blue-50 border-b border-slate-100 py-16 sm:py-20 lg:py-24">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 text-center">
-          <div className="flex justify-center mb-6">
-            <Image
-              src="/workiom-logo.png"
-              alt="Workiom"
-              width={160}
-              height={44}
-              className="h-10 w-auto object-contain"
-              priority
-            />
-          </div>
           <h1 className="text-3xl sm:text-4xl lg:text-5xl font-bold text-slate-900 tracking-tight mb-4">
-            Assets Library
+            Brand Assets Library
           </h1>
           <p className="text-lg text-slate-500 mb-8 max-w-xl mx-auto">
-            Your centralized hub for brand assets, templates, and creative resources. Find,
-            download, and share everything you need.
+            Your centralized hub for logos, icons, illustrations, and brand resources — available
+            in SVG, PNG, and JPG.
           </p>
           <div className="flex justify-center px-4">
             <HeroSearch />
@@ -129,7 +94,7 @@ export default async function HomePage() {
       <section className="py-12 bg-white">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <h2 className="text-xl font-semibold text-slate-900 mb-6">Browse by Category</h2>
-          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-8 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-4 lg:grid-cols-7 gap-3">
             {CATEGORIES.map((cat) => {
               const Icon = CATEGORY_ICONS[cat];
               const colorClass = CATEGORY_COLORS[cat];
@@ -149,7 +114,7 @@ export default async function HomePage() {
       </section>
 
       {/* Recently Added */}
-      {listIdSet && recentAssets.length > 0 && (
+      {recentAssets.length > 0 && (
         <section className="py-10 bg-slate-50 border-t border-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-5">
@@ -173,7 +138,7 @@ export default async function HomePage() {
       )}
 
       {/* Most Downloaded */}
-      {listIdSet && topAssets.length > 0 && (
+      {topAssets.length > 0 && (
         <section className="py-10 bg-white border-t border-slate-100">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div className="flex items-center justify-between mb-5">
@@ -196,23 +161,21 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Empty state when list ID not set */}
-      {!listIdSet && (
-        <section className="py-16 text-center">
+      {recentAssets.length === 0 && (
+        <section className="py-20 text-center">
           <div className="max-w-md mx-auto px-4">
-            <Image
-              src="/workiom-icon.png"
-              alt="Workiom"
-              width={64}
-              height={64}
-              className="mx-auto mb-4 opacity-40"
-            />
-            <h3 className="text-lg font-medium text-slate-900 mb-2">Connect Your Assets List</h3>
-            <p className="text-slate-500 text-sm">
-              Set your{' '}
-              <code className="bg-slate-100 px-1 rounded font-mono text-xs">WORKIOM_LIST_ID</code>{' '}
-              environment variable to start managing your assets.
+            <div className="h-16 w-16 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-4">
+              <Star className="h-8 w-8 text-blue-400" />
+            </div>
+            <h3 className="text-lg font-medium text-slate-900 mb-2">No assets yet</h3>
+            <p className="text-slate-500 text-sm mb-6">
+              Upload your first brand asset to get started.
             </p>
+            <Link href="/upload">
+              <Button className="bg-[#4E86F7] hover:bg-[#3a72e3] text-white">
+                Upload Asset
+              </Button>
+            </Link>
           </div>
         </section>
       )}

@@ -1,7 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { verifyToken } from '@/lib/auth';
-import { workiomCollections } from '@/lib/workiom-collections';
+import { setCollectionVisibility, deleteCollection } from '@/lib/appwrite-collections';
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const cookieStore = await cookies();
@@ -10,11 +10,11 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!user) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
 
   const { id } = await params;
-  const { visibility } = await request.json() as { visibility?: 'Private' | 'Public' };
+  const { visibility } = (await request.json()) as { visibility?: 'Private' | 'Public' };
   if (!visibility) return NextResponse.json({ error: 'visibility required' }, { status: 400 });
 
   try {
-    await workiomCollections.setVisibility(id, visibility);
+    await setCollectionVisibility(id, visibility);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to update' }, { status: 500 });
@@ -29,7 +29,7 @@ export async function DELETE(_request: Request, { params }: { params: Promise<{ 
 
   const { id } = await params;
   try {
-    await workiomCollections.delete(id);
+    await deleteCollection(id);
     return NextResponse.json({ success: true });
   } catch {
     return NextResponse.json({ error: 'Failed to delete' }, { status: 500 });

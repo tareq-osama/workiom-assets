@@ -2,20 +2,12 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import {
-  Download,
-  Link2,
-  FileText,
-  FileImage,
-  Film,
-  FileSpreadsheet,
-  File,
-} from 'lucide-react';
+import { Download, Link2, FileImage } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import StatusBadge from '@/components/status-badge';
 import AssetPreviewDialog from '@/components/asset-preview-dialog';
-import type { Asset } from '@/types/asset';
+import type { Asset, AssetFormat } from '@/types/asset';
 import { cn } from '@/lib/utils';
 
 interface AssetCardProps {
@@ -23,42 +15,40 @@ interface AssetCardProps {
   viewMode?: 'grid' | 'list';
 }
 
-function FileTypeIcon({ fileType, className }: { fileType: string; className?: string }) {
-  const type = fileType.toUpperCase();
-  const iconClass = cn('text-slate-400', className);
-  if (['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(type)) return <FileImage className={iconClass} />;
-  if (['MP4', 'MOV', 'AVI', 'WEBM'].includes(type)) return <Film className={iconClass} />;
-  if (['PDF', 'DOC', 'DOCX'].includes(type)) return <FileText className={iconClass} />;
-  if (['XLS', 'XLSX', 'CSV'].includes(type)) return <FileSpreadsheet className={iconClass} />;
-  return <File className={iconClass} />;
-}
-
-function isImageType(fileType: string) {
-  return ['PNG', 'JPG', 'JPEG', 'GIF', 'WEBP', 'SVG'].includes(fileType.toUpperCase());
+function isImageFormat(fmt: string) {
+  return ['SVG', 'PNG', 'JPG', 'JPEG'].includes(fmt.toUpperCase());
 }
 
 function formatFileSize(bytes: number): string {
-  if (bytes === 0) return '0 B';
+  if (bytes === 0) return '';
   if (bytes < 1024) return `${bytes} B`;
   if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
   return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
-async function handleDownload(asset: Asset, e: React.MouseEvent) {
+function getFormatUrl(asset: Asset, format: AssetFormat): string | undefined {
+  if (format === 'SVG') return asset.svgUrl;
+  if (format === 'PNG') return asset.pngUrl;
+  if (format === 'JPG') return asset.jpgUrl;
+}
+
+async function downloadFormat(asset: Asset, format: AssetFormat, e: React.MouseEvent) {
   e.stopPropagation();
+  const url = getFormatUrl(asset, format);
+  if (!url) return;
   try {
-    const response = await fetch(asset.fileUrl);
+    const response = await fetch(url);
     const blob = await response.blob();
-    const url = window.URL.createObjectURL(blob);
+    const blobUrl = window.URL.createObjectURL(blob);
     const a = document.createElement('a');
-    a.href = url;
-    a.download = `${asset.name}.${asset.fileType.toLowerCase()}`;
+    a.href = blobUrl;
+    a.download = `${asset.name}.${format.toLowerCase()}`;
     document.body.appendChild(a);
     a.click();
-    window.URL.revokeObjectURL(url);
+    window.URL.revokeObjectURL(blobUrl);
     document.body.removeChild(a);
   } catch {
-    window.open(asset.fileUrl, '_blank');
+    window.open(url, '_blank');
   }
 }
 
@@ -68,11 +58,19 @@ function handleCopyLink(asset: Asset, e: React.MouseEvent) {
   navigator.clipboard.writeText(url).catch(() => {});
 }
 
+const FORMAT_COLORS: Record<AssetFormat, string> = {
+  SVG: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100',
+  PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
+  JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+};
+
 const iconBtnBase =
   'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer border-0 p-0 bg-transparent';
 
 export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const previewUrl = asset.thumbnailUrl ?? (asset.formats.some(isImageFormat) ? asset.fileUrl : undefined);
+  const primaryFormat = asset.formats[0];
 
   if (viewMode === 'list') {
     return (
@@ -83,17 +81,17 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
         >
           {/* Thumbnail */}
           <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
-            {(asset.thumbnailUrl || asset.fileUrl) && isImageType(asset.fileType) ? (
+            {previewUrl ? (
               <Image
-                src={asset.thumbnailUrl || asset.fileUrl}
+                src={previewUrl}
                 alt={asset.name}
                 width={64}
                 height={64}
-                className="w-full h-full object-cover"
+                className="w-full h-full object-contain"
                 unoptimized
               />
             ) : (
-              <FileTypeIcon fileType={asset.fileType} className="w-8 h-8" />
+              <FileImage className="w-8 h-8 text-slate-300" />
             )}
           </div>
 
@@ -102,10 +100,22 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             <h3 className="font-medium text-slate-900 truncate">{asset.name}</h3>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className="text-xs text-slate-500">{asset.category}</span>
-              <span className="text-slate-300">•</span>
-              <Badge variant="outline" className="text-xs px-1.5 py-0 h-5 bg-slate-50">
-                {asset.fileType}
-              </Badge>
+              {asset.formats.length > 0 && (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <div className="flex gap-1">
+                    {asset.formats.map((fmt) => (
+                      <Badge
+                        key={fmt}
+                        variant="outline"
+                        className={`text-xs px-1.5 py-0 h-4 leading-none ${FORMAT_COLORS[fmt]}`}
+                      >
+                        {fmt}
+                      </Badge>
+                    ))}
+                  </div>
+                </>
+              )}
               {asset.fileSize > 0 && (
                 <span className="text-xs text-slate-400">{formatFileSize(asset.fileSize)}</span>
               )}
@@ -120,15 +130,18 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
-            <Tooltip>
-              <TooltipTrigger
-                className={cn(iconBtnBase, 'h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100')}
-                onClick={(e) => handleDownload(asset, e)}
-              >
-                <Download className="h-4 w-4" />
-              </TooltipTrigger>
-              <TooltipContent>Download</TooltipContent>
-            </Tooltip>
+            {asset.formats.map((fmt) => (
+              <Tooltip key={fmt}>
+                <TooltipTrigger
+                  className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md', FORMAT_COLORS[fmt])}
+                  onClick={(e) => downloadFormat(asset, fmt, e)}
+                >
+                  <Download className="h-3 w-3 mr-1" />
+                  {fmt}
+                </TooltipTrigger>
+                <TooltipContent>Download {fmt}</TooltipContent>
+              </Tooltip>
+            ))}
             <Tooltip>
               <TooltipTrigger
                 className={cn(iconBtnBase, 'h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100')}
@@ -155,35 +168,41 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
       >
         {/* Thumbnail area */}
         <div className="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
-          {(asset.thumbnailUrl || asset.fileUrl) && isImageType(asset.fileType) ? (
+          {previewUrl ? (
             <Image
-              src={asset.thumbnailUrl || asset.fileUrl}
+              src={previewUrl}
               alt={asset.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
-              className="object-cover"
+              className="object-contain p-4"
               unoptimized
             />
           ) : (
-            <div className="flex flex-col items-center gap-2 text-slate-400">
-              <FileTypeIcon fileType={asset.fileType} className="w-12 h-12" />
-              <span className="text-xs font-medium uppercase tracking-wide">{asset.fileType}</span>
+            <div className="flex flex-col items-center gap-2 text-slate-300">
+              <FileImage className="w-12 h-12" />
+              {primaryFormat && (
+                <span className="text-xs font-medium uppercase tracking-wide">{primaryFormat}</span>
+              )}
             </div>
           )}
 
-          {/* Hover overlay — quick actions only, pointer-events-none when invisible so full card remains clickable */}
-          <div
-            className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto"
-          >
-            <Tooltip>
-              <TooltipTrigger
-                className={cn(iconBtnBase, 'h-9 w-9 bg-white text-slate-900 hover:bg-slate-100 rounded-md')}
-                onClick={(e) => handleDownload(asset, e)}
-              >
-                <Download className="h-4 w-4" />
-              </TooltipTrigger>
-              <TooltipContent>Download</TooltipContent>
-            </Tooltip>
+          {/* Hover overlay */}
+          <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
+            {asset.formats.map((fmt) => (
+              <Tooltip key={fmt}>
+                <TooltipTrigger
+                  className={cn(
+                    'h-9 px-3 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer',
+                    FORMAT_COLORS[fmt]
+                  )}
+                  onClick={(e) => downloadFormat(asset, fmt, e)}
+                >
+                  <Download className="h-3.5 w-3.5" />
+                  {fmt}
+                </TooltipTrigger>
+                <TooltipContent>Download {fmt}</TooltipContent>
+              </Tooltip>
+            ))}
             <Tooltip>
               <TooltipTrigger
                 className={cn(iconBtnBase, 'h-9 w-9 bg-white text-slate-900 hover:bg-slate-100 rounded-md')}
@@ -198,25 +217,21 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
 
         {/* Card footer */}
         <div className="p-3">
-          <div className="flex items-start gap-2 mb-1">
-            <h3 className="font-medium text-sm text-slate-900 truncate leading-snug flex-1 min-w-0">
-              {asset.name}
-            </h3>
-          </div>
+          <h3 className="font-medium text-sm text-slate-900 truncate leading-snug mb-1.5">
+            {asset.name}
+          </h3>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs text-slate-500 truncate">{asset.category}</span>
-            {asset.fileType && (
-              <>
-                <span className="text-slate-300 text-xs">·</span>
-                <Badge variant="outline" className="text-xs px-1.5 py-0 h-4 bg-slate-50 leading-none">
-                  {asset.fileType}
-                </Badge>
-              </>
-            )}
+            <span className="text-xs text-slate-500 truncate flex-1 min-w-0">{asset.category}</span>
+            {asset.formats.map((fmt) => (
+              <Badge
+                key={fmt}
+                variant="outline"
+                className={`text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 ${FORMAT_COLORS[fmt]}`}
+              >
+                {fmt}
+              </Badge>
+            ))}
           </div>
-          {asset.fileSize > 0 && (
-            <p className="text-xs text-slate-400 mt-1">{formatFileSize(asset.fileSize)}</p>
-          )}
         </div>
       </div>
 
