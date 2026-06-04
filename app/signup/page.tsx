@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -18,16 +17,9 @@ export default function SignupPage() {
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
 
-  const emailInvalid = email.length > 0 && !email.toLowerCase().endsWith('@workiom.com')
-
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault()
     setError('')
-
-    if (emailInvalid) {
-      setError('Only @workiom.com email addresses are allowed.')
-      return
-    }
 
     if (password.length < 8) {
       setError('Password must be at least 8 characters.')
@@ -66,22 +58,11 @@ export default function SignupPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/workiom-logo.png"
-            alt="Workiom"
-            width={140}
-            height={38}
-            className="h-auto w-auto object-contain"
-            priority
-          />
-        </div>
-
         <h1 className="text-xl font-semibold text-slate-900 text-center mb-1">
           Create your account
         </h1>
         <p className="text-sm text-slate-500 text-center mb-6">
-          Join the Workiom Assets Library
+          Join the Brand Assets Library
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -108,16 +89,13 @@ export default function SignupPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@workiom.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
               autoComplete="email"
-              className={`h-10 ${emailInvalid ? 'border-red-400 focus-visible:ring-red-300' : ''}`}
+              className="h-10"
             />
-            {emailInvalid && (
-              <p className="text-xs text-red-600 mt-1">Must be a @workiom.com email address.</p>
-            )}
           </div>
 
           <div>
@@ -138,10 +116,7 @@ export default function SignupPage() {
           </div>
 
           <div>
-            <Label
-              htmlFor="confirmPassword"
-              className="text-sm font-medium text-slate-700 mb-1.5 block"
-            >
+            <Label htmlFor="confirmPassword" className="text-sm font-medium text-slate-700 mb-1.5 block">
               Confirm password
             </Label>
             <Input

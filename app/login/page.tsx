@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import Image from 'next/image'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { Loader2 } from 'lucide-react'
@@ -46,22 +45,11 @@ export default function LoginPage() {
   return (
     <div className="bg-slate-50 min-h-screen flex items-center justify-center px-4">
       <div className="bg-white rounded-2xl shadow-sm border border-slate-200 p-8 w-full max-w-md">
-        <div className="flex justify-center mb-6">
-          <Image
-            src="/workiom-logo.png"
-            alt="Workiom"
-            width={140}
-            height={38}
-            className="h-auto w-auto object-contain"
-            priority
-          />
-        </div>
-
         <h1 className="text-xl font-semibold text-slate-900 text-center mb-1">
           Sign in to Assets Library
         </h1>
         <p className="text-sm text-slate-500 text-center mb-6">
-          Use your Workiom account to continue
+          Enter your email and password to continue
         </p>
 
         <form onSubmit={handleSubmit} className="space-y-4">
@@ -72,7 +60,7 @@ export default function LoginPage() {
             <Input
               id="email"
               type="email"
-              placeholder="you@workiom.com"
+              placeholder="you@example.com"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
