@@ -3,8 +3,6 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Image from 'next/image';
-import { CONTRIBUTOR_ROLES } from '@/lib/auth';
-import type { UserRole } from '@/types/user';
 import type { AssetFormat } from '@/types/asset';
 import {
   Upload,
@@ -166,15 +164,11 @@ function FormatDropZone({
 
 export default function UploadPage() {
   const router = useRouter();
-  const [userRole, setUserRole] = useState<UserRole | null>(null);
   const [authChecked, setAuthChecked] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((res) => (res.ok ? res.json() : Promise.reject(res.status)))
-      .then((data) => {
-        if (data?.user?.role) setUserRole(data.user.role as UserRole);
-      })
       .catch((statusOrErr) => {
         if (statusOrErr === 401) router.replace('/login');
       })
@@ -310,25 +304,6 @@ export default function UploadPage() {
     return (
       <div className="flex-1 bg-slate-50 flex items-center justify-center">
         <div className="text-slate-400 text-sm">Loading...</div>
-      </div>
-    );
-  }
-
-  if (!userRole || !CONTRIBUTOR_ROLES.includes(userRole)) {
-    return (
-      <div className="flex-1 bg-slate-50 flex items-center justify-center px-4">
-        <div className="bg-white border border-slate-200 rounded-2xl p-10 max-w-md w-full text-center">
-          <div className="h-12 w-12 rounded-full bg-slate-100 flex items-center justify-center mx-auto mb-4">
-            <Upload className="h-6 w-6 text-slate-400" />
-          </div>
-          <h2 className="text-lg font-semibold text-slate-900 mb-2">Access Denied</h2>
-          <p className="text-slate-500 text-sm">
-            Upload is restricted to Design Team, Marketing Team, and Admin roles.
-          </p>
-          <Button variant="outline" className="mt-6" onClick={() => router.push('/browse')}>
-            Browse Assets
-          </Button>
-        </div>
       </div>
     );
   }
