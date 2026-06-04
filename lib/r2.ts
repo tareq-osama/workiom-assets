@@ -30,7 +30,7 @@ export async function r2Upload(key: string, body: Buffer, contentType: string): 
       'Content-Type': contentType,
       'Content-Length': String(body.byteLength),
     },
-    body,
+    body: new Uint8Array(body),
   });
   if (!res.ok) {
     const text = await res.text().catch(() => '');
