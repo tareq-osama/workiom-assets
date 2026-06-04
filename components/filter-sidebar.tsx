@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
-import { CATEGORIES, STATUS_OPTIONS, FILE_TYPES } from '@/lib/constants';
+import { STATUS_OPTIONS, FILE_TYPES } from '@/lib/constants';
 
 export interface FilterState {
   categories: string[];
@@ -17,6 +17,7 @@ export interface FilterState {
 interface FilterSidebarProps {
   filters: FilterState;
   setFilters: (filters: FilterState) => void;
+  categories: string[]; // names only, fetched by the parent
 }
 
 function FilterGroup({
@@ -57,7 +58,7 @@ function FilterGroup({
   );
 }
 
-export default function FilterSidebar({ filters, setFilters }: FilterSidebarProps) {
+export default function FilterSidebar({ filters, setFilters, categories }: FilterSidebarProps) {
   const activeCount =
     filters.categories.length + filters.statuses.length + filters.fileTypes.length;
 
@@ -94,26 +95,17 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
 
   return (
     <div className="w-full">
-      {/* Header */}
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
           <h2 className="text-base font-semibold text-slate-900">Filters</h2>
           {activeCount > 0 && (
-            <Badge
-              variant="secondary"
-              className="text-xs h-5 px-1.5 bg-blue-100 text-blue-700 border-blue-200"
-            >
+            <Badge variant="secondary" className="text-xs h-5 px-1.5 bg-blue-100 text-blue-700 border-blue-200">
               {activeCount}
             </Badge>
           )}
         </div>
         {activeCount > 0 && (
-          <Button
-            variant="ghost"
-            size="sm"
-            className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900"
-            onClick={clearAll}
-          >
+          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900" onClick={clearAll}>
             <X className="h-3 w-3 mr-1" />
             Clear All
           </Button>
@@ -121,12 +113,14 @@ export default function FilterSidebar({ filters, setFilters }: FilterSidebarProp
       </div>
 
       <div className="space-y-5">
-        <FilterGroup
-          title="Category"
-          options={CATEGORIES}
-          selected={filters.categories}
-          onToggle={toggleCategory}
-        />
+        {categories.length > 0 && (
+          <FilterGroup
+            title="Category"
+            options={categories}
+            selected={filters.categories}
+            onToggle={toggleCategory}
+          />
+        )}
 
         <Separator />
 

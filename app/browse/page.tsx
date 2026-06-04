@@ -11,6 +11,7 @@ import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '@/co
 import AssetCard from '@/components/asset-card';
 import FilterSidebar, { type FilterState } from '@/components/filter-sidebar';
 import type { Asset } from '@/types/asset';
+import type { Category } from '@/lib/appwrite-categories';
 
 const LIMIT = 24;
 
@@ -51,6 +52,14 @@ export default function BrowsePage({
   const [page, setPage] = useState(1);
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
+
+  useEffect(() => {
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
+      .catch(() => {});
+  }, []);
 
   const fetchAssets = useCallback(
     async (currentPage: number) => {
@@ -152,7 +161,7 @@ export default function BrowsePage({
                 <SheetHeader className="mb-6">
                   <SheetTitle>Filters</SheetTitle>
                 </SheetHeader>
-                <FilterSidebar filters={filters} setFilters={setFilters} />
+                <FilterSidebar filters={filters} setFilters={setFilters} categories={categories.map((c) => c.name)} />
               </SheetContent>
             </Sheet>
 
@@ -191,7 +200,7 @@ export default function BrowsePage({
           {/* Desktop sidebar */}
           <aside className="hidden lg:block w-56 flex-shrink-0">
             <div className="sticky top-36 bg-white rounded-xl border border-slate-200 p-5">
-              <FilterSidebar filters={filters} setFilters={setFilters} />
+              <FilterSidebar filters={filters} setFilters={setFilters} categories={categories.map((c) => c.name)} />
             </div>
           </aside>
 

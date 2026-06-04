@@ -1,13 +1,6 @@
 export type AssetFormat = 'SVG' | 'PNG' | 'JPG';
 export type AssetStatus = 'Active' | 'Deprecated' | 'Draft';
-export type AssetCategory =
-  | 'Brand Items'
-  | 'Logos'
-  | 'Client Logos'
-  | 'Brand Icons'
-  | 'Brand Illustrations'
-  | 'Canva Templates'
-  | 'Ready to Design Brochures';
+export type AssetCategory = string; // dynamic — managed in Appwrite categories collection
 
 export interface Asset {
   id: string;

@@ -26,7 +26,8 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { CATEGORIES, STATUS_OPTIONS } from '@/lib/constants';
+import { STATUS_OPTIONS } from '@/lib/constants';
+import type { Category } from '@/lib/appwrite-categories';
 
 type UploadStep = 'idle' | 'uploading' | 'creating' | 'done' | 'error';
 
@@ -165,6 +166,7 @@ function FormatDropZone({
 export default function UploadPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
+  const [categories, setCategories] = useState<Category[]>([]);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -173,6 +175,11 @@ export default function UploadPage() {
         if (statusOrErr === 401) router.replace('/login');
       })
       .finally(() => setAuthChecked(true));
+
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
+      .catch(() => {});
   }, [router]);
 
   const [slots, setSlots] = useState<FormatSlot[]>([
@@ -390,9 +397,9 @@ export default function UploadPage() {
                       <SelectValue placeholder="Select category" />
                     </SelectTrigger>
                     <SelectContent>
-                      {CATEGORIES.map((cat) => (
-                        <SelectItem key={cat} value={cat}>
-                          {cat}
+                      {categories.map((cat) => (
+                        <SelectItem key={cat.id} value={cat.name}>
+                          {cat.name}
                         </SelectItem>
                       ))}
                     </SelectContent>
