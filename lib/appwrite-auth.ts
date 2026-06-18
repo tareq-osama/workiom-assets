@@ -1,5 +1,4 @@
 import { Client, Users, Account, ID, Query } from 'node-appwrite';
-import { APPWRITE_ENDPOINT, APPWRITE_PROJECT_ID, APPWRITE_API_KEY } from './appwrite';
 import type { User, UserRole, UserStatus } from '@/types/user';
 
 // Appwrite native-auth user shape (admin Users API)
@@ -13,9 +12,9 @@ interface AppwriteNativeUser {
 
 function adminClient() {
   return new Client()
-    .setEndpoint(APPWRITE_ENDPOINT)
-    .setProject(APPWRITE_PROJECT_ID)
-    .setKey(APPWRITE_API_KEY);
+    .setEndpoint(process.env.APPWRITE_ENDPOINT ?? 'https://appwrite.diginsider.net/v1')
+    .setProject(process.env.APPWRITE_PROJECT_ID ?? '6a20b7ce00370d089aa3')
+    .setKey(process.env.APPWRITE_API_KEY ?? '');
 }
 
 function mapUser(u: AppwriteNativeUser): User {
@@ -86,8 +85,8 @@ export async function verifyUserCredentials(
 ): Promise<string | null> {
   // No API key — behaves as a regular client so session creation works
   const client = new Client()
-    .setEndpoint(APPWRITE_ENDPOINT)
-    .setProject(APPWRITE_PROJECT_ID);
+    .setEndpoint(process.env.APPWRITE_ENDPOINT ?? 'https://appwrite.diginsider.net/v1')
+    .setProject(process.env.APPWRITE_PROJECT_ID ?? '6a20b7ce00370d089aa3');
 
   const account = new Account(client);
 

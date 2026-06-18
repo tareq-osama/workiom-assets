@@ -1,11 +1,6 @@
 import { NextRequest } from 'next/server';
 import { r2Download, r2Configured } from '@/lib/r2';
-import {
-  APPWRITE_ENDPOINT,
-  APPWRITE_PROJECT_ID,
-  APPWRITE_API_KEY,
-  APPWRITE_BUCKET_ID,
-} from '@/lib/appwrite';
+import { APPWRITE_BUCKET_ID } from '@/lib/appwrite';
 
 // File IDs are stored as either:
 //   "r2/{objectKey}"   → fetch from Cloudflare R2
@@ -46,14 +41,18 @@ export async function GET(
 
   // ── Appwrite path (legacy) ────────────────────────────────────────────────
   const fileId = raw;
+  const endpoint = process.env.APPWRITE_ENDPOINT ?? 'https://appwrite.diginsider.net/v1';
+  const projectId = process.env.APPWRITE_PROJECT_ID ?? '6a20b7ce00370d089aa3';
+  const apiKey = process.env.APPWRITE_API_KEY ?? '';
+
   const appwriteUrl =
-    `${APPWRITE_ENDPOINT}/storage/buckets/${APPWRITE_BUCKET_ID}/files/${fileId}/view` +
-    `?project=${APPWRITE_PROJECT_ID}`;
+    `${endpoint}/storage/buckets/${APPWRITE_BUCKET_ID}/files/${fileId}/view` +
+    `?project=${projectId}`;
 
   const res = await fetch(appwriteUrl, {
     headers: {
-      'X-Appwrite-Project': APPWRITE_PROJECT_ID,
-      'X-Appwrite-Key': APPWRITE_API_KEY, // admin key — bypasses file-level permissions
+      'X-Appwrite-Project': projectId,
+      'X-Appwrite-Key': apiKey, // admin key — bypasses file-level permissions
     },
   });
 
