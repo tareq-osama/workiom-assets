@@ -2,7 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { notFound } from 'next/navigation';
 import { cookies } from 'next/headers';
-import { ArrowLeft, FolderOpen, Lock, Globe, Layers } from 'lucide-react';
+import { ArrowLeft, FolderOpen, Lock, Globe, Layers } from '@/components/client-icons';
 import { Badge } from '@/components/ui/badge';
 import { getCollectionByShareToken } from '@/lib/appwrite-collections';
 import { getAssets } from '@/lib/appwrite-assets';

@@ -1,5 +1,5 @@
 import Link from 'next/link';
-import { ArrowRight, Folder } from 'lucide-react';
+import { ArrowRight, Folder } from '@/components/client-icons';
 import { Button } from '@/components/ui/button';
 import AssetCard from '@/components/asset-card';
 import HeroSearch from '@/components/hero-search';
