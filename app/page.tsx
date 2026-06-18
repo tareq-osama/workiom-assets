@@ -6,7 +6,7 @@ import HeroSearch from '@/components/hero-search';
 import { getAssets } from '@/lib/appwrite-assets';
 import { getCategories } from '@/lib/appwrite-categories';
 import { getColorClasses } from '@/lib/category-colors';
-import { getCategoryIcon } from '@/lib/category-icons';
+import { CategoryIcon } from '@/components/category-icon';
 
 export const dynamic = 'force-dynamic';
 
@@ -54,7 +54,6 @@ export default async function HomePage() {
             <h2 className="text-xl font-semibold text-slate-900 mb-6">Browse by Category</h2>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-7 gap-3">
               {categories.map((cat) => {
-                const Icon = getCategoryIcon(cat.icon);
                 const c = getColorClasses(cat.color);
                 return (
                   <Link
@@ -62,7 +61,7 @@ export default async function HomePage() {
                     href={`/browse?category=${encodeURIComponent(cat.name)}`}
                     className={`flex flex-col items-center gap-2 p-4 rounded-xl border transition-colors cursor-pointer ${c.bg} ${c.text} ${c.border} ${c.hover}`}
                   >
-                    <Icon className="h-6 w-6" />
+                    <CategoryIcon icon={cat.icon} className="h-6 w-6" />
                     <span className="text-xs font-medium text-center leading-tight">{cat.name}</span>
                   </Link>
                 );

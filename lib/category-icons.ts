@@ -1,5 +1,3 @@
-'use client';
-
 import {
   Star, Layers, Building2, Shapes, Pen, LayoutTemplate, BookOpen,
   Folder, Image, Video, FileText, Music, Code2, Package, Globe,
