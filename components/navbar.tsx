@@ -34,8 +34,7 @@ interface AuthUser {
 }
 
 const navLinks = [
-  { href: '/', label: 'Home' },
-  { href: '/browse', label: 'Browse', icon: LayoutGrid },
+  { href: '/', label: 'Browse', icon: LayoutGrid },
   { href: '/collections', label: 'Collections', icon: FolderOpen },
   { href: '/brand-guidelines', label: 'Brand Guidelines', icon: BookOpen },
 ];
@@ -113,7 +112,7 @@ export default function Navbar() {
   function handleSearch(e: React.FormEvent) {
     e.preventDefault();
     if (searchValue.trim()) {
-      router.push(`/browse?search=${encodeURIComponent(searchValue.trim())}`);
+      router.push(`/?search=${encodeURIComponent(searchValue.trim())}`);
       setSearchOpen(false);
       setSearchValue('');
     }

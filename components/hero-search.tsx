@@ -13,9 +13,9 @@ export default function HeroSearch() {
   function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     if (value.trim()) {
-      router.push(`/browse?search=${encodeURIComponent(value.trim())}`);
+      router.push(`/?search=${encodeURIComponent(value.trim())}`);
     } else {
-      router.push('/browse');
+      router.push('/');
     }
   }
 

@@ -59,13 +59,13 @@ export default function BrandGuidelinesPage() {
               Follow these guidelines to keep Workiom's visual identity consistent across all touchpoints — digital, print, and beyond.
             </p>
             <div className="flex items-center gap-4">
-              <Link href="/browse">
+              <Link href="/">
                 <Button className="h-10 bg-[#4E86F7] hover:bg-[#3a72e3] text-white gap-2">
                   Browse Assets
                   <ArrowRight className="h-4 w-4" />
                 </Button>
               </Link>
-              <Link href="/browse?category=Logos">
+              <Link href="/?category=Logos">
                 <Button variant="outline" className="h-10 gap-2 text-slate-600 border-slate-200">
                   <Download className="h-4 w-4" />
                   Download Logos
@@ -176,7 +176,7 @@ export default function BrandGuidelinesPage() {
             <p className="text-slate-500 text-sm">All logos, icons, and brand files are available in the assets library in SVG, PNG, and JPG formats.</p>
           </div>
           <div className="flex items-center gap-3 flex-shrink-0">
-            <Link href="/browse">
+            <Link href="/">
               <Button className="bg-[#4E86F7] hover:bg-[#3a72e3] text-white gap-2">
                 Open Library
                 <ArrowRight className="h-4 w-4" />

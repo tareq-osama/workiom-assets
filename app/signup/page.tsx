@@ -47,7 +47,7 @@ export default function SignupPage() {
         return
       }
 
-      router.push('/browse')
+      router.push('/')
     } catch {
       setError('Something went wrong. Please try again.')
     } finally {

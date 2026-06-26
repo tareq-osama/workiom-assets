@@ -79,7 +79,7 @@ export default async function SharedCollectionPage({
           </div>
           <h1 className="text-xl font-semibold text-slate-900 mb-2">Private Collection</h1>
           <p className="text-slate-500 text-sm mb-6">This collection is private and only accessible to the owner.</p>
-          <Link href="/browse" className="inline-flex items-center gap-2 text-sm text-[#4E86F7] hover:text-[#3a72e3] font-medium">
+          <Link href="/" className="inline-flex items-center gap-2 text-sm text-[#4E86F7] hover:text-[#3a72e3] font-medium">
             <ArrowLeft className="h-4 w-4" /> Browse Assets
           </Link>
         </div>
@@ -104,7 +104,7 @@ export default async function SharedCollectionPage({
         <div className="absolute top-4 left-0 right-0">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <Link
-              href={isOwner ? '/collections' : '/browse'}
+              href={isOwner ? '/collections' : '/'}
               className="inline-flex items-center gap-1.5 text-sm font-medium px-3 py-1.5 rounded-lg bg-white/80 backdrop-blur-sm text-slate-700 hover:bg-white transition-colors shadow-sm"
             >
               <ArrowLeft className="h-4 w-4" />

@@ -43,7 +43,7 @@ export default async function AssetDetailPage({
     <div className="bg-white flex-1">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <Link
-          href="/browse"
+          href="/"
           className="inline-flex items-center gap-1.5 text-sm text-slate-500 hover:text-slate-900 mb-6 transition-colors"
         >
           <ArrowLeft className="h-4 w-4" />
@@ -195,7 +195,7 @@ export default async function AssetDetailPage({
                       {asset.tags.map((tag) => (
                         <Link
                           key={tag}
-                          href={`/browse?search=${encodeURIComponent(tag)}`}
+                          href={`/?search=${encodeURIComponent(tag)}`}
                           className="inline-flex"
                         >
                           <Badge

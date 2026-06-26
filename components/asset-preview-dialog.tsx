@@ -223,7 +223,7 @@ export default function AssetPreviewDialog({ asset, open, onOpenChange }: AssetP
                         key={tag}
                         variant="secondary"
                         className="text-xs bg-slate-100 text-slate-600 hover:bg-slate-200 cursor-pointer transition-colors"
-                        onClick={() => { onOpenChange(false); window.location.href = `/browse?search=${encodeURIComponent(tag)}`; }}
+                        onClick={() => { onOpenChange(false); window.location.href = `/?search=${encodeURIComponent(tag)}`; }}
                       >
                         {tag}
                       </Badge>

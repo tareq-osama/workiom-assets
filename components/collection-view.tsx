@@ -89,7 +89,7 @@ export default function CollectionView({ assets: initial, collectionId, isOwner 
             : 'No assets have been added to this collection yet.'}
         </p>
         {isOwner && (
-          <Link href="/browse">
+          <Link href="/">
             <Button className="gap-2 bg-[#4E86F7] hover:bg-[#3a72e3] text-white">
               <Plus className="h-4 w-4" /> Browse Assets
             </Button>
@@ -169,7 +169,7 @@ export default function CollectionView({ assets: initial, collectionId, isOwner 
           </div>
 
           {isOwner && (
-            <Link href="/browse">
+            <Link href="/">
               <Button variant="outline" size="sm" className="gap-1.5 text-sm h-9">
                 <Plus className="h-4 w-4" /> Add Assets
               </Button>
