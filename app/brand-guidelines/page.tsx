@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, ExternalLink, Menu, X, ArrowLeft, Heart } from 'lucide-react';
+import { Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -36,7 +36,6 @@ Colors:
 • Dark Purple     #360C73  RGB(54,12,115)    — deep accent
 • Violet          #8201AD  RGB(130,1,173)    — accent
 • Yellow          #FDBC0B  RGB(253,188,11)   — highlight / warning
-• Deep Navy       #231F61  RGB(35,31,97)     — text / backgrounds
 • Light Gray      #D9D9D9  RGB(217,217,217)  — neutral
 • Black #000000 / White #FFFFFF
 
@@ -71,18 +70,9 @@ Available formats: SVG (preferred), PNG, JPG`,
   typography: `Workiom Typography
 ──────────────────
 Primary font (Latin/English): General Sans
-Arabic font: IBM Plex Sans Arabic
-
 Weights: Light · Regular · Medium · SemiBold · Bold
 
-Screen usage chart:
-Size       Line Height   Tracking
-0–15px     128%          −1%
-16–25px    120%          −2%
-26–42px    104%          −2%
-42–76px    98%           −3%
-76px+      96%           −4%
-
+Arabic font: IBM Plex Sans Arabic
 Arabic specimen: استفد الآن من ميزات الذكاء الاصطناعي`,
 
   colors: `Workiom Brand Colors
@@ -95,7 +85,6 @@ Extended palette:
 • Dark Purple     #360C73  RGB(54,12,115)
 • Violet          #8201AD  RGB(130,1,173)
 • Yellow Accent   #FDBC0B  RGB(253,188,11)
-• Deep Navy       #231F61  RGB(35,31,97)
 • Light Gray      #D9D9D9  RGB(217,217,217)
 • Black           #000000
 • White           #FFFFFF
@@ -143,6 +132,34 @@ function ColorCopyButton({ hex, name, rgb }: { hex: string; name: string; rgb: s
       {copied ? <Check className="h-2.5 w-2.5" /> : <Copy className="h-2.5 w-2.5" />}
       {copied ? 'Copied' : 'Copy'}
     </button>
+  );
+}
+
+function LogoActions({ src, filename, dark }: { src: string; filename: string; dark?: boolean }) {
+  const [copied, setCopied] = useState(false);
+  async function handleCopy(e: React.MouseEvent) {
+    e.preventDefault();
+    try {
+      await navigator.clipboard.writeText(window.location.origin + src);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {}
+  }
+  const base = 'inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-[10px] font-semibold border transition-colors';
+  const cls = dark
+    ? cn(base, 'text-white/80 border-white/20 bg-white/10 hover:bg-white/20')
+    : cn(base, 'text-slate-600 border-[#EAEAEA] bg-white hover:bg-slate-50');
+  return (
+    <div className="flex items-center gap-1.5 opacity-0 group-hover/logo:opacity-100 transition-opacity duration-150">
+      <a href={src} download={filename} className={cls}>
+        <Download className="h-2.5 w-2.5" />
+        Download
+      </a>
+      <button onClick={handleCopy} className={cls}>
+        {copied ? <Check className="h-2.5 w-2.5" /> : <Copy className="h-2.5 w-2.5" />}
+        {copied ? 'Copied!' : 'Copy URL'}
+      </button>
+    </div>
   );
 }
 
@@ -295,7 +312,6 @@ export default function BrandGuidelinesPage() {
             className="relative h-72 sm:h-80 flex flex-col justify-end px-10 sm:px-16 pb-12 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
           >
-            {/* Back button */}
             <button
               onClick={goBack}
               className="absolute top-6 left-10 sm:left-16 flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm font-medium"
@@ -303,16 +319,10 @@ export default function BrandGuidelinesPage() {
               <ArrowLeft className="h-4 w-4" />
               Back
             </button>
-
-            {/* Title */}
             <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-none tracking-tight whitespace-nowrap">
               Workiom Brand Guidelines
             </h1>
-
-            {/* Version — bottom right */}
             <p className="absolute bottom-10 right-10 sm:right-16 text-xs text-white/30">Version 1.0  ·  May 2026</p>
-
-            {/* Decorative blobs */}
             <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-[#FDBC0B]/8 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-20 w-48 h-48 rounded-full bg-[#3C84FD]/10 blur-2xl pointer-events-none" />
           </div>
@@ -339,7 +349,7 @@ export default function BrandGuidelinesPage() {
               <span className="text-[72px] font-black text-slate-200 leading-none tracking-tighter select-none">Aa</span>
             </div>
             <div className="aspect-square rounded-2xl overflow-hidden flex flex-col">
-              {['#9635F0', '#3C84FD', '#FDBC0B', '#231F61'].map((c) => (
+              {['#9635F0', '#3C84FD', '#FDBC0B', '#360C73'].map((c) => (
                 <div key={c} className="flex-1" style={{ backgroundColor: c }} />
               ))}
             </div>
@@ -355,13 +365,15 @@ export default function BrandGuidelinesPage() {
               <CopyLLMButton text={LLM.logo} />
             </div>
 
-            {/* Wordmark on light / dark */}
+            {/* Wordmark on light / dark — downloadable */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] flex items-center justify-center min-h-[180px] p-12">
+              <div className="group/logo rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] flex flex-col items-center justify-center gap-4 min-h-[180px] p-10">
                 <Image src="/workiom-logo.png" alt="Workiom wordmark on light" width={220} height={56} className="h-12 w-auto max-w-full object-contain" unoptimized />
+                <LogoActions src="/workiom-logo.png" filename="workiom-logo.png" />
               </div>
-              <div className="rounded-2xl flex items-center justify-center min-h-[180px] p-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 100%)' }}>
+              <div className="group/logo rounded-2xl flex flex-col items-center justify-center gap-4 min-h-[180px] p-10" style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 100%)' }}>
                 <Image src="/workiom-logo.png" alt="Workiom wordmark on dark" width={220} height={56} className="h-12 w-auto max-w-full object-contain brightness-0 invert" unoptimized />
+                <LogoActions src="/workiom-logo.png" filename="workiom-logo-white.png" dark />
               </div>
             </div>
 
@@ -370,14 +382,14 @@ export default function BrandGuidelinesPage() {
               <p className="text-xs font-semibold text-slate-400 mb-4">Color usage</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { bg: '#FFFFFF', border: true,  label: 'On White',      src: '/workiom-logo.png',                   filter: '',                   darkLabel: false },
-                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', src: '/workiom-logo.png',                   filter: '',                   darkLabel: false },
-                  { bg: '#9635F0', border: false, label: 'On Purple',     src: '/workiom-logo.png',                   filter: 'brightness-0 invert', darkLabel: true  },
-                  { bg: '#231F61', border: false, label: 'On Navy',       src: '/api/file/6a20ccff001498d2577c?v=2',  filter: '',                   darkLabel: true  },
+                  { bg: '#FFFFFF', border: true,  label: 'On White',      src: '/workiom-logo.png',                  filename: 'workiom-logo.png',       filter: '',                    darkLabel: false, dark: false },
+                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', src: '/workiom-logo.png',                  filename: 'workiom-logo.png',       filter: '',                    darkLabel: false, dark: false },
+                  { bg: '#9635F0', border: false, label: 'On Purple',     src: '/workiom-logo.png',                  filename: 'workiom-logo-white.png', filter: 'brightness-0 invert', darkLabel: true,  dark: true  },
+                  { bg: '#231F61', border: false, label: 'On Navy',       src: '/api/file/6a20ccff001498d2577c?v=2', filename: 'workiom-logo-navy.png',  filter: '',                    darkLabel: true,  dark: true  },
                 ].map((v) => (
                   <div
                     key={v.label}
-                    className="rounded-xl flex flex-col items-center justify-center gap-5 py-10 px-6"
+                    className="group/logo rounded-xl flex flex-col items-center justify-center gap-4 py-8 px-4"
                     style={{ backgroundColor: v.bg, border: v.border ? '1px solid #EAEAEA' : undefined }}
                   >
                     <Image
@@ -389,55 +401,61 @@ export default function BrandGuidelinesPage() {
                       unoptimized
                     />
                     <p className={cn('text-[11px] font-medium text-center', v.darkLabel ? 'text-white/50' : 'text-slate-400')}>{v.label}</p>
+                    <LogoActions src={v.src} filename={v.filename} dark={v.dark} />
                   </div>
                 ))}
               </div>
             </div>
 
-            {/* Do / Don't visual comparison */}
-            <div className="space-y-5">
+            {/* Do / Don't */}
+            <div className="space-y-8">
 
-              {/* ✓ Do */}
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6 flex flex-col gap-4">
-                <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-emerald-500 text-white text-[9px]">✓</span>
-                  Do
+              {/* ✓ DO */}
+              <div className="space-y-3">
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-emerald-500 text-white text-[10px] font-bold">✓</span>
+                  DO
                 </p>
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
-                  <div className="rounded-xl bg-white border border-emerald-100 flex flex-col items-center justify-center gap-3 py-8 px-6">
-                    <Image src="/workiom-logo.png" alt="Correct usage on white" width={160} height={44} className="h-9 w-auto object-contain" unoptimized />
+                  <div className="rounded-xl bg-[#F7F7F7] border border-[#EAEAEA] flex flex-col items-center justify-center gap-2 py-6 px-6">
+                    <Image src="/workiom-logo.png" alt="Correct usage on white" width={140} height={36} className="h-7 w-auto object-contain" unoptimized />
                     <p className="text-[11px] text-slate-400">Correct proportions on white</p>
                   </div>
-                  <div className="rounded-xl flex flex-col items-center justify-center gap-3 py-8 px-6" style={{ background: 'linear-gradient(135deg, #231F61, #360C73)' }}>
-                    <Image src="/workiom-logo.png" alt="Correct usage on dark" width={160} height={44} className="h-9 w-auto object-contain brightness-0 invert" unoptimized />
+                  <div className="rounded-xl flex flex-col items-center justify-center gap-2 py-6 px-6" style={{ background: 'linear-gradient(135deg, #231F61, #360C73)' }}>
+                    <Image src="/workiom-logo.png" alt="Correct usage on dark" width={140} height={36} className="h-7 w-auto object-contain brightness-0 invert" unoptimized />
                     <p className="text-[11px] text-white/50">White version on dark background</p>
                   </div>
                 </div>
               </div>
 
-              {/* ✕ Don't — full-width row */}
-              <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6 flex flex-col gap-4">
-                <p className="text-xs font-bold text-red-600 flex items-center gap-1.5">
-                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-red-500 text-white text-[9px]">✕</span>
-                  Don't
+              {/* ✕ DON'T */}
+              <div className="space-y-3">
+                <p className="text-sm font-bold text-slate-900 flex items-center gap-2">
+                  <span className="inline-flex items-center justify-center h-5 w-5 rounded-full bg-red-500 text-white text-[10px] font-bold">✕</span>
+                  DON&apos;T
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
-                    { label: 'Stretched',        style: { transform: 'scaleX(1.9)'       }, bg: '#F9F9F9', cls: '' },
-                    { label: 'Skewed',           style: { transform: 'skewX(-22deg)'     }, bg: '#F9F9F9', cls: '' },
-                    { label: 'Squished',         style: { transform: 'scaleY(0.35)'      }, bg: '#F9F9F9', cls: '' },
-                    { label: 'Rotated',          style: { transform: 'rotate(18deg)'     }, bg: '#F9F9F9', cls: '' },
-                    { label: 'Wrong background', style: {},                                bg: '#231F61', cls: '' },
-                    { label: 'Added glow',       style: { filter: 'drop-shadow(0 0 7px #9635F0) drop-shadow(0 0 14px #3C84FD)' }, bg: '#F9F9F9', cls: '' },
-                  ].map(({ label, style, bg, cls }) => (
-                    <div key={label} className="rounded-xl flex flex-col items-center justify-center gap-2.5 py-5 px-3 overflow-hidden" style={{ backgroundColor: bg }}>
-                      <div className="h-8 flex items-center justify-center overflow-hidden w-full">
+                    { label: 'Stretched',        style: { transform: 'scaleX(1.9)'       }, bg: '#F9F9F9' },
+                    { label: 'Skewed',           style: { transform: 'skewX(-22deg)'     }, bg: '#F9F9F9' },
+                    { label: 'Squished',         style: { transform: 'scaleY(0.4)'       }, bg: '#F9F9F9' },
+                    { label: 'Rotated',          style: { transform: 'rotate(18deg)'     }, bg: '#F9F9F9' },
+                    { label: 'Wrong background', style: {},                                bg: '#231F61' },
+                    { label: 'Added glow',       style: { filter: 'drop-shadow(0 0 6px #9635F0) drop-shadow(0 0 12px #3C84FD)' }, bg: '#F9F9F9' },
+                  ].map(({ label, style, bg }) => (
+                    <div
+                      key={label}
+                      className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3"
+                      style={{ backgroundColor: bg }}
+                    >
+                      {/* Tall container so rotated/skewed logos are never clipped */}
+                      <div className="h-16 w-full flex items-center justify-center">
                         <Image
                           src="/workiom-logo.png"
                           alt={label}
-                          width={100}
-                          height={28}
-                          className={cn('h-6 w-auto object-contain flex-shrink-0', cls)}
+                          width={90}
+                          height={24}
+                          className="h-5 w-auto object-contain flex-shrink-0"
                           style={style}
                           unoptimized
                         />
@@ -446,8 +464,7 @@ export default function BrandGuidelinesPage() {
                     </div>
                   ))}
                 </div>
-                {/* Advice list below the cards */}
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 pt-1 border-t border-red-100">
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 pt-3 border-t border-[#EAEAEA]">
                   {[
                     'Stretch, skew, or distort the logo',
                     'Place on busy or low-contrast backgrounds',
@@ -476,7 +493,7 @@ export default function BrandGuidelinesPage() {
               <CopyLLMButton text={LLM.typography} />
             </div>
 
-            {/* Font cards — stacked */}
+            {/* General Sans */}
             <div className="space-y-4">
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] px-10 py-8 flex flex-col justify-between min-h-[140px]">
                 <p className="text-xs font-semibold text-slate-400">Latin / English</p>
@@ -485,6 +502,25 @@ export default function BrandGuidelinesPage() {
                   <p className="text-sm text-slate-400 mt-1.5">For all Latin and English text</p>
                 </div>
               </div>
+
+              <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]">
+                {[
+                  { w: 700, label: 'Bold',     sample: 'Workiom AI will do the work' },
+                  { w: 600, label: 'SemiBold', sample: 'Transforming ideas into workflows' },
+                  { w: 500, label: 'Medium',   sample: 'Build, automate, and scale operations' },
+                  { w: 400, label: 'Regular',  sample: 'A future where every team creates the software they need' },
+                  { w: 300, label: 'Light',    sample: 'Minimal, modern, product-focused, spacious' },
+                ].map((r) => (
+                  <div key={r.label} className="flex items-center gap-6 px-8 py-5 bg-white hover:bg-[#FAFAFA] transition-colors">
+                    <span className="text-[11px] font-mono text-slate-300 w-20 flex-shrink-0">{r.label}</span>
+                    <p className="text-slate-800 truncate text-xl leading-tight" style={{ fontWeight: r.w }}>{r.sample}</p>
+                  </div>
+                ))}
+              </div>
+            </div>
+
+            {/* IBM Plex Sans Arabic */}
+            <div className="space-y-4">
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] px-10 py-8 flex flex-col justify-between min-h-[140px]" dir="rtl">
                 <p className="text-xs font-semibold text-slate-400 text-right">عربي / Arabic</p>
                 <div className="mt-4">
@@ -492,59 +528,20 @@ export default function BrandGuidelinesPage() {
                   <p className="text-sm text-slate-400 mt-1.5 text-right">للنصوص العربية في كل مكان</p>
                 </div>
               </div>
-            </div>
 
-            {/* Weight specimens EN */}
-            <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]">
-              {[
-                { w: 700, label: 'Bold',     sample: 'Workiom AI will do the work' },
-                { w: 600, label: 'SemiBold', sample: 'Transforming ideas into workflows' },
-                { w: 500, label: 'Medium',   sample: 'Build, automate, and scale operations' },
-                { w: 400, label: 'Regular',  sample: 'A future where every team creates the software they need' },
-                { w: 300, label: 'Light',    sample: 'Minimal, modern, product-focused, spacious' },
-              ].map((r) => (
-                <div key={r.label} className="flex items-center gap-6 px-8 py-5 bg-white hover:bg-[#FAFAFA] transition-colors">
-                  <span className="text-[11px] font-mono text-slate-300 w-20 flex-shrink-0">{r.label}</span>
-                  <p className="text-slate-800 truncate text-xl leading-tight" style={{ fontWeight: r.w }}>{r.sample}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Weight specimens AR */}
-            <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]" dir="rtl">
-              {[
-                { w: 700, sample: 'استفد الآن من ميزات الذكاء الاصطناعي' },
-                { w: 500, sample: 'أنشئ سير العمل وأتمتها بسهولة تامة' },
-                { w: 400, sample: 'منصة عمل ذكية وقابلة للتخصيص لكل فريق' },
-              ].map((r) => (
-                <div key={r.w} className="px-8 py-5 bg-white hover:bg-[#FAFAFA] transition-colors">
-                  <p className="text-slate-800 text-xl text-right leading-relaxed" style={{ fontWeight: r.w }}>{r.sample}</p>
-                </div>
-              ))}
-            </div>
-
-            {/* Usage chart */}
-            <div>
-              <p className="text-xs font-semibold text-slate-400 mb-4">Screen usage chart</p>
-              <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden">
-                <div className="grid grid-cols-4 bg-[#F6F6F6] px-7 py-3 border-b border-[#EAEAEA]">
-                  {['Size', 'Line Height', 'Kerning', 'Tracking'].map((h) => (
-                    <p key={h} className="text-xs font-semibold text-slate-400">{h}</p>
-                  ))}
-                </div>
+              <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]" dir="rtl">
                 {[
-                  ['0–15 px',  '128%', 'Metrics', '−1%'],
-                  ['16–25 px', '120%', 'Metrics', '−2%'],
-                  ['26–42 px', '104%', 'Metrics', '−2%'],
-                  ['42–76 px', '98%',  'Metrics', '−3%'],
-                  ['76 px+',   '96%',  'Metrics', '−4%'],
-                ].map((row, i) => (
-                  <div key={i} className="grid grid-cols-4 px-7 py-4 bg-white hover:bg-[#FAFAFA] transition-colors border-b border-[#F0F0F0] last:border-0">
-                    {row.map((cell) => <p key={cell} className="text-sm text-slate-700 font-mono">{cell}</p>)}
+                  { w: 700, sample: 'استفد الآن من ميزات الذكاء الاصطناعي' },
+                  { w: 500, sample: 'أنشئ سير العمل وأتمتها بسهولة تامة' },
+                  { w: 400, sample: 'منصة عمل ذكية وقابلة للتخصيص لكل فريق' },
+                ].map((r) => (
+                  <div key={r.w} className="px-8 py-5 bg-white hover:bg-[#FAFAFA] transition-colors">
+                    <p className="text-slate-800 text-xl text-right leading-relaxed" style={{ fontWeight: r.w }}>{r.sample}</p>
                   </div>
                 ))}
               </div>
             </div>
+
           </div>
         </section>
 
@@ -558,7 +555,7 @@ export default function BrandGuidelinesPage() {
             </div>
 
             <p className="text-base text-slate-500 max-w-xl leading-relaxed pb-6">
-              Our palette combines vibrant purples and blues with a bold yellow accent, grounded by deep navy and clean neutrals.
+              Our palette combines vibrant purples and blues with a bold yellow accent, grounded by clean neutrals.
             </p>
 
             <ColorSwatch name="Workiom Purple" hex="#9635F0" rgb="150, 53, 240" tall />
@@ -569,9 +566,8 @@ export default function BrandGuidelinesPage() {
               <ColorSwatch name="Violet"      hex="#8201AD" rgb="130, 1, 173" />
             </div>
 
-            <div className="grid grid-cols-3 gap-4">
+            <div className="grid grid-cols-2 gap-4">
               <ColorSwatch name="Yellow"     hex="#FDBC0B" rgb="253, 188, 11" />
-              <ColorSwatch name="Deep Navy"  hex="#231F61" rgb="35, 31, 97" />
               <ColorSwatch name="Light Gray" hex="#D9D9D9" rgb="217, 217, 217" light />
             </div>
 
