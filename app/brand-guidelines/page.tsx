@@ -370,10 +370,10 @@ export default function BrandGuidelinesPage() {
               <p className="text-xs font-semibold text-slate-400 mb-4">Color usage</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { bg: '#FFFFFF', border: true,  label: 'On White',      filter: ''                        },
-                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', filter: ''                        },
-                  { bg: '#9635F0', border: false, label: 'On Purple',     filter: 'brightness-0 invert'     },
-                  { bg: '#231F61', border: false, label: 'On Navy',       filter: 'brightness-0 invert'     },
+                  { bg: '#FFFFFF', border: true,  label: 'On White',      src: '/workiom-logo.png',                   filter: '',                   darkLabel: false },
+                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', src: '/workiom-logo.png',                   filter: '',                   darkLabel: false },
+                  { bg: '#9635F0', border: false, label: 'On Purple',     src: '/workiom-logo.png',                   filter: 'brightness-0 invert', darkLabel: true  },
+                  { bg: '#231F61', border: false, label: 'On Navy',       src: '/api/file/6a20ccff001498d2577c?v=2',  filter: '',                   darkLabel: true  },
                 ].map((v) => (
                   <div
                     key={v.label}
@@ -381,14 +381,14 @@ export default function BrandGuidelinesPage() {
                     style={{ backgroundColor: v.bg, border: v.border ? '1px solid #EAEAEA' : undefined }}
                   >
                     <Image
-                      src="/workiom-logo.png"
+                      src={v.src}
                       alt={`Workiom logo ${v.label}`}
                       width={120}
                       height={32}
                       className={cn('h-7 w-auto max-w-full object-contain', v.filter)}
                       unoptimized
                     />
-                    <p className={cn('text-[11px] font-medium text-center', v.filter ? 'text-white/50' : 'text-slate-400')}>{v.label}</p>
+                    <p className={cn('text-[11px] font-medium text-center', v.darkLabel ? 'text-white/50' : 'text-slate-400')}>{v.label}</p>
                   </div>
                 ))}
               </div>
@@ -442,10 +442,25 @@ export default function BrandGuidelinesPage() {
                           unoptimized
                         />
                       </div>
-                      <p className="text-[10px] font-medium text-red-400 text-center leading-tight">{label}</p>
+                      <p className={cn('text-[10px] font-medium text-center leading-tight', bg === '#231F61' ? 'text-white/50' : 'text-red-400')}>{label}</p>
                     </div>
                   ))}
                 </div>
+                {/* Original don't sentences */}
+                <ul className="flex flex-col gap-1.5 pt-1 border-t border-red-100">
+                  {[
+                    'Stretch, skew, or distort the logo',
+                    'Place on busy or low-contrast backgrounds',
+                    'Add shadows, outlines, glows, or effects',
+                    'Use unofficial colors on the mark',
+                    'Recreate the logo in a different typeface',
+                  ].map((sentence) => (
+                    <li key={sentence} className="flex items-start gap-2 text-[11px] text-red-500/80">
+                      <span className="mt-0.5 flex-shrink-0 text-red-400">✕</span>
+                      {sentence}
+                    </li>
+                  ))}
+                </ul>
               </div>
 
             </div>
