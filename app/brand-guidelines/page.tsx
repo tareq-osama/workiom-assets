@@ -187,7 +187,7 @@ function ColorSwatch({
       style={{ backgroundColor: hex, border: light ? '1px solid #EAEAEA' : undefined }}
     >
       <div className="absolute bottom-0 left-0 right-0 p-4">
-        <p className={cn('text-[10px] font-bold tracking-widest uppercase mb-0.5 opacity-50', textCls)}>{name}</p>
+        <p className={cn('text-xs font-semibold mb-1 opacity-60', textCls)}>{name}</p>
         <p className={cn('text-sm font-mono font-bold', textCls)}>{hex}</p>
         <p className={cn('text-xs font-mono opacity-40', textCls)}>RGB {rgb}</p>
       </div>
@@ -232,10 +232,10 @@ export default function BrandGuidelinesPage() {
       <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-[210px] bg-white border-r border-[#EBEBEB] z-20 overflow-y-auto">
         <div className="px-6 py-7 border-b border-[#EBEBEB]">
           <Image src="/workiom-logo.png" alt="Workiom" width={100} height={28} className="h-7 w-auto object-contain mb-5" unoptimized />
-          <p className="text-[9px] font-extrabold tracking-[0.22em] uppercase text-slate-400 leading-loose">
+          <p className="text-xs font-semibold text-slate-500 leading-relaxed">
             Visual Identity<br />Guidelines
           </p>
-          <p className="text-[9px] tracking-[0.18em] uppercase text-slate-300 mt-0.5">Updated May 2026</p>
+          <p className="text-xs text-slate-300 mt-0.5">Updated May 2026</p>
         </div>
 
         <nav className="flex-1 py-3">
@@ -261,7 +261,7 @@ export default function BrandGuidelinesPage() {
             href="https://workiom.com"
             target="_blank"
             rel="noopener noreferrer"
-            className="flex items-center gap-1.5 text-[10px] font-extrabold tracking-[0.18em] uppercase text-slate-400 hover:text-slate-900 transition-colors"
+            className="flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-900 transition-colors"
           >
             Go to Website <ExternalLink className="h-2.5 w-2.5" />
           </a>
@@ -307,7 +307,7 @@ export default function BrandGuidelinesPage() {
             <Menu className="h-4 w-4" /> Sections
           </button>
           <span className="text-slate-300">·</span>
-          <span className="text-[10px] font-mono text-slate-300 uppercase tracking-widest">Visual Identity Guidelines</span>
+          <span className="text-xs font-mono text-slate-300">Visual Identity Guidelines</span>
         </div>
 
         {/* ── 01 Introduction ── */}
@@ -317,11 +317,11 @@ export default function BrandGuidelinesPage() {
             className="relative h-72 sm:h-80 flex flex-col justify-end px-10 sm:px-16 pb-12 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
           >
-            <p className="text-[10px] font-extrabold tracking-[0.3em] uppercase text-white/35 mb-3">Visual Identity Guidelines</p>
+            <p className="text-xs font-semibold text-white/40 mb-3">Visual Identity Guidelines</p>
             <h1 className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tight">
               Workiom<br />Brand
             </h1>
-            <p className="text-[10px] tracking-[0.25em] uppercase text-white/30 mt-3">Version 1.0  ·  May 2026</p>
+            <p className="text-xs text-white/30 mt-3">Version 1.0  ·  May 2026</p>
             <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-[#FDBC0B]/8 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-20 w-48 h-48 rounded-full bg-[#3C84FD]/10 blur-2xl pointer-events-none" />
           </div>
@@ -365,7 +365,7 @@ export default function BrandGuidelinesPage() {
             </div>
 
             <div className="rounded-2xl px-12 py-14" style={{ background: 'linear-gradient(135deg, #52009F, #9635F0)' }}>
-              <p className="text-[10px] font-extrabold tracking-[0.25em] uppercase text-white/40 mb-4">Brand Essence</p>
+              <p className="text-xs font-semibold text-white/40 mb-4">Brand Essence</p>
               <p className="text-4xl sm:text-5xl font-black text-white leading-tight tracking-tight">
                 Workflows<br />made simple.
               </p>
@@ -377,14 +377,14 @@ export default function BrandGuidelinesPage() {
                 { label: 'Vision',  copy: 'A future where every team can create the software they need to work better.' },
               ].map((c) => (
                 <div key={c.label} className="border border-[#EAEAEA] rounded-2xl p-8 bg-white">
-                  <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300 mb-4">{c.label}</p>
+                  <p className="text-xs font-semibold text-slate-400 mb-4">{c.label}</p>
                   <p className="text-lg text-slate-700 leading-relaxed">{c.copy}</p>
                 </div>
               ))}
             </div>
 
             <div>
-              <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300 mb-5">Brand Principles</p>
+              <p className="text-xs font-semibold text-slate-400 mb-5">Brand Principles</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { word: 'Clear',       desc: 'Simple, direct communication. No jargon, no fluff.' },
@@ -421,7 +421,7 @@ export default function BrandGuidelinesPage() {
             </div>
 
             <div>
-              <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300 mb-4">Color Usage</p>
+              <p className="text-xs font-semibold text-slate-400 mb-4">Color Usage</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
                   { bg: '#FFFFFF', border: true,  label: 'On White',      invert: false },
@@ -443,7 +443,7 @@ export default function BrandGuidelinesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-8">
-                <p className="text-xs font-extrabold tracking-wider text-emerald-700 mb-5">DO</p>
+                <p className="text-xs font-bold text-emerald-700 mb-5">Do</p>
                 <ul className="space-y-3">
                   {['Use on white or very light backgrounds', 'Maintain clear space around the logo', 'Use SVG format for all digital outputs', 'Use the white version on dark / colored backgrounds', 'Use the icon mark for small app contexts'].map((i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
@@ -453,7 +453,7 @@ export default function BrandGuidelinesPage() {
                 </ul>
               </div>
               <div className="rounded-2xl border border-red-100 bg-red-50/60 p-8">
-                <p className="text-xs font-extrabold tracking-wider text-red-600 mb-5">DON'T</p>
+                <p className="text-xs font-bold text-red-600 mb-5">Don't</p>
                 <ul className="space-y-3">
                   {['Stretch, skew, or distort the logo', 'Place on busy or low-contrast backgrounds', 'Add shadows, outlines, glows, or effects', 'Use unofficial colors on the mark', 'Recreate the logo in a different typeface'].map((i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
@@ -477,14 +477,14 @@ export default function BrandGuidelinesPage() {
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] p-10 flex flex-col justify-between min-h-[160px]">
-                <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300">Latin / English</p>
+                <p className="text-xs font-semibold text-slate-400">Latin / English</p>
                 <div>
                   <p className="text-4xl font-bold text-slate-900 tracking-tight mt-4">General Sans</p>
                   <p className="text-sm text-slate-400 mt-1.5">For all Latin and English text</p>
                 </div>
               </div>
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] p-10 flex flex-col justify-between min-h-[160px]" dir="rtl">
-                <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300 text-right">عربي / Arabic</p>
+                <p className="text-xs font-semibold text-slate-400 text-right">عربي / Arabic</p>
                 <div>
                   <p className="text-4xl font-bold text-slate-900 mt-4 text-right">IBM Plex Sans Arabic</p>
                   <p className="text-sm text-slate-400 mt-1.5 text-right">للنصوص العربية في كل مكان</p>
@@ -520,11 +520,11 @@ export default function BrandGuidelinesPage() {
             </div>
 
             <div>
-              <p className="text-[10px] font-extrabold tracking-[0.22em] uppercase text-slate-300 mb-4">Screen Usage Chart</p>
+              <p className="text-xs font-semibold text-slate-400 mb-4">Screen Usage Chart</p>
               <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden">
                 <div className="grid grid-cols-4 bg-[#F6F6F6] px-7 py-3 border-b border-[#EAEAEA]">
                   {['Size', 'Line Height', 'Kerning', 'Tracking'].map((h) => (
-                    <p key={h} className="text-[10px] font-extrabold text-slate-400 uppercase tracking-wider">{h}</p>
+                    <p key={h} className="text-xs font-semibold text-slate-400">{h}</p>
                   ))}
                 </div>
                 {[
@@ -596,7 +596,7 @@ export default function BrandGuidelinesPage() {
                   <p className="text-sm text-slate-400 leading-relaxed mb-5">{r.desc}</p>
                   <Link
                     href="/browse"
-                    className="inline-flex items-center gap-1.5 text-[10px] font-extrabold tracking-[0.18em] uppercase text-slate-900 hover:text-[#9635F0] transition-colors"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-900 hover:text-[#9635F0] transition-colors"
                   >
                     Browse Assets <ExternalLink className="h-2.5 w-2.5" />
                   </Link>
@@ -614,7 +614,7 @@ export default function BrandGuidelinesPage() {
               </div>
               <a
                 href="mailto:brand@workiom.com"
-                className="flex-shrink-0 inline-flex items-center px-6 py-3 bg-white text-slate-900 text-xs font-extrabold tracking-[0.18em] uppercase rounded-lg hover:bg-white/90 transition-colors"
+                className="flex-shrink-0 inline-flex items-center px-6 py-3 bg-white text-slate-900 text-sm font-semibold rounded-lg hover:bg-white/90 transition-colors"
               >
                 Contact Brand Team
               </a>
@@ -626,7 +626,7 @@ export default function BrandGuidelinesPage() {
         <footer className="bg-[#0A0A0A] px-10 sm:px-16 py-12">
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/10">
             <div>
-              <p className="text-xs font-extrabold tracking-[0.2em] uppercase text-white/60 mb-1">Visual Identity Guidelines</p>
+              <p className="text-xs font-semibold text-white/60 mb-1">Visual Identity Guidelines</p>
               <p className="text-[10px] text-white/25 tracking-wider">Version 1.0</p>
             </div>
             <p className="text-xs text-white/25">brand@workiom.com</p>
