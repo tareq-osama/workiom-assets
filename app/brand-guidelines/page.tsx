@@ -59,11 +59,18 @@ DO:
 ✓ Use the icon-only mark for app icons and small contexts
 
 DON'T:
-✕ Never stretch, skew, or distort the logo
-✕ Never place on busy or low-contrast backgrounds
-✕ Never recreate in a different typeface
-✕ Never add shadows, outlines, glows, or effects
-✕ Never use unofficial colors on the mark
+✕ Stretch, skew, squish, or distort the logo
+✕ Tilt, rotate, or mirror / flip the logo
+✕ Add glow, shadows, outlines, strokes, or effects
+✕ Use a keyline or stroke around the logo
+✕ Alter or change the brand colors
+✕ Place on a pattern, textured, or photo background
+✕ Place on a clashing or unbranded colored background
+✕ Change the proportions between the logotype and the mark
+✕ Place the logo over the icon mark itself
+✕ Contain the logo inside a photo or place it on top of an object
+✕ Use unofficial colors on the mark
+✕ Recreate the logo in a different typeface
 
 Available formats: SVG (preferred), PNG, JPG`,
 
@@ -435,40 +442,61 @@ export default function BrandGuidelinesPage() {
                   DON&apos;T
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-                  {[
-                    { label: 'Stretched',        style: { transform: 'scaleX(1.9)'       }, bg: '#F9F9F9' },
-                    { label: 'Skewed',           style: { transform: 'skewX(-22deg)'     }, bg: '#F9F9F9' },
-                    { label: 'Squished',         style: { transform: 'scaleY(0.4)'       }, bg: '#F9F9F9' },
-                    { label: 'Rotated',          style: { transform: 'rotate(18deg)'     }, bg: '#F9F9F9' },
-                    { label: 'Wrong background', style: {},                                bg: '#231F61' },
-                    { label: 'Added glow',       style: { filter: 'drop-shadow(0 0 6px #9635F0) drop-shadow(0 0 12px #3C84FD)' }, bg: '#F9F9F9' },
-                  ].map(({ label, style, bg }) => (
-                    <div
-                      key={label}
-                      className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3"
-                      style={{ backgroundColor: bg }}
-                    >
-                      {/* Tall container so rotated/skewed logos are never clipped */}
-                      <div className="h-16 w-full flex items-center justify-center">
-                        <Image
-                          src="/workiom-logo.png"
-                          alt={label}
-                          width={90}
-                          height={24}
-                          className="h-5 w-auto object-contain flex-shrink-0"
-                          style={style}
-                          unoptimized
-                        />
+                  {([
+                    { label: 'Stretched',       imgStyle: { transform: 'scaleX(1.9)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Skewed',          imgStyle: { transform: 'skewX(-22deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Squished',        imgStyle: { transform: 'scaleY(0.4)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Tilted',          imgStyle: { transform: 'rotate(18deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Mirrored',        imgStyle: { transform: 'scaleX(-1)'    },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Glow effect',     imgStyle: { filter: 'drop-shadow(0 0 6px #9635F0) drop-shadow(0 0 12px #3C84FD)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Over a pattern',  imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(45deg, #d9d9d9 0px, #d9d9d9 2px, #f5f5f5 2px, #f5f5f5 14px)' } },
+                    { label: 'Textured bg',     imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px), #e8e8e8' } },
+                    { label: 'Photo bg',        imgStyle: {},                                           bgStyle: { background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' } },
+                    { label: 'Colored bg',      imgStyle: { filter: 'brightness(0) invert(1)' },        bgStyle: { backgroundColor: '#E53E3E' }, dark: true },
+                    { label: 'Keyline',         imgStyle: {},                                           bgStyle: { backgroundColor: '#F9F9F9' }, keyline: true },
+                    { label: 'Altered colors',  imgStyle: { filter: 'hue-rotate(140deg) saturate(1.5)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
+                  ] as Array<{ label: string; imgStyle: React.CSSProperties; bgStyle: React.CSSProperties; dark?: boolean; keyline?: boolean }>)
+                    .map(({ label, imgStyle, bgStyle, dark, keyline }) => (
+                      <div
+                        key={label}
+                        className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3"
+                        style={bgStyle}
+                      >
+                        {/* h-16 container ensures nothing gets clipped even with rotation/skew */}
+                        <div className="h-16 w-full flex items-center justify-center">
+                          {keyline ? (
+                            <span style={{ display: 'inline-flex', border: '1.5px solid #9635F0', borderRadius: '4px', padding: '3px' }}>
+                              <Image src="/workiom-logo.png" alt={label} width={80} height={22} className="h-4 w-auto object-contain" unoptimized />
+                            </span>
+                          ) : (
+                            <Image
+                              src="/workiom-logo.png"
+                              alt={label}
+                              width={90}
+                              height={24}
+                              className="h-5 w-auto object-contain flex-shrink-0"
+                              style={imgStyle}
+                              unoptimized
+                            />
+                          )}
+                        </div>
+                        <p className={cn('text-[10px] font-medium text-center leading-tight', dark ? 'text-white/70' : 'text-red-400')}>{label}</p>
                       </div>
-                      <p className={cn('text-[10px] font-medium text-center leading-tight', bg === '#231F61' ? 'text-white/50' : 'text-red-400')}>{label}</p>
-                    </div>
-                  ))}
+                    ))
+                  }
                 </div>
                 <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 pt-3 border-t border-[#EAEAEA]">
                   {[
-                    'Stretch, skew, or distort the logo',
-                    'Place on busy or low-contrast backgrounds',
-                    'Add shadows, outlines, glows, or effects',
+                    'Stretch, skew, squish, or distort the logo',
+                    'Tilt, rotate, or mirror / flip the logo',
+                    'Add glow, shadows, outlines, strokes, or effects',
+                    'Use a keyline or stroke around the logo',
+                    'Alter or change the brand colors',
+                    'Place on a pattern, textured, or photo background',
+                    'Place on a clashing or unbranded colored background',
+                    'Change the proportions between the logotype and the mark',
+                    'Place the logo over the icon mark itself',
+                    'Contain the logo inside a photo or place it on top of an object',
                     'Use unofficial colors on the mark',
                     'Recreate the logo in a different typeface',
                   ].map((sentence) => (
