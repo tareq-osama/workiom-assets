@@ -38,7 +38,6 @@ const navLinks = [
   { href: '/browse', label: 'Browse', icon: LayoutGrid },
   { href: '/collections', label: 'Collections', icon: FolderOpen },
   { href: '/brand-guidelines', label: 'Brand Guidelines', icon: BookOpen },
-  { href: '/upload', label: 'Upload', icon: Upload },
 ];
 
 function getInitials(name: string): string {
@@ -198,16 +197,21 @@ export default function Navbar() {
               </Button>
             )}
 
-            {/* Upload CTA */}
-            <Link href="/upload" className="hidden md:flex">
-              <Button
-                size="sm"
-                className="h-9 bg-[#4E86F7] hover:bg-[#3a72e3] text-white gap-1.5"
-              >
-                <Upload className="h-3.5 w-3.5" />
-                Upload
-              </Button>
-            </Link>
+            {/* Upload / Login CTA */}
+            {currentUser ? (
+              <Link href="/upload" className="hidden md:flex">
+                <Button size="sm" className="h-9 bg-[#4E86F7] hover:bg-[#3a72e3] text-white gap-1.5">
+                  <Upload className="h-3.5 w-3.5" />
+                  Upload
+                </Button>
+              </Link>
+            ) : (
+              <Link href="/login" className="hidden md:flex">
+                <Button size="sm" variant="outline" className="h-9">
+                  Login
+                </Button>
+              </Link>
+            )}
 
             {/* User menu */}
             {currentUser && (
@@ -296,17 +300,35 @@ export default function Navbar() {
                       {link.label}
                     </Link>
                   ))}
-                  {currentUser && (
-                    <button
-                      onClick={() => {
-                        setMobileOpen(false);
-                        handleSignOut();
-                      }}
-                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-red-600 hover:bg-red-50 mt-1"
+                  {currentUser ? (
+                    <>
+                      <Link
+                        href="/upload"
+                        onClick={() => setMobileOpen(false)}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-blue-600 hover:bg-blue-50"
+                      >
+                        <Upload className="h-4 w-4" />
+                        Upload
+                      </Link>
+                      <button
+                        onClick={() => {
+                          setMobileOpen(false);
+                          handleSignOut();
+                        }}
+                        className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-red-600 hover:bg-red-50 mt-1"
+                      >
+                        <LogOut className="h-4 w-4" />
+                        Sign out
+                      </button>
+                    </>
+                  ) : (
+                    <Link
+                      href="/login"
+                      onClick={() => setMobileOpen(false)}
+                      className="flex items-center gap-3 px-4 py-3 rounded-lg text-sm font-medium transition-colors text-slate-600 hover:text-slate-900 hover:bg-slate-100 mt-1"
                     >
-                      <LogOut className="h-4 w-4" />
-                      Sign out
-                    </button>
+                      Login
+                    </Link>
                   )}
                 </nav>
               </SheetContent>
