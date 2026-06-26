@@ -52,35 +52,128 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
    LLM copy payloads
 ───────────────────────────────────────────── */
 const LLM = {
-  full: `Workiom Brand Guide
-──────────────────────
-Brand: Workiom — AI-powered work management & no-code platform
+  full: `# Workiom Brand Guidelines — Full Reference
+Version 1.0 · May 2026
 
-Colors:
-• Workiom Purple  #9635F0  RGB(150,53,240)   — primary
-• Blue            #3C84FD  RGB(60,132,253)   — secondary / CTAs
-• Dark Purple     #360C73  RGB(54,12,115)    — deep accent
-• Violet          #8201AD  RGB(130,1,173)    — accent
-• Yellow          #FDBC0B  RGB(253,188,11)   — highlight
-• Light Gray      #D9D9D9  RGB(217,217,217)  — neutral
+## About Workiom
+AI-powered work management & no-code platform.
+Tagline: "Transforming ideas into workflows"
+
+## Logo
+Primary logo: /workiom-logo.png (PNG)
+Use on white or light backgrounds. Use inverted white version on dark backgrounds.
+Clear space: equal to the logo cap-height on all sides.
+Minimum digital size: 80px wide. Preferred format: SVG.
+
+Logo DO's:
+✓ Use on a clean white or light (#F7F7F7) background
+✓ Use inverted (white) version on dark or gradient backgrounds
+✓ Maintain correct proportions at all times
+✓ Keep ample clear space on all sides
+
+Logo DON'Ts:
+✕ Never stretch the logo horizontally
+✕ Never skew or warp the logo
+✕ Never squish or compress the logo
+✕ Never tilt or rotate the logo
+✕ Never mirror or flip the logo
+✕ Never add glow, shadows, outlines, or special effects
+✕ Never place on a patterned background
+✕ Never use a textured background
+✕ Never place on a photo or colorful background
+✕ Never use a clashing or unbranded colored background
+✕ Never add a keyline or stroke around the logo
+✕ Never alter or change the brand colors
+
+## Typography
+Latin/English — General Sans:
+  Light (300): "Minimal, modern, product-focused, spacious"
+  Regular (400): "A future where every team creates the software they need"
+  Medium (500): "Build, automate, and scale operations"
+  SemiBold (600): "Transforming ideas into workflows"
+  Bold (700): "Workiom AI will do the work"
+
+Arabic — IBM Plex Sans Arabic (Light, Regular, Medium, SemiBold, Bold)
+  Direction: RTL · Use for all Arabic language content
+
+## Brand Colors
+Workiom Purple  #9635F0  RGB(150, 53, 240)   — primary brand color
+Blue            #3C84FD  RGB(60, 132, 253)   — CTAs, links, interactive
+Dark Purple     #360C73  RGB(54, 12, 115)    — deep backgrounds
+Violet          #8201AD  RGB(130, 1, 173)    — gradient midpoint
+Yellow          #FDBC0B  RGB(253, 188, 11)   — accent / highlight
+Light Gray      #D9D9D9  RGB(217, 217, 217)  — borders, disabled states
+Black           #000000  RGB(0, 0, 0)        — body text
+White           #FFFFFF  RGB(255, 255, 255)  — backgrounds
 
 Primary gradient: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
+Dark header gradient: linear-gradient(135deg, #231F61 0%, #360C73 100%)`,
 
-Typography:
-• Latin/English: General Sans (Bold, SemiBold, Medium, Regular, Light)
-• Arabic: IBM Plex Sans Arabic`,
+  logo: `# Workiom Logo Guidelines
 
-  logo: `Workiom Logo Guidelines
-DO: white/light backgrounds · clear space · SVG format · white version on dark
-DON'T: stretch · skew · rotate · mirror · glow · patterns · colored bg · keyline · alter colors`,
+Primary logo file: /workiom-logo.png
 
-  typography: `Workiom Typography
-General Sans — Latin/English (Bold, SemiBold, Medium, Regular, Light)
-IBM Plex Sans Arabic — Arabic text`,
+## DO's
+✓ Use on a clean white or light background (#F7F7F7 or similar)
+✓ Use inverted white version (CSS: brightness(0) invert(1)) on dark or gradient backgrounds
+✓ Maintain correct proportions — never alter the aspect ratio
+✓ Keep clear space equal to the logo cap-height on all four sides
+✓ Use SVG format for digital; high-res PNG for print
 
-  colors: `Workiom Brand Colors
-• #9635F0 Workiom Purple  • #3C84FD Blue  • #360C73 Dark Purple
-• #8201AD Violet  • #FDBC0B Yellow  • #D9D9D9 Light Gray`,
+## DON'Ts
+✕ Never stretch the logo horizontally
+✕ Never skew or warp the logo
+✕ Never squish or compress the logo
+✕ Never tilt or rotate the logo
+✕ Never mirror or flip the logo
+✕ Never add glow, drop-shadows, outlines, or any visual effects
+✕ Never place on a patterned or repeating background
+✕ Never place on a textured background
+✕ Never place on a photo or colorful gradient background
+✕ Never use on a clashing or unbranded colored background
+✕ Never add a keyline or stroke border around the logo
+✕ Never alter, recolor, or change the brand colors in any way`,
+
+  typography: `# Workiom Typography Guidelines
+
+## Latin / English — General Sans
+Light (300): "Minimal, modern, product-focused, spacious"
+Regular (400): "A future where every team creates the software they need"
+Medium (500): "Build, automate, and scale operations"
+SemiBold (600): "Transforming ideas into workflows"
+Bold (700): "Workiom AI will do the work"
+
+Use General Sans for all Latin/English text across digital products, marketing, and print.
+
+## Arabic — IBM Plex Sans Arabic
+Weights: Light · Regular · Medium · SemiBold · Bold
+Direction: RTL (right-to-left)
+Sample (Bold 700): "استفد الآن من ميزات الذكاء الاصطناعي"
+Sample (Medium 500): "أنشئ سير العمل وأتمتها بسهولة تامة"
+Sample (Regular 400): "منصة عمل ذكية وقابلة للتخصيص لكل فريق"
+
+Use IBM Plex Sans Arabic for all Arabic language content across all Workiom surfaces.`,
+
+  colors: `# Workiom Brand Colors
+
+Primary gradient: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
+Dark header gradient: linear-gradient(135deg, #231F61 0%, #360C73 100%)
+
+Color palette:
+  Workiom Purple  #9635F0  RGB(150, 53, 240)   — primary brand color
+  Blue            #3C84FD  RGB(60, 132, 253)   — CTAs, links, interactive elements
+  Dark Purple     #360C73  RGB(54, 12, 115)    — deep dark backgrounds
+  Violet          #8201AD  RGB(130, 1, 173)    — gradient midpoint / accent
+  Yellow          #FDBC0B  RGB(253, 188, 11)   — highlight / accent color
+  Light Gray      #D9D9D9  RGB(217, 217, 217)  — borders, dividers, disabled states
+  Black           #000000  RGB(0, 0, 0)        — body text, high-contrast elements
+  White           #FFFFFF  RGB(255, 255, 255)  — backgrounds, inverted logo
+
+Usage notes:
+  • Workiom Purple (#9635F0) is the primary brand identity color
+  • Blue (#3C84FD) is used for interactive elements, CTAs, and links
+  • Yellow (#FDBC0B) is used sparingly as an accent/highlight only
+  • Do not introduce off-brand colors in Workiom materials`,
 };
 
 /* ─────────────────────────────────────────────
@@ -89,7 +182,8 @@ IBM Plex Sans Arabic — Arabic text`,
 function CopyLLMButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
   async function handleCopy() {
-    try { await navigator.clipboard.writeText(text); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
+    const full = `Source: ${window.location.href}\n\n${text}`;
+    try { await navigator.clipboard.writeText(full); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
   }
   return (
     <button
@@ -658,20 +752,22 @@ export default function BrandGuidelinesPage() {
                     { label: 'Altered colors', note: 'Never alter or change the brand colors',          imgStyle: { filter: 'hue-rotate(140deg) saturate(1.5)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
                   ] as Array<{ label: string; note: string; imgStyle: React.CSSProperties; bgStyle: React.CSSProperties; dark?: boolean; keyline?: boolean }>)
                     .map(({ label, note, imgStyle, bgStyle, dark, keyline }) => (
-                      <div key={label} className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3" style={bgStyle}>
-                        <div className="h-14 sm:h-16 w-full flex items-center justify-center">
-                          {keyline ? (
-                            <span style={{ display: 'inline-flex', border: '1.5px solid #9635F0', borderRadius: '4px', padding: '3px' }}>
-                              <Image src="/workiom-logo.png" alt={label} width={72} height={20} className="h-3.5 sm:h-4 w-auto object-contain" unoptimized />
-                            </span>
-                          ) : (
-                            <Image src="/workiom-logo.png" alt={label} width={80} height={22}
-                              className="h-4 sm:h-5 w-auto object-contain flex-shrink-0"
-                              style={imgStyle} unoptimized />
-                          )}
+                      <div key={label} className="flex flex-col gap-2.5">
+                        <div className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3" style={bgStyle}>
+                          <div className="h-14 sm:h-16 w-full flex items-center justify-center">
+                            {keyline ? (
+                              <span style={{ display: 'inline-flex', border: '1.5px solid #9635F0', borderRadius: '4px', padding: '3px' }}>
+                                <Image src="/workiom-logo.png" alt={label} width={72} height={20} className="h-3.5 sm:h-4 w-auto object-contain" unoptimized />
+                              </span>
+                            ) : (
+                              <Image src="/workiom-logo.png" alt={label} width={80} height={22}
+                                className="h-4 sm:h-5 w-auto object-contain flex-shrink-0"
+                                style={imgStyle} unoptimized />
+                            )}
+                          </div>
+                          <p className={cn('text-[10px] sm:text-[11px] font-semibold text-center leading-tight', dark ? 'text-white/80' : 'text-slate-700')}>{label}</p>
                         </div>
-                        <p className={cn('text-[9px] sm:text-[10px] font-semibold text-center leading-tight', dark ? 'text-white/80' : 'text-slate-800')}>{label}</p>
-                        <p className={cn('text-[8px] sm:text-[9px] text-center leading-tight', dark ? 'text-white/60' : 'text-slate-500')}>{note}</p>
+                        <p className="text-xs sm:text-sm text-slate-600 text-center leading-snug px-1">{note}</p>
                       </div>
                     ))
                   }

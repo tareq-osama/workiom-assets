@@ -93,9 +93,8 @@ export default function Navbar() {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
-  if (pathname === '/brand-guidelines') return null;
-
   useEffect(() => {
+    if (pathname === '/brand-guidelines') return;
     fetch('/api/auth/me')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -104,6 +103,8 @@ export default function Navbar() {
       })
       .catch(() => {});
   }, [pathname]);
+
+  if (pathname === '/brand-guidelines') return null;
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' });
