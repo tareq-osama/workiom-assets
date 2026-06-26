@@ -582,25 +582,25 @@ export default function BrandGuidelinesPage() {
 
         {/* Footer */}
         <footer className="px-10 sm:px-16 py-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}>
-          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/10">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/20">
             <div>
-              <p className="text-xs font-semibold text-white/60 mb-1">Visual Identity Guidelines</p>
-              <p className="text-[10px] text-white/25">Version 1.0</p>
+              <p className="text-xs font-semibold text-white mb-1">Visual Identity Guidelines</p>
+              <p className="text-[10px] text-white">Version 1.0</p>
             </div>
-            <p className="text-xs text-white/25">brand@workiom.com</p>
+            <p className="text-xs text-white">brand@workiom.com</p>
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-8">
             <div className="flex items-center gap-3">
-              <Image src="/workiom-icon.png" alt="Workiom" width={20} height={20} className="h-5 w-5 object-contain opacity-40" unoptimized />
-              <span className="text-[11px] text-white/25">© 2026 Workiom. All rights reserved.</span>
+              <Image src="/workiom-icon.png" alt="Workiom" width={20} height={20} className="h-5 w-5 object-contain brightness-0 invert" unoptimized />
+              <span className="text-[11px] text-white">© 2026 Workiom. All rights reserved.</span>
             </div>
-            <p className="flex items-center gap-1.5 text-[11px] text-white/25">
-              Made with <Heart className="h-3 w-3 text-red-400 fill-red-400" /> by{' '}
+            <p className="flex items-center gap-1.5 text-[11px] text-white">
+              Made with <Heart className="h-3 w-3 text-red-300 fill-red-300" /> by{' '}
               <a
                 href="https://diginsider.net"
                 target="_blank"
                 rel="noopener noreferrer"
-                className="text-white/40 hover:text-white/70 underline underline-offset-2 transition-colors"
+                className="text-white underline underline-offset-2 hover:text-white/80 transition-colors"
               >
                 Insider
               </a>
