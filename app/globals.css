@@ -118,6 +118,9 @@
   html {
     @apply font-sans;
   }
+  a, button, [role="button"], select, label[for], summary {
+    cursor: pointer;
+  }
 }
 
 /* Arabic text uses IBM Plex Sans Arabic */
