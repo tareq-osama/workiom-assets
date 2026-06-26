@@ -19,6 +19,7 @@ import { cn } from '@/lib/utils';
 interface AssetCardProps {
   asset: Asset;
   viewMode?: 'grid' | 'list';
+  isAuthenticated?: boolean;
 }
 
 function isImageFormat(fmt: string) {
@@ -76,7 +77,7 @@ const iconBtnBase =
 const menuItemCls =
   'w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left';
 
-export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) {
+export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = false }: AssetCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(asset);
@@ -113,6 +114,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
   function openContextMenu(e: React.MouseEvent) {
     e.preventDefault();
     e.stopPropagation();
+    if (!isAuthenticated) return;
     const x = Math.min(e.clientX, window.innerWidth - 192);
     const y = Math.min(e.clientY, window.innerHeight - 180);
     setContextMenu({ x, y });

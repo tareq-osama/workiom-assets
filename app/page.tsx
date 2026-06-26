@@ -53,6 +53,13 @@ export default function BrowsePage({
   const [loading, setLoading] = useState(true);
   const [mobileFiltersOpen, setMobileFiltersOpen] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+
+  useEffect(() => {
+    fetch('/api/auth/me')
+      .then((r) => r.ok ? setIsAuthenticated(true) : null)
+      .catch(() => {});
+  }, []);
 
   useEffect(() => {
     fetch('/api/categories')
@@ -237,13 +244,13 @@ export default function BrowsePage({
             ) : viewMode === 'grid' ? (
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                 {assets.map((asset) => (
-                  <AssetCard key={asset.id} asset={asset} viewMode="grid" />
+                  <AssetCard key={asset.id} asset={asset} viewMode="grid" isAuthenticated={isAuthenticated} />
                 ))}
               </div>
             ) : (
               <div className="space-y-2">
                 {assets.map((asset) => (
-                  <AssetCard key={asset.id} asset={asset} viewMode="list" />
+                  <AssetCard key={asset.id} asset={asset} viewMode="list" isAuthenticated={isAuthenticated} />
                 ))}
               </div>
             )}
