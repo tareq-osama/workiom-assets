@@ -1,7 +1,5 @@
 'use client';
 
-import { Checkbox } from '@/components/ui/checkbox';
-import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
@@ -32,23 +30,21 @@ function FilterGroup({
   return (
     <div>
       {title && <h3 className="text-sm font-semibold text-slate-700 mb-3">{title}</h3>}
-      <div className="space-y-3.5">
+      <div className="space-y-2">
         {options.map((option) => {
-          const id = `filter-${title}-${option}`.replace(/\s+/g, '-').toLowerCase();
+          const isSelected = selected.includes(option);
           return (
-            <div key={option} className="flex items-center gap-2">
-              <Checkbox
-                id={id}
-                checked={selected.includes(option)}
-                onCheckedChange={() => onToggle(option)}
-              />
-              <Label
-                htmlFor={id}
-                className="text-sm text-slate-600 cursor-pointer leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70"
-              >
-                {option}
-              </Label>
-            </div>
+            <button
+              key={option}
+              onClick={() => onToggle(option)}
+              className={`w-full text-left px-3 py-2.5 rounded-lg text-sm transition-colors border ${
+                isSelected
+                  ? 'bg-blue-50 border-blue-200 text-blue-700 font-medium'
+                  : 'bg-white border-slate-200 text-slate-600 hover:bg-slate-50 hover:border-slate-300'
+              }`}
+            >
+              {option}
+            </button>
           );
         })}
       </div>
