@@ -247,18 +247,9 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
     return () => window.removeEventListener('keydown', handleKey);
   }, [images]);
 
-  // Preload prev + next so navigation feels instant
-  useEffect(() => {
-    const srcs = [
-      images[(idx - 1 + images.length) % images.length],
-      images[(idx + 1) % images.length],
-    ];
-    srcs.forEach(src => { const i = new window.Image(); i.src = src; });
-  }, [idx, images]);
-
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 sm:p-8"
       onClick={() => onCloseRef.current()}
     >
       <div
@@ -299,13 +290,19 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
               <ChevronLeft className="h-6 w-6" />
             </button>
           )}
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            key={images[idx]}
-            src={images[idx]}
-            alt={`Brand in use ${idx + 1}`}
-            className="max-h-full max-w-full object-contain select-none p-4 sm:p-6 animate-in fade-in duration-200 fill-mode-both"
-          />
+          {/* Render all images; toggle opacity so no remount/refetch on nav */}
+          {images.map((url, i) => (
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              key={url}
+              src={url}
+              alt={`Brand in use ${i + 1}`}
+              className={cn(
+                'absolute inset-0 m-auto max-h-full max-w-full object-contain select-none p-4 sm:p-6 transition-opacity duration-150',
+                i === idx ? 'opacity-100' : 'opacity-0 pointer-events-none',
+              )}
+            />
+          ))}
           {images.length > 1 && (
             <button
               onClick={() => setIdx(i => (i + 1) % images.length)}
@@ -1003,7 +1000,7 @@ export default function BrandGuidelinesPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-6 sm:pt-8">
             <div className="flex items-center gap-3">
-              <Image src="/workiom-icon.png" alt="Workiom" width={20} height={20} className="h-5 w-5 object-contain brightness-0 invert" unoptimized />
+              <Image src="/workiom-icon.png" alt="Workiom" width={32} height={32} className="h-8 w-8 object-contain brightness-0 invert" unoptimized />
               <span className="text-[11px] text-white">© 2026 Workiom. All rights reserved.</span>
             </div>
             <p className="flex items-center gap-1.5 text-[11px] text-white">
