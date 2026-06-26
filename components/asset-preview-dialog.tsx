@@ -676,7 +676,7 @@ export default function AssetPreviewDialog({
                       </Label>
                       <Select
                         value={editForm.category}
-                        onValueChange={(v) => setEditForm((f) => f ? { ...f, category: v } : f)}
+                        onValueChange={(v) => setEditForm((f) => f ? { ...f, category: v ?? '' } : f)}
                       >
                         <SelectTrigger className="h-9 text-sm w-full">
                           <SelectValue placeholder="Select category" />
