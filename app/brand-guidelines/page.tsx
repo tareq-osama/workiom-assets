@@ -644,20 +644,20 @@ export default function BrandGuidelinesPage() {
                 </p>
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {([
-                    { label: 'Stretched',       imgStyle: { transform: 'scaleX(1.9)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Skewed',          imgStyle: { transform: 'skewX(-22deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Squished',        imgStyle: { transform: 'scaleY(0.4)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Tilted',          imgStyle: { transform: 'rotate(18deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Mirrored',        imgStyle: { transform: 'scaleX(-1)'    },               bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Glow effect',     imgStyle: { filter: 'drop-shadow(0 0 6px #9635F0) drop-shadow(0 0 12px #3C84FD)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
-                    { label: 'Over a pattern',  imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(45deg, #d9d9d9 0px, #d9d9d9 2px, #f5f5f5 2px, #f5f5f5 14px)' } },
-                    { label: 'Textured bg',     imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px), #e8e8e8' } },
-                    { label: 'Photo bg',        imgStyle: {},                                           bgStyle: { background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' } },
-                    { label: 'Colored bg',      imgStyle: { filter: 'brightness(0) invert(1)' },        bgStyle: { backgroundColor: '#E53E3E' }, dark: true },
-                    { label: 'Keyline',         imgStyle: {},                                           bgStyle: { backgroundColor: '#F9F9F9' }, keyline: true },
-                    { label: 'Altered colors',  imgStyle: { filter: 'hue-rotate(140deg) saturate(1.5)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
-                  ] as Array<{ label: string; imgStyle: React.CSSProperties; bgStyle: React.CSSProperties; dark?: boolean; keyline?: boolean }>)
-                    .map(({ label, imgStyle, bgStyle, dark, keyline }) => (
+                    { label: 'Stretched',      note: 'Never stretch the logo horizontally',              imgStyle: { transform: 'scaleX(1.9)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Skewed',         note: 'Never skew or warp the logo',                     imgStyle: { transform: 'skewX(-22deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Squished',       note: 'Never squish or compress the logo',               imgStyle: { transform: 'scaleY(0.4)'   },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Tilted',         note: 'Never tilt or rotate the logo',                   imgStyle: { transform: 'rotate(18deg)' },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Mirrored',       note: 'Never mirror or flip the logo',                   imgStyle: { transform: 'scaleX(-1)'    },               bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Glow effect',    note: 'Never add glow, shadows, or effects',             imgStyle: { filter: 'drop-shadow(0 0 6px #9635F0) drop-shadow(0 0 12px #3C84FD)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
+                    { label: 'Over a pattern', note: 'Never place on a patterned background',           imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(45deg, #d9d9d9 0px, #d9d9d9 2px, #f5f5f5 2px, #f5f5f5 14px)' } },
+                    { label: 'Textured bg',    note: 'Never use a textured background',                 imgStyle: {},                                           bgStyle: { background: 'repeating-linear-gradient(0deg, transparent, transparent 3px, rgba(0,0,0,0.07) 3px, rgba(0,0,0,0.07) 4px), #e8e8e8' } },
+                    { label: 'Photo bg',       note: 'Never place on a photo or colorful background',   imgStyle: {},                                           bgStyle: { background: 'linear-gradient(135deg, #a8edea 0%, #fed6e3 100%)' } },
+                    { label: 'Colored bg',     note: 'Never use a clashing colored background',         imgStyle: { filter: 'brightness(0) invert(1)' },        bgStyle: { backgroundColor: '#E53E3E' }, dark: true },
+                    { label: 'Keyline',        note: 'Never add a keyline or stroke around the logo',   imgStyle: {},                                           bgStyle: { backgroundColor: '#F9F9F9' }, keyline: true },
+                    { label: 'Altered colors', note: 'Never alter or change the brand colors',          imgStyle: { filter: 'hue-rotate(140deg) saturate(1.5)' }, bgStyle: { backgroundColor: '#F9F9F9' } },
+                  ] as Array<{ label: string; note: string; imgStyle: React.CSSProperties; bgStyle: React.CSSProperties; dark?: boolean; keyline?: boolean }>)
+                    .map(({ label, note, imgStyle, bgStyle, dark, keyline }) => (
                       <div key={label} className="rounded-xl flex flex-col items-center justify-center gap-2 py-5 px-3" style={bgStyle}>
                         <div className="h-14 sm:h-16 w-full flex items-center justify-center">
                           {keyline ? (
@@ -670,31 +670,12 @@ export default function BrandGuidelinesPage() {
                               style={imgStyle} unoptimized />
                           )}
                         </div>
-                        <p className={cn('text-[9px] sm:text-[10px] font-medium text-center leading-tight', dark ? 'text-white/70' : 'text-red-400')}>{label}</p>
+                        <p className={cn('text-[9px] sm:text-[10px] font-semibold text-center leading-tight', dark ? 'text-white/80' : 'text-slate-800')}>{label}</p>
+                        <p className={cn('text-[8px] sm:text-[9px] text-center leading-tight', dark ? 'text-white/60' : 'text-slate-500')}>{note}</p>
                       </div>
                     ))
                   }
                 </div>
-                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 pt-3 border-t border-[#EAEAEA]">
-                  {[
-                    'Stretch, skew, squish, or distort the logo',
-                    'Tilt, rotate, or mirror / flip the logo',
-                    'Add glow, shadows, outlines, strokes, or effects',
-                    'Use a keyline or stroke around the logo',
-                    'Alter or change the brand colors',
-                    'Place on a pattern, textured, or photo background',
-                    'Place on a clashing or unbranded colored background',
-                    'Change the proportions between the logotype and the mark',
-                    'Place the logo over the icon mark itself',
-                    'Contain the logo inside a photo or place it on top of an object',
-                    'Use unofficial colors on the mark',
-                    'Recreate the logo in a different typeface',
-                  ].map((s) => (
-                    <li key={s} className="flex items-start gap-2 text-[11px] text-red-500/80">
-                      <span className="mt-0.5 flex-shrink-0 text-red-400">✕</span>{s}
-                    </li>
-                  ))}
-                </ul>
               </div>
             </div>
 

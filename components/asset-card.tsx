@@ -2,7 +2,7 @@
 
 import { useState } from 'react';
 import Image from 'next/image';
-import { Download, Link2, FileImage } from 'lucide-react';
+import { Download, Link2, FileImage, ExternalLink } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import StatusBadge from '@/components/status-badge';
@@ -77,6 +77,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
     ? undefined
     : (currentAsset.thumbnailUrl ?? (currentAsset.formats.some(isImageFormat) ? currentAsset.fileUrl : undefined));
   const primaryFormat = currentAsset.formats[0];
+  const isLinkAsset = Boolean(currentAsset.linkUrl);
 
   if (isDeleted) return null;
 
@@ -85,10 +86,10 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
       <>
         <div
           className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow group cursor-pointer"
-          onClick={() => setDialogOpen(true)}
+          onClick={() => isLinkAsset ? window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer') : setDialogOpen(true)}
         >
           {/* Thumbnail */}
-          <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center">
+          <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative">
             {previewUrl ? (
               <Image
                 src={previewUrl}
@@ -102,6 +103,11 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             ) : (
               <FileImage className="w-8 h-8 text-slate-300" />
             )}
+            {isLinkAsset && (
+              <div className="absolute bottom-0.5 right-0.5 bg-blue-500 rounded-full p-0.5">
+                <ExternalLink className="w-2.5 h-2.5 text-white" />
+              </div>
+            )}
           </div>
 
           {/* Info */}
@@ -109,7 +115,14 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             <h3 className="font-medium text-slate-900 truncate">{currentAsset.name}</h3>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
               <span className="text-xs text-slate-500">{currentAsset.category}</span>
-              {currentAsset.formats.length > 0 && (
+              {isLinkAsset ? (
+                <>
+                  <span className="text-slate-300">•</span>
+                  <span className="text-xs text-blue-600 font-medium flex items-center gap-0.5">
+                    <ExternalLink className="w-3 h-3" /> Link
+                  </span>
+                </>
+              ) : currentAsset.formats.length > 0 && (
                 <>
                   <span className="text-slate-300">•</span>
                   <div className="flex gap-1">
@@ -125,7 +138,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
                   </div>
                 </>
               )}
-              {currentAsset.fileSize > 0 && (
+              {!isLinkAsset && currentAsset.fileSize > 0 && (
                 <span className="text-xs text-slate-400">{formatFileSize(currentAsset.fileSize)}</span>
               )}
             </div>
@@ -139,18 +152,31 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
-            {currentAsset.formats.map((fmt) => (
-              <Tooltip key={fmt}>
+            {isLinkAsset ? (
+              <Tooltip>
                 <TooltipTrigger
-                  className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md', FORMAT_COLORS[fmt])}
-                  onClick={(e) => downloadFormat(currentAsset, fmt, e)}
+                  className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100')}
+                  onClick={() => window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer')}
                 >
-                  <Download className="h-3 w-3 mr-1" />
-                  {fmt}
+                  <ExternalLink className="h-3 w-3 mr-1" />
+                  Visit
                 </TooltipTrigger>
-                <TooltipContent>Download {fmt}</TooltipContent>
+                <TooltipContent>Open link</TooltipContent>
               </Tooltip>
-            ))}
+            ) : (
+              currentAsset.formats.map((fmt) => (
+                <Tooltip key={fmt}>
+                  <TooltipTrigger
+                    className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md', FORMAT_COLORS[fmt])}
+                    onClick={(e) => downloadFormat(currentAsset, fmt, e)}
+                  >
+                    <Download className="h-3 w-3 mr-1" />
+                    {fmt}
+                  </TooltipTrigger>
+                  <TooltipContent>Download {fmt}</TooltipContent>
+                </Tooltip>
+              ))
+            )}
             <Tooltip>
               <TooltipTrigger
                 className={cn(iconBtnBase, 'h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100')}
@@ -163,13 +189,15 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
           </div>
         </div>
 
-        <AssetPreviewDialog
-          asset={currentAsset}
-          open={dialogOpen}
-          onOpenChange={setDialogOpen}
-          onAssetUpdated={(updated) => setCurrentAsset(updated)}
-          onAssetDeleted={() => setIsDeleted(true)}
-        />
+        {!isLinkAsset && (
+          <AssetPreviewDialog
+            asset={currentAsset}
+            open={dialogOpen}
+            onOpenChange={setDialogOpen}
+            onAssetUpdated={(updated) => setCurrentAsset(updated)}
+            onAssetDeleted={() => setIsDeleted(true)}
+          />
+        )}
       </>
     );
   }
@@ -179,7 +207,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
     <>
       <div
         className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-slate-300 transition-all duration-200 cursor-pointer"
-        onClick={() => setDialogOpen(true)}
+        onClick={() => isLinkAsset ? window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer') : setDialogOpen(true)}
       >
         {/* Thumbnail area */}
         <div className="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
@@ -202,32 +230,49 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             </div>
           )}
 
+          {/* Link asset badge */}
+          {isLinkAsset && (
+            <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full px-1.5 py-0.5 flex items-center gap-1 text-[10px] font-medium">
+              <ExternalLink className="w-2.5 h-2.5" />
+              Link
+            </div>
+          )}
+
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
-            {currentAsset.formats.map((fmt) => (
-              <Tooltip key={fmt}>
-                <TooltipTrigger
-                  className={cn(
-                    'h-9 px-3 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer',
-                    FORMAT_COLORS[fmt]
-                  )}
-                  onClick={(e) => downloadFormat(currentAsset, fmt, e)}
-                >
-                  <Download className="h-3.5 w-3.5" />
-                  {fmt}
-                </TooltipTrigger>
-                <TooltipContent>Download {fmt}</TooltipContent>
-              </Tooltip>
-            ))}
-            <Tooltip>
-              <TooltipTrigger
-                className={cn(iconBtnBase, 'h-9 w-9 bg-white text-slate-900 hover:bg-slate-100 rounded-md')}
-                onClick={(e) => handleCopyLink(currentAsset, e)}
-              >
-                <Link2 className="h-4 w-4" />
-              </TooltipTrigger>
-              <TooltipContent>Copy Link</TooltipContent>
-            </Tooltip>
+            {isLinkAsset ? (
+              <span className="h-9 px-4 text-xs font-semibold rounded-md flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
+                <ExternalLink className="h-3.5 w-3.5" />
+                Visit Link
+              </span>
+            ) : (
+              <>
+                {currentAsset.formats.map((fmt) => (
+                  <Tooltip key={fmt}>
+                    <TooltipTrigger
+                      className={cn(
+                        'h-9 px-3 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer',
+                        FORMAT_COLORS[fmt]
+                      )}
+                      onClick={(e) => downloadFormat(currentAsset, fmt, e)}
+                    >
+                      <Download className="h-3.5 w-3.5" />
+                      {fmt}
+                    </TooltipTrigger>
+                    <TooltipContent>Download {fmt}</TooltipContent>
+                  </Tooltip>
+                ))}
+                <Tooltip>
+                  <TooltipTrigger
+                    className={cn(iconBtnBase, 'h-9 w-9 bg-white text-slate-900 hover:bg-slate-100 rounded-md')}
+                    onClick={(e) => handleCopyLink(currentAsset, e)}
+                  >
+                    <Link2 className="h-4 w-4" />
+                  </TooltipTrigger>
+                  <TooltipContent>Copy Link</TooltipContent>
+                </Tooltip>
+              </>
+            )}
           </div>
         </div>
 
@@ -238,26 +283,34 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
           </h3>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-slate-500 truncate flex-1 min-w-0">{currentAsset.category}</span>
-            {currentAsset.formats.map((fmt) => (
-              <Badge
-                key={fmt}
-                variant="outline"
-                className={`text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 ${FORMAT_COLORS[fmt]}`}
-              >
-                {fmt}
+            {isLinkAsset ? (
+              <Badge variant="outline" className="text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 bg-blue-50 text-blue-700 border-blue-200">
+                Link
               </Badge>
-            ))}
+            ) : (
+              currentAsset.formats.map((fmt) => (
+                <Badge
+                  key={fmt}
+                  variant="outline"
+                  className={`text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 ${FORMAT_COLORS[fmt]}`}
+                >
+                  {fmt}
+                </Badge>
+              ))
+            )}
           </div>
         </div>
       </div>
 
-      <AssetPreviewDialog
-        asset={currentAsset}
-        open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        onAssetUpdated={(updated) => setCurrentAsset(updated)}
-        onAssetDeleted={() => setIsDeleted(true)}
-      />
+      {!isLinkAsset && (
+        <AssetPreviewDialog
+          asset={currentAsset}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onAssetUpdated={(updated) => setCurrentAsset(updated)}
+          onAssetDeleted={() => setIsDeleted(true)}
+        />
+      )}
     </>
   );
 }

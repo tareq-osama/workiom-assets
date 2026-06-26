@@ -36,13 +36,17 @@ function mapDoc(doc: AppwriteAssetDoc): Asset {
   const jpgUrl = doc.jpgFileId ? getFileViewUrl(doc.jpgFileId) : undefined;
   const thumbnailUrl = doc.thumbnailFileId ? getFileViewUrl(doc.thumbnailFileId) : undefined;
 
-  const fileUrl = svgUrl ?? pngUrl ?? jpgUrl ?? '';
+  const fileUrl = svgUrl ?? pngUrl ?? jpgUrl ?? thumbnailUrl ?? '';
   const fileType = formats[0] ?? '';
+
+  const rawDesc = doc.description ?? '';
+  const linkUrl = rawDesc.startsWith('[LINK]') ? rawDesc.slice(6) : undefined;
+  const description = linkUrl ? undefined : (rawDesc || undefined);
 
   return {
     id: doc.$id,
     name: doc.name,
-    description: doc.description || undefined,
+    description,
     category: (doc.category as AssetCategory) || 'Brand Items',
     tags: doc.tags ?? [],
     status: (doc.status as AssetStatus) || 'Draft',
@@ -50,6 +54,7 @@ function mapDoc(doc: AppwriteAssetDoc): Asset {
     downloadCount: doc.downloadCount ?? 0,
     deprecationReason: doc.deprecationReason || undefined,
     createdAt: doc.$createdAt,
+    linkUrl,
     formats,
     svgFileId: doc.svgFileId || undefined,
     pngFileId: doc.pngFileId || undefined,

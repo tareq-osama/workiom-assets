@@ -29,6 +29,9 @@ export interface Asset {
   jpgUrl?: string;
   thumbnailUrl?: string;
 
+  // External link URL — present when the asset is a clickable link (e.g. a Canva presentation)
+  linkUrl?: string;
+
   // Convenience fields (primary format)
   fileUrl: string;
   fileType: string;

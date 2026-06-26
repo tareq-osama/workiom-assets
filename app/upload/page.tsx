@@ -12,6 +12,7 @@ import {
   Loader2,
   CloudUpload,
   FileImage,
+  ExternalLink,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -26,6 +27,7 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
+import { Switch } from '@/components/ui/switch';
 import { STATUS_OPTIONS } from '@/lib/constants';
 import type { Category } from '@/lib/appwrite-categories';
 
@@ -37,14 +39,13 @@ const FORMAT_ACCEPT: Record<AssetFormat, string> = {
   JPG: '.jpg,.jpeg,image/jpeg',
 };
 
-const FORMAT_MIME: Record<AssetFormat, string> = {
-  SVG: 'image/svg+xml',
-  PNG: 'image/png',
-  JPG: 'image/jpeg',
-};
-
 interface FormatSlot {
   format: AssetFormat;
+  file: File | null;
+  previewUrl: string | null;
+}
+
+interface CoverSlot {
   file: File | null;
   previewUrl: string | null;
 }
@@ -163,10 +164,104 @@ function FormatDropZone({
   );
 }
 
+function CoverImageDropZone({
+  slot,
+  onChange,
+  onRemove,
+}: {
+  slot: CoverSlot;
+  onChange: (file: File) => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const file = e.dataTransfer.files[0];
+    if (file) onChange(file);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5 border-blue-200 bg-blue-50 text-blue-700">
+          Cover Image
+        </Badge>
+        <span className="text-xs text-slate-400">Required — displayed as the asset thumbnail</span>
+      </div>
+
+      {slot.file ? (
+        <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3 bg-slate-50">
+          {slot.previewUrl ? (
+            <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden border border-slate-100 bg-white flex items-center justify-center">
+              <Image
+                src={slot.previewUrl}
+                alt="Cover"
+                width={64}
+                height={64}
+                className="w-full h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-16 h-16 flex-shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
+              <FileImage className="h-6 w-6 text-slate-400" />
+            </div>
+          )}
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate">{slot.file.name}</p>
+            <p className="text-xs text-slate-400">{formatFileSize(slot.file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+            dragging ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+        >
+          <CloudUpload className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs text-slate-500">
+            Drop an image or <span className="text-blue-600 font-medium">browse</span>
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">PNG, JPG, SVG, or any image</p>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept=".png,.jpg,.jpeg,.svg,image/*"
+        className="hidden"
+        onChange={(e) => {
+          const file = e.target.files?.[0];
+          if (file) onChange(file);
+          e.target.value = '';
+        }}
+      />
+    </div>
+  );
+}
+
 export default function UploadPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
+  const [linkMode, setLinkMode] = useState(false);
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -188,6 +283,8 @@ export default function UploadPage() {
     { format: 'JPG', file: null, previewUrl: null },
   ]);
 
+  const [coverSlot, setCoverSlot] = useState<CoverSlot>({ file: null, previewUrl: null });
+
   const [step, setStep] = useState<UploadStep>('idle');
   const [errorMessage, setErrorMessage] = useState('');
   const [formData, setFormData] = useState({
@@ -197,6 +294,7 @@ export default function UploadPage() {
     tags: '',
     owner: '',
     status: 'Active',
+    externalUrl: '',
   });
 
   const handleFileSelect = useCallback((format: AssetFormat, file: File) => {
@@ -226,27 +324,42 @@ export default function UploadPage() {
     );
   }
 
+  function handleCoverChange(file: File) {
+    const previewUrl = URL.createObjectURL(file);
+    setCoverSlot((prev) => {
+      if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+      return { file, previewUrl };
+    });
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || file.name.replace(/\.[^.]+$/, ''),
+    }));
+  }
+
+  function handleCoverRemove() {
+    setCoverSlot((prev) => {
+      if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+      return { file: null, previewUrl: null };
+    });
+  }
+
   function handleInputChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function uploadFormat(slot: FormatSlot): Promise<string | null> {
-    if (!slot.file) return null;
+  async function uploadFile(file: File): Promise<string> {
     const form = new FormData();
-    form.append('file', slot.file, slot.file.name);
+    form.append('file', file, file.name);
     const res = await fetch('/api/upload', { method: 'POST', body: form });
-    if (!res.ok) throw new Error(`Failed to upload ${slot.format} file`);
+    if (!res.ok) throw new Error('Failed to upload file');
     const { fileId } = await res.json();
     return fileId as string;
   }
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
-    const hasAnyFile = slots.some((s) => s.file !== null);
-    if (!hasAnyFile) {
-      setErrorMessage('Please upload at least one file (SVG, PNG, or JPG).');
-      return;
-    }
+    setErrorMessage('');
+
     if (!formData.name.trim()) {
       setErrorMessage('Please enter a name for this asset.');
       return;
@@ -256,21 +369,71 @@ export default function UploadPage() {
       return;
     }
 
-    setErrorMessage('');
-    setStep('uploading');
+    if (linkMode) {
+      if (!coverSlot.file) {
+        setErrorMessage('Please upload a cover image.');
+        return;
+      }
+      if (!formData.externalUrl.trim()) {
+        setErrorMessage('Please enter the external link URL.');
+        return;
+      }
+      if (!/^https?:\/\/.+/.test(formData.externalUrl.trim())) {
+        setErrorMessage('Please enter a valid URL starting with http:// or https://');
+        return;
+      }
 
+      setStep('uploading');
+      try {
+        const thumbnailFileId = await uploadFile(coverSlot.file);
+        setStep('creating');
+
+        const tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
+        const assetRes = await fetch('/api/assets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            description: `[LINK]${formData.externalUrl.trim()}`,
+            category: formData.category,
+            tags,
+            status: formData.status,
+            owner: formData.owner.trim() || undefined,
+            thumbnailFileId,
+            formats: [],
+            fileSize: coverSlot.file.size,
+          }),
+        });
+
+        if (!assetRes.ok) throw new Error('Failed to create asset record');
+        setStep('done');
+        setTimeout(() => router.push('/'), 1500);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+        setStep('error');
+      }
+      return;
+    }
+
+    // Standard upload mode
+    const hasAnyFile = slots.some((s) => s.file !== null);
+    if (!hasAnyFile) {
+      setErrorMessage('Please upload at least one file (SVG, PNG, or JPG).');
+      return;
+    }
+
+    setStep('uploading');
     try {
       const [svgFileId, pngFileId, jpgFileId] = await Promise.all(
-        slots.map((s) => uploadFormat(s))
+        slots.map(async (s) => {
+          if (!s.file) return null;
+          return uploadFile(s.file);
+        })
       );
 
       setStep('creating');
 
-      const tags = formData.tags
-        .split(',')
-        .map((t) => t.trim())
-        .filter(Boolean);
-
+      const tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
       const assetRes = await fetch('/api/assets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -290,11 +453,8 @@ export default function UploadPage() {
 
       if (!assetRes.ok) throw new Error('Failed to create asset record');
       const asset = await assetRes.json();
-
       setStep('done');
-      setTimeout(() => {
-        router.push(`/assets/${asset.id}`);
-      }, 1500);
+      setTimeout(() => router.push(`/assets/${asset.id}`), 1500);
     } catch (err) {
       setErrorMessage(err instanceof Error ? err.message : 'Upload failed. Please try again.');
       setStep('error');
@@ -302,7 +462,7 @@ export default function UploadPage() {
   }
 
   const isUploading = step === 'uploading' || step === 'creating';
-  const hasAnyFile = slots.some((s) => s.file !== null);
+  const hasAnyFile = linkMode ? Boolean(coverSlot.file) : slots.some((s) => s.file !== null);
 
   const stepLabel: Record<string, string> = {
     uploading: 'Uploading files...',
@@ -323,7 +483,7 @@ export default function UploadPage() {
         <div className="mb-8">
           <h1 className="text-2xl font-bold text-slate-900">Upload Asset</h1>
           <p className="text-slate-500 mt-1 text-sm">
-            Add a new brand asset. Upload SVG (required) plus PNG and JPG variants.
+            Add a new brand asset to the library.
           </p>
         </div>
 
@@ -331,28 +491,84 @@ export default function UploadPage() {
           <div className="bg-white border border-green-200 rounded-2xl p-12 text-center">
             <CheckCircle className="h-12 w-12 text-green-500 mx-auto mb-4" />
             <h2 className="text-xl font-semibold text-slate-900 mb-2">Upload Complete!</h2>
-            <p className="text-slate-500">Redirecting to your asset...</p>
+            <p className="text-slate-500">Redirecting...</p>
           </div>
         ) : (
           <form onSubmit={handleSubmit}>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
-              {/* Format upload slots */}
+
+              {/* Link mode toggle */}
+              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50">
+                <div className="flex items-center gap-3">
+                  <div className={`p-2 rounded-lg ${linkMode ? 'bg-blue-100' : 'bg-slate-100'}`}>
+                    <ExternalLink className={`h-4 w-4 ${linkMode ? 'text-blue-600' : 'text-slate-400'}`} />
+                  </div>
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">Link Mode</p>
+                    <p className="text-xs text-slate-500">
+                      {linkMode
+                        ? 'Upload a cover image + external URL — clicking the asset opens the link'
+                        : 'Upload image files (SVG, PNG, JPG) as a downloadable asset'}
+                    </p>
+                  </div>
+                </div>
+                <Switch
+                  checked={linkMode}
+                  onCheckedChange={(checked) => {
+                    setLinkMode(checked);
+                    setErrorMessage('');
+                  }}
+                />
+              </div>
+
+              {/* File upload area */}
               <div>
                 <Label className="text-sm font-semibold text-slate-700 mb-4 block">
-                  Files <span className="text-red-500">*</span>
-                  <span className="font-normal text-slate-400 ml-1">(at least one required)</span>
+                  {linkMode ? 'Cover Image' : 'Files'}
+                  {' '}<span className="text-red-500">*</span>
+                  {!linkMode && <span className="font-normal text-slate-400 ml-1">(at least one required)</span>}
                 </Label>
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  {slots.map((slot) => (
-                    <FormatDropZone
-                      key={slot.format}
-                      slot={slot}
-                      onFileSelect={handleFileSelect}
-                      onRemove={handleRemove}
-                    />
-                  ))}
-                </div>
+
+                {linkMode ? (
+                  <CoverImageDropZone
+                    slot={coverSlot}
+                    onChange={handleCoverChange}
+                    onRemove={handleCoverRemove}
+                  />
+                ) : (
+                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    {slots.map((slot) => (
+                      <FormatDropZone
+                        key={slot.format}
+                        slot={slot}
+                        onFileSelect={handleFileSelect}
+                        onRemove={handleRemove}
+                      />
+                    ))}
+                  </div>
+                )}
               </div>
+
+              {/* External URL field (link mode only) */}
+              {linkMode && (
+                <div>
+                  <Label htmlFor="externalUrl" className="text-sm font-medium text-slate-700 mb-1.5 block">
+                    External URL <span className="text-red-500">*</span>
+                    <span className="text-slate-400 font-normal ml-1 text-xs">— clicking the asset will navigate here</span>
+                  </Label>
+                  <div className="relative">
+                    <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                    <Input
+                      id="externalUrl"
+                      type="url"
+                      value={formData.externalUrl}
+                      onChange={(e) => handleInputChange('externalUrl', e.target.value)}
+                      placeholder="https://www.canva.com/design/..."
+                      className="h-10 pl-9"
+                    />
+                  </div>
+                </div>
+              )}
 
               <Separator />
 
@@ -366,25 +582,27 @@ export default function UploadPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder="e.g. Primary Logo"
+                    placeholder={linkMode ? 'e.g. Q4 Marketing Presentation' : 'e.g. Primary Logo'}
                     required
                     className="h-10"
                   />
                 </div>
 
-                <div className="sm:col-span-2">
-                  <Label htmlFor="description" className="text-sm font-medium text-slate-700 mb-1.5 block">
-                    Description
-                  </Label>
-                  <Textarea
-                    id="description"
-                    value={formData.description}
-                    onChange={(e) => handleInputChange('description', e.target.value)}
-                    placeholder="Brief description of this asset..."
-                    rows={3}
-                    className="resize-none"
-                  />
-                </div>
+                {!linkMode && (
+                  <div className="sm:col-span-2">
+                    <Label htmlFor="description" className="text-sm font-medium text-slate-700 mb-1.5 block">
+                      Description
+                    </Label>
+                    <Textarea
+                      id="description"
+                      value={formData.description}
+                      onChange={(e) => handleInputChange('description', e.target.value)}
+                      placeholder="Brief description of this asset..."
+                      rows={3}
+                      className="resize-none"
+                    />
+                  </div>
+                )}
 
                 <div>
                   <Label htmlFor="category" className="text-sm font-medium text-slate-700 mb-1.5 block">
@@ -451,7 +669,7 @@ export default function UploadPage() {
                     id="tags"
                     value={formData.tags}
                     onChange={(e) => handleInputChange('tags', e.target.value)}
-                    placeholder="logo, brand, primary"
+                    placeholder={linkMode ? 'presentation, canva, q4' : 'logo, brand, primary'}
                     className="h-10"
                   />
                 </div>
@@ -479,8 +697,8 @@ export default function UploadPage() {
                     </>
                   ) : (
                     <>
-                      <Upload className="h-4 w-4" />
-                      Upload Asset
+                      {linkMode ? <ExternalLink className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
+                      {linkMode ? 'Add Link Asset' : 'Upload Asset'}
                     </>
                   )}
                 </Button>
