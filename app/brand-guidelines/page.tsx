@@ -52,128 +52,212 @@ function uid() { return Date.now().toString(36) + Math.random().toString(36).sli
    LLM copy payloads
 ───────────────────────────────────────────── */
 const LLM = {
-  full: `# Workiom Brand Guidelines — Full Reference
+  full: `# Workiom Brand Guidelines — Complete Reference
 Version 1.0 · May 2026
+Brand guidelines: __ORIGIN__/brand-guidelines
+
+---
 
 ## About Workiom
 AI-powered work management & no-code platform.
 Tagline: "Transforming ideas into workflows"
+Website: https://workiom.com
 
-## Logo
-Primary logo: /workiom-logo.png (PNG)
-Use on white or light backgrounds. Use inverted white version on dark backgrounds.
-Clear space: equal to the logo cap-height on all sides.
-Minimum digital size: 80px wide. Preferred format: SVG.
+---
+
+## Logo Assets (direct download links)
+
+Wordmark (dark version — use on light backgrounds):
+  PNG: __ORIGIN__/workiom-logo.png
+  Usage: Place on white (#FFFFFF) or light gray (#F7F7F7) backgrounds
+
+Wordmark (white version — use on dark backgrounds):
+  Same file, apply CSS filter: brightness(0) invert(1)
+  Or use on the brand gradient / dark backgrounds
+
+Icon / Mark only:
+  PNG: __ORIGIN__/api/file/r2/6a3e9a4e0007fdbc5842/icon.png
+
+To embed in HTML:
+  <!-- Dark wordmark on light bg -->
+  <img src="__ORIGIN__/workiom-logo.png" alt="Workiom" height="32" />
+
+  <!-- White wordmark on dark bg -->
+  <img src="__ORIGIN__/workiom-logo.png" alt="Workiom" height="32" style="filter: brightness(0) invert(1);" />
+
+  <!-- Icon mark -->
+  <img src="__ORIGIN__/api/file/r2/6a3e9a4e0007fdbc5842/icon.png" alt="Workiom" width="32" height="32" />
 
 Logo DO's:
-✓ Use on a clean white or light (#F7F7F7) background
-✓ Use inverted (white) version on dark or gradient backgrounds
-✓ Maintain correct proportions at all times
-✓ Keep ample clear space on all sides
+  ✓ Use on white (#FFFFFF) or light (#F7F7F7) backgrounds
+  ✓ Use white/inverted version on dark or gradient backgrounds
+  ✓ Maintain original aspect ratio at all times
+  ✓ Keep clear space equal to the cap-height on all four sides
 
 Logo DON'Ts:
-✕ Never stretch the logo horizontally
-✕ Never skew or warp the logo
-✕ Never squish or compress the logo
-✕ Never tilt or rotate the logo
-✕ Never mirror or flip the logo
-✕ Never add glow, shadows, outlines, or special effects
-✕ Never place on a patterned background
-✕ Never use a textured background
-✕ Never place on a photo or colorful background
-✕ Never use a clashing or unbranded colored background
-✕ Never add a keyline or stroke around the logo
-✕ Never alter or change the brand colors
+  ✕ Never stretch, squish, skew, rotate, or mirror the logo
+  ✕ Never add glow, drop-shadows, outlines, or filters
+  ✕ Never place on patterned, textured, or photo backgrounds
+  ✕ Never use on clashing or unbranded colored backgrounds
+  ✕ Never add a keyline/stroke around the logo
+  ✕ Never recolor or alter the brand colors
 
-## Typography
-Latin/English — General Sans:
-  Light (300): "Minimal, modern, product-focused, spacious"
-  Regular (400): "A future where every team creates the software they need"
-  Medium (500): "Build, automate, and scale operations"
-  SemiBold (600): "Transforming ideas into workflows"
-  Bold (700): "Workiom AI will do the work"
-
-Arabic — IBM Plex Sans Arabic (Light, Regular, Medium, SemiBold, Bold)
-  Direction: RTL · Use for all Arabic language content
+---
 
 ## Brand Colors
-Workiom Purple  #9635F0  RGB(150, 53, 240)   — primary brand color
-Blue            #3C84FD  RGB(60, 132, 253)   — CTAs, links, interactive
-Dark Purple     #360C73  RGB(54, 12, 115)    — deep backgrounds
-Violet          #8201AD  RGB(130, 1, 173)    — gradient midpoint
-Yellow          #FDBC0B  RGB(253, 188, 11)   — accent / highlight
-Light Gray      #D9D9D9  RGB(217, 217, 217)  — borders, disabled states
-Black           #000000  RGB(0, 0, 0)        — body text
-White           #FFFFFF  RGB(255, 255, 255)  — backgrounds
 
-Primary gradient: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
-Dark header gradient: linear-gradient(135deg, #231F61 0%, #360C73 100%)`,
+CSS custom properties (paste into :root):
+  --color-purple:      #9635F0;  /* rgb(150, 53, 240)  — primary brand color */
+  --color-blue:        #3C84FD;  /* rgb(60, 132, 253)  — CTAs, links, interactive */
+  --color-dark-purple: #360C73;  /* rgb(54, 12, 115)   — deep backgrounds */
+  --color-violet:      #8201AD;  /* rgb(130, 1, 173)   — gradient midpoint */
+  --color-yellow:      #FDBC0B;  /* rgb(253, 188, 11)  — accent / highlight */
+  --color-gray:        #D9D9D9;  /* rgb(217, 217, 217) — borders, disabled */
+  --color-near-black:  #231F61;  /* rgb(35, 31, 97)    — darkest backgrounds */
+
+Gradients (CSS):
+  /* Primary brand gradient */
+  background: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%);
+
+  /* Dark header / hero gradient */
+  background: linear-gradient(135deg, #231F61 0%, #360C73 100%);
+
+  /* Blue-to-purple */
+  background: linear-gradient(135deg, #3C84FD 0%, #9635F0 100%);
+
+---
+
+## Typography
+
+Latin / English — General Sans (commercial, available at https://www.fontshare.com/fonts/general-sans)
+  CSS font-family: 'General Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+  Weights: 300 (Light) · 400 (Regular) · 500 (Medium) · 600 (SemiBold) · 700 (Bold)
+
+  Weight usage:
+    700 Bold     — Hero headlines, primary CTAs
+    600 SemiBold — Section titles, card headers
+    500 Medium   — Navigation, labels, UI elements
+    400 Regular  — Body text, descriptions
+    300 Light    — Captions, fine print
+
+Arabic — IBM Plex Sans Arabic (free, Google Fonts)
+  Import: @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+  CSS font-family: 'IBM Plex Sans Arabic', sans-serif;
+  Direction: RTL — always wrap Arabic content in dir="rtl"
+  Weights: 300 · 400 · 500 · 600 · 700`,
 
   logo: `# Workiom Logo Guidelines
+Source: __ORIGIN__/brand-guidelines
 
-Primary logo file: /workiom-logo.png
+## Direct Asset Links
+
+Wordmark PNG (use on light backgrounds):
+  __ORIGIN__/workiom-logo.png
+
+Wordmark white (use on dark backgrounds — same file, invert with CSS):
+  filter: brightness(0) invert(1);
+
+Icon / Mark only:
+  __ORIGIN__/api/file/r2/6a3e9a4e0007fdbc5842/icon.png
+
+## HTML Snippets
+
+<!-- Light background -->
+<img src="__ORIGIN__/workiom-logo.png" alt="Workiom" height="32" />
+
+<!-- Dark / gradient background -->
+<img src="__ORIGIN__/workiom-logo.png" alt="Workiom" height="32" style="filter: brightness(0) invert(1);" />
+
+<!-- Icon mark -->
+<img src="__ORIGIN__/api/file/r2/6a3e9a4e0007fdbc5842/icon.png" alt="Workiom" width="32" height="32" />
+
+## Background Compatibility
+
+Light bg:  #FFFFFF or #F7F7F7 — use logo as-is
+Dark bg:   Gradient (linear-gradient(135deg, #231F61 0%, #360C73 100%)) — use inverted (white) version
 
 ## DO's
-✓ Use on a clean white or light background (#F7F7F7 or similar)
-✓ Use inverted white version (CSS: brightness(0) invert(1)) on dark or gradient backgrounds
-✓ Maintain correct proportions — never alter the aspect ratio
-✓ Keep clear space equal to the logo cap-height on all four sides
-✓ Use SVG format for digital; high-res PNG for print
+  ✓ Maintain original aspect ratio — never alter width/height independently
+  ✓ Keep clear space equal to the logo cap-height on all four sides
+  ✓ Use SVG or high-res PNG; minimum digital width 80px
 
 ## DON'Ts
-✕ Never stretch the logo horizontally
-✕ Never skew or warp the logo
-✕ Never squish or compress the logo
-✕ Never tilt or rotate the logo
-✕ Never mirror or flip the logo
-✕ Never add glow, drop-shadows, outlines, or any visual effects
-✕ Never place on a patterned or repeating background
-✕ Never place on a textured background
-✕ Never place on a photo or colorful gradient background
-✕ Never use on a clashing or unbranded colored background
-✕ Never add a keyline or stroke border around the logo
-✕ Never alter, recolor, or change the brand colors in any way`,
+  ✕ Never stretch, squish, skew, tilt, or mirror the logo
+  ✕ Never add glow, drop-shadows, outlines, strokes, or any visual effects
+  ✕ Never place on patterned, textured, or photo backgrounds
+  ✕ Never use on a clashing or unbranded colored background
+  ✕ Never add a keyline/stroke border
+  ✕ Never recolor, hue-shift, or alter the brand colors`,
 
   typography: `# Workiom Typography Guidelines
+Source: __ORIGIN__/brand-guidelines
 
 ## Latin / English — General Sans
-Light (300): "Minimal, modern, product-focused, spacious"
-Regular (400): "A future where every team creates the software they need"
-Medium (500): "Build, automate, and scale operations"
-SemiBold (600): "Transforming ideas into workflows"
-Bold (700): "Workiom AI will do the work"
+Download / info: https://www.fontshare.com/fonts/general-sans
+CSS: font-family: 'General Sans', -apple-system, BlinkMacSystemFont, sans-serif;
 
-Use General Sans for all Latin/English text across digital products, marketing, and print.
+Weights & usage:
+  700 Bold     — "Workiom AI will do the work"              → hero headlines, primary CTAs
+  600 SemiBold — "Transforming ideas into workflows"         → section titles, card headers
+  500 Medium   — "Build, automate, and scale operations"    → navigation, labels, UI
+  400 Regular  — "A future where every team creates..."     → body copy, descriptions
+  300 Light    — "Minimal, modern, product-focused"         → captions, fine print
+
+Web font import (if using Fontshare CDN):
+  <link href="https://api.fontshare.com/v2/css?f[]=general-sans@700,600,500,400,300&display=swap" rel="stylesheet">
 
 ## Arabic — IBM Plex Sans Arabic
-Weights: Light · Regular · Medium · SemiBold · Bold
-Direction: RTL (right-to-left)
-Sample (Bold 700): "استفد الآن من ميزات الذكاء الاصطناعي"
-Sample (Medium 500): "أنشئ سير العمل وأتمتها بسهولة تامة"
-Sample (Regular 400): "منصة عمل ذكية وقابلة للتخصيص لكل فريق"
+Google Fonts: https://fonts.google.com/specimen/IBM+Plex+Sans+Arabic
 
-Use IBM Plex Sans Arabic for all Arabic language content across all Workiom surfaces.`,
+CSS import:
+  @import url('https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+Arabic:wght@300;400;500;600;700&display=swap');
+
+CSS usage:
+  font-family: 'IBM Plex Sans Arabic', sans-serif;
+  direction: rtl;
+
+Weights: 300 (Light) · 400 (Regular) · 500 (Medium) · 600 (SemiBold) · 700 (Bold)
+Always use dir="rtl" on Arabic containers.`,
 
   colors: `# Workiom Brand Colors
+Source: __ORIGIN__/brand-guidelines
 
-Primary gradient: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
-Dark header gradient: linear-gradient(135deg, #231F61 0%, #360C73 100%)
+## CSS Custom Properties (paste into :root {})
+  --workiom-purple:      #9635F0;  /* rgb(150, 53, 240)  PRIMARY */
+  --workiom-blue:        #3C84FD;  /* rgb(60, 132, 253)  CTAs / interactive */
+  --workiom-dark-purple: #360C73;  /* rgb(54, 12, 115)   dark backgrounds */
+  --workiom-violet:      #8201AD;  /* rgb(130, 1, 173)   gradient midpoint */
+  --workiom-yellow:      #FDBC0B;  /* rgb(253, 188, 11)  accent / highlight */
+  --workiom-gray:        #D9D9D9;  /* rgb(217, 217, 217) borders / disabled */
+  --workiom-near-black:  #231F61;  /* rgb(35, 31, 97)    darkest backgrounds */
 
-Color palette:
-  Workiom Purple  #9635F0  RGB(150, 53, 240)   — primary brand color
-  Blue            #3C84FD  RGB(60, 132, 253)   — CTAs, links, interactive elements
-  Dark Purple     #360C73  RGB(54, 12, 115)    — deep dark backgrounds
-  Violet          #8201AD  RGB(130, 1, 173)    — gradient midpoint / accent
-  Yellow          #FDBC0B  RGB(253, 188, 11)   — highlight / accent color
-  Light Gray      #D9D9D9  RGB(217, 217, 217)  — borders, dividers, disabled states
-  Black           #000000  RGB(0, 0, 0)        — body text, high-contrast elements
-  White           #FFFFFF  RGB(255, 255, 255)  — backgrounds, inverted logo
+## Gradients (CSS)
+  /* Primary brand gradient — use for hero sections, CTAs, banners */
+  background: linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%);
 
-Usage notes:
-  • Workiom Purple (#9635F0) is the primary brand identity color
-  • Blue (#3C84FD) is used for interactive elements, CTAs, and links
-  • Yellow (#FDBC0B) is used sparingly as an accent/highlight only
-  • Do not introduce off-brand colors in Workiom materials`,
+  /* Dark header gradient — nav bars, dark hero sections */
+  background: linear-gradient(135deg, #231F61 0%, #360C73 100%);
+
+  /* Blue-to-purple — buttons, highlights */
+  background: linear-gradient(135deg, #3C84FD 0%, #9635F0 100%);
+
+## Palette
+  Name            Hex       RGB                  Role
+  Workiom Purple  #9635F0   rgb(150, 53, 240)    Primary brand identity color
+  Blue            #3C84FD   rgb(60, 132, 253)    CTAs, links, interactive elements
+  Dark Purple     #360C73   rgb(54, 12, 115)     Deep dark backgrounds
+  Violet          #8201AD   rgb(130, 1, 173)     Gradient midpoint / accent
+  Yellow          #FDBC0B   rgb(253, 188, 11)    Accent / highlight (use sparingly)
+  Light Gray      #D9D9D9   rgb(217, 217, 217)   Borders, dividers, disabled states
+  Near Black      #231F61   rgb(35, 31, 97)      Darkest UI backgrounds
+  Black           #000000   rgb(0, 0, 0)         Body text
+  White           #FFFFFF   rgb(255, 255, 255)   Backgrounds, inverted logo
+
+## Usage Rules
+  • #9635F0 (Purple) is the single most important brand color — anchor every design to it
+  • #3C84FD (Blue) is for interactive/action elements only — not decorative
+  • #FDBC0B (Yellow) is a highlight only — never dominant
+  • Never introduce off-brand colors in Workiom materials`,
 };
 
 /* ─────────────────────────────────────────────
@@ -182,7 +266,8 @@ Usage notes:
 function CopyLLMButton({ text, className }: { text: string; className?: string }) {
   const [copied, setCopied] = useState(false);
   async function handleCopy() {
-    const full = `Source: ${window.location.href}\n\n${text}`;
+    const resolved = text.replaceAll('__ORIGIN__', window.location.origin);
+    const full = `Source: ${window.location.href}\n\n${resolved}`;
     try { await navigator.clipboard.writeText(full); setCopied(true); setTimeout(() => setCopied(false), 2000); } catch {}
   }
   return (
