@@ -49,7 +49,7 @@ export async function GET(
     return new Response(file.body, {
       headers: {
         'Content-Type': contentType,
-        'Cache-Control': 'public, max-age=31536000, immutable',
+        'Cache-Control': 'public, max-age=86400',
         'X-Content-Type-Options': 'nosniff',
       },
     });
@@ -81,7 +81,7 @@ export async function GET(
   return new Response(res.body, {
     headers: {
       'Content-Type': contentType,
-      'Cache-Control': 'public, max-age=31536000, immutable',
+      'Cache-Control': 'public, max-age=86400',
       'X-Content-Type-Options': 'nosniff',
     },
   });

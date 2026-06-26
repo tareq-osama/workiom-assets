@@ -28,5 +28,6 @@ export function createAdminClient() {
 // fixes SVG display (same-origin, admin key used server-side).
 export function getFileViewUrl(fileId: string): string {
   // fileId is either "r2/{key}" (Cloudflare R2) or a bare Appwrite file ID
-  return `/api/file/${fileId}`;
+  // ?v=2 busts any browser-cached responses that had wrong Content-Type headers
+  return `/api/file/${fileId}?v=2`;
 }
