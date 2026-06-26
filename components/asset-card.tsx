@@ -70,8 +70,15 @@ const iconBtnBase =
 export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
-  const previewUrl = imgError ? undefined : (asset.thumbnailUrl ?? (asset.formats.some(isImageFormat) ? asset.fileUrl : undefined));
-  const primaryFormat = asset.formats[0];
+  const [currentAsset, setCurrentAsset] = useState(asset);
+  const [isDeleted, setIsDeleted] = useState(false);
+
+  const previewUrl = imgError
+    ? undefined
+    : (currentAsset.thumbnailUrl ?? (currentAsset.formats.some(isImageFormat) ? currentAsset.fileUrl : undefined));
+  const primaryFormat = currentAsset.formats[0];
+
+  if (isDeleted) return null;
 
   if (viewMode === 'list') {
     return (
@@ -85,7 +92,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             {previewUrl ? (
               <Image
                 src={previewUrl}
-                alt={asset.name}
+                alt={currentAsset.name}
                 width={64}
                 height={64}
                 className="w-full h-full object-contain"
@@ -99,14 +106,14 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
 
           {/* Info */}
           <div className="flex-1 min-w-0">
-            <h3 className="font-medium text-slate-900 truncate">{asset.name}</h3>
+            <h3 className="font-medium text-slate-900 truncate">{currentAsset.name}</h3>
             <div className="flex items-center gap-2 mt-1 flex-wrap">
-              <span className="text-xs text-slate-500">{asset.category}</span>
-              {asset.formats.length > 0 && (
+              <span className="text-xs text-slate-500">{currentAsset.category}</span>
+              {currentAsset.formats.length > 0 && (
                 <>
                   <span className="text-slate-300">•</span>
                   <div className="flex gap-1">
-                    {asset.formats.map((fmt) => (
+                    {currentAsset.formats.map((fmt) => (
                       <Badge
                         key={fmt}
                         variant="outline"
@@ -118,25 +125,25 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
                   </div>
                 </>
               )}
-              {asset.fileSize > 0 && (
-                <span className="text-xs text-slate-400">{formatFileSize(asset.fileSize)}</span>
+              {currentAsset.fileSize > 0 && (
+                <span className="text-xs text-slate-400">{formatFileSize(currentAsset.fileSize)}</span>
               )}
             </div>
           </div>
 
           {/* Status */}
-          <StatusBadge status={asset.status} />
+          <StatusBadge status={currentAsset.status} />
 
           {/* Quick actions */}
           <div
             className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity"
             onClick={(e) => e.stopPropagation()}
           >
-            {asset.formats.map((fmt) => (
+            {currentAsset.formats.map((fmt) => (
               <Tooltip key={fmt}>
                 <TooltipTrigger
                   className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md', FORMAT_COLORS[fmt])}
-                  onClick={(e) => downloadFormat(asset, fmt, e)}
+                  onClick={(e) => downloadFormat(currentAsset, fmt, e)}
                 >
                   <Download className="h-3 w-3 mr-1" />
                   {fmt}
@@ -147,7 +154,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             <Tooltip>
               <TooltipTrigger
                 className={cn(iconBtnBase, 'h-8 w-8 text-slate-500 hover:text-slate-900 hover:bg-slate-100')}
-                onClick={(e) => handleCopyLink(asset, e)}
+                onClick={(e) => handleCopyLink(currentAsset, e)}
               >
                 <Link2 className="h-4 w-4" />
               </TooltipTrigger>
@@ -156,7 +163,13 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
           </div>
         </div>
 
-        <AssetPreviewDialog asset={asset} open={dialogOpen} onOpenChange={setDialogOpen} />
+        <AssetPreviewDialog
+          asset={currentAsset}
+          open={dialogOpen}
+          onOpenChange={setDialogOpen}
+          onAssetUpdated={(updated) => setCurrentAsset(updated)}
+          onAssetDeleted={() => setIsDeleted(true)}
+        />
       </>
     );
   }
@@ -173,7 +186,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
           {previewUrl ? (
             <Image
               src={previewUrl}
-              alt={asset.name}
+              alt={currentAsset.name}
               fill
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-contain p-4"
@@ -191,14 +204,14 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
 
           {/* Hover overlay */}
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
-            {asset.formats.map((fmt) => (
+            {currentAsset.formats.map((fmt) => (
               <Tooltip key={fmt}>
                 <TooltipTrigger
                   className={cn(
                     'h-9 px-3 text-xs font-semibold rounded-md flex items-center gap-1.5 transition-colors cursor-pointer',
                     FORMAT_COLORS[fmt]
                   )}
-                  onClick={(e) => downloadFormat(asset, fmt, e)}
+                  onClick={(e) => downloadFormat(currentAsset, fmt, e)}
                 >
                   <Download className="h-3.5 w-3.5" />
                   {fmt}
@@ -209,7 +222,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
             <Tooltip>
               <TooltipTrigger
                 className={cn(iconBtnBase, 'h-9 w-9 bg-white text-slate-900 hover:bg-slate-100 rounded-md')}
-                onClick={(e) => handleCopyLink(asset, e)}
+                onClick={(e) => handleCopyLink(currentAsset, e)}
               >
                 <Link2 className="h-4 w-4" />
               </TooltipTrigger>
@@ -221,11 +234,11 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
         {/* Card footer */}
         <div className="p-3">
           <h3 className="font-medium text-sm text-slate-900 truncate leading-snug mb-1.5">
-            {asset.name}
+            {currentAsset.name}
           </h3>
           <div className="flex items-center gap-1.5 flex-wrap">
-            <span className="text-xs text-slate-500 truncate flex-1 min-w-0">{asset.category}</span>
-            {asset.formats.map((fmt) => (
+            <span className="text-xs text-slate-500 truncate flex-1 min-w-0">{currentAsset.category}</span>
+            {currentAsset.formats.map((fmt) => (
               <Badge
                 key={fmt}
                 variant="outline"
@@ -238,7 +251,13 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
         </div>
       </div>
 
-      <AssetPreviewDialog asset={asset} open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AssetPreviewDialog
+        asset={currentAsset}
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        onAssetUpdated={(updated) => setCurrentAsset(updated)}
+        onAssetDeleted={() => setIsDeleted(true)}
+      />
     </>
   );
 }

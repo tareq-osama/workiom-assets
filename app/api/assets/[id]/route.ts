@@ -1,5 +1,14 @@
 import { NextRequest } from 'next/server';
+import { cookies } from 'next/headers';
 import { getAsset, updateAsset, deleteAsset } from '@/lib/appwrite-assets';
+import { verifyToken } from '@/lib/auth';
+
+async function getAuthUser() {
+  const cookieStore = await cookies();
+  const token = cookieStore.get('auth-token')?.value;
+  if (!token) return null;
+  return verifyToken(token);
+}
 
 export async function GET(
   _req: NextRequest,
@@ -27,6 +36,11 @@ export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const user = await getAuthUser();
+  if (!user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const body = await request.json();
@@ -48,6 +62,11 @@ export async function DELETE(
   _req: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
+  const user = await getAuthUser();
+  if (!user) {
+    return Response.json({ error: 'Unauthorized' }, { status: 401 });
+  }
+
   try {
     const { id } = await params;
     const success = await deleteAsset(id);

@@ -2,10 +2,10 @@
 
 import Image from 'next/image';
 import Link from 'next/link';
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
   Download, ExternalLink, FileImage, Link2, Check, TrendingDown, Tag, User,
-  Pencil, Trash2, ChevronDown, Loader2, AlertTriangle, X,
+  Pencil, Trash2, ChevronDown, Loader2, AlertTriangle, X, CloudUpload,
 } from 'lucide-react';
 import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
@@ -51,10 +51,25 @@ interface EditFormState {
   deprecationReason: string;
 }
 
+interface EditFormatSlot {
+  format: AssetFormat;
+  file: File | null;
+  previewUrl: string | null;
+  existingFileId: string | undefined;
+  existingUrl: string | undefined;
+  removed: boolean;
+}
+
 function getFormatUrl(asset: Asset, format: AssetFormat): string | undefined {
   if (format === 'SVG') return asset.svgUrl;
   if (format === 'PNG') return asset.pngUrl;
   if (format === 'JPG') return asset.jpgUrl;
+}
+
+function formatFileSize(bytes: number): string {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
 }
 
 async function triggerDownload(url: string, name: string, format: AssetFormat) {
@@ -80,10 +95,22 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
 };
 
+const FORMAT_BADGE: Record<AssetFormat, string> = {
+  SVG: 'border-violet-200 bg-violet-50 text-violet-700',
+  PNG: 'border-blue-200 bg-blue-50 text-blue-700',
+  JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+};
+
 const FORMAT_DOT: Record<AssetFormat, string> = {
   SVG: 'bg-violet-500',
   PNG: 'bg-blue-500',
   JPG: 'bg-emerald-500',
+};
+
+const FORMAT_ACCEPT: Record<AssetFormat, string> = {
+  SVG: '.svg,image/svg+xml',
+  PNG: '.png,image/png',
+  JPG: '.jpg,.jpeg,image/jpeg',
 };
 
 function CopyLinkButton({ value }: { value: string }) {
@@ -118,14 +145,30 @@ export default function AssetPreviewDialog({
   const [localAsset, setLocalAsset] = useState<Asset | null>(asset);
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
+  const [editSlots, setEditSlots] = useState<EditFormatSlot[]>([]);
+  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
   const [saving, setSaving] = useState(false);
+  const [saveError, setSaveError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
   const [deleting, setDeleting] = useState(false);
+
+  const svgInputRef = useRef<HTMLInputElement>(null);
+  const pngInputRef = useRef<HTMLInputElement>(null);
+  const jpgInputRef = useRef<HTMLInputElement>(null);
+  const formatRefs: Record<AssetFormat, React.RefObject<HTMLInputElement | null>> = {
+    SVG: svgInputRef,
+    PNG: pngInputRef,
+    JPG: jpgInputRef,
+  };
 
   useEffect(() => {
     fetch('/api/auth/me')
       .then((r) => (r.ok ? r.json() : null))
       .then((d) => setCurrentUser(d?.user ?? null))
+      .catch(() => {});
+    fetch('/api/categories')
+      .then((r) => r.json())
+      .then((d) => setCategories(d.categories ?? []))
       .catch(() => {});
   }, []);
 
@@ -134,6 +177,8 @@ export default function AssetPreviewDialog({
     setEditMode(false);
     setConfirmDelete(false);
     setEditForm(null);
+    setEditSlots([]);
+    setSaveError('');
   }, [asset]);
 
   if (!localAsset) return null;
@@ -153,14 +198,87 @@ export default function AssetPreviewDialog({
       owner: localAsset!.owner,
       deprecationReason: localAsset!.deprecationReason ?? '',
     });
+    setEditSlots([
+      { format: 'SVG', file: null, previewUrl: null, existingFileId: localAsset!.svgFileId, existingUrl: localAsset!.svgUrl, removed: false },
+      { format: 'PNG', file: null, previewUrl: null, existingFileId: localAsset!.pngFileId, existingUrl: localAsset!.pngUrl, removed: false },
+      { format: 'JPG', file: null, previewUrl: null, existingFileId: localAsset!.jpgFileId, existingUrl: localAsset!.jpgUrl, removed: false },
+    ]);
+    setSaveError('');
     setEditMode(true);
     setConfirmDelete(false);
+  }
+
+  const handleSlotFile = useCallback((format: AssetFormat, file: File) => {
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const isImg = file.type.startsWith('image/') || ['svg', 'png', 'jpg', 'jpeg'].includes(ext);
+    const previewUrl = isImg ? URL.createObjectURL(file) : null;
+    setEditSlots((prev) =>
+      prev.map((s) => {
+        if (s.format !== format) return s;
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return { ...s, file, previewUrl, removed: false };
+      })
+    );
+  }, []);
+
+  function handleSlotRemoveNew(format: AssetFormat) {
+    setEditSlots((prev) =>
+      prev.map((s) => {
+        if (s.format !== format) return s;
+        if (s.previewUrl) URL.revokeObjectURL(s.previewUrl);
+        return { ...s, file: null, previewUrl: null };
+      })
+    );
+  }
+
+  function handleSlotRemoveExisting(format: AssetFormat) {
+    setEditSlots((prev) =>
+      prev.map((s) => s.format !== format ? s : { ...s, removed: true, file: null, previewUrl: null })
+    );
+  }
+
+  function handleSlotRestore(format: AssetFormat) {
+    setEditSlots((prev) =>
+      prev.map((s) => s.format !== format ? s : { ...s, removed: false })
+    );
+  }
+
+  async function uploadSlotFile(slot: EditFormatSlot): Promise<string> {
+    if (!slot.file) throw new Error('No file');
+    const form = new FormData();
+    form.append('file', slot.file, slot.file.name);
+    const res = await fetch('/api/upload', { method: 'POST', body: form });
+    if (!res.ok) throw new Error(`Failed to upload ${slot.format}`);
+    const { fileId } = await res.json();
+    return fileId as string;
   }
 
   async function handleSave() {
     if (!editForm || !localAsset) return;
     setSaving(true);
+    setSaveError('');
     try {
+      // Resolve each format's fileId: upload new → keep existing → clear if removed
+      const slotMap = Object.fromEntries(editSlots.map((s) => [s.format, s])) as Record<AssetFormat, EditFormatSlot>;
+
+      const resolveFileId = async (fmt: AssetFormat, existing: string | undefined): Promise<string> => {
+        const s = slotMap[fmt];
+        if (s.removed) return '';
+        if (s.file) return uploadSlotFile(s);
+        return existing ?? '';
+      };
+
+      const [svgFileId, pngFileId, jpgFileId] = await Promise.all([
+        resolveFileId('SVG', localAsset.svgFileId),
+        resolveFileId('PNG', localAsset.pngFileId),
+        resolveFileId('JPG', localAsset.jpgFileId),
+      ]);
+
+      const formats: AssetFormat[] = [];
+      if (svgFileId) formats.push('SVG');
+      if (pngFileId) formats.push('PNG');
+      if (jpgFileId) formats.push('JPG');
+
       const body = {
         name: editForm.name.trim(),
         description: editForm.description.trim() || undefined,
@@ -170,7 +288,12 @@ export default function AssetPreviewDialog({
         owner: editForm.owner.trim(),
         deprecationReason:
           editForm.status === 'Deprecated' ? (editForm.deprecationReason.trim() || undefined) : undefined,
+        svgFileId,
+        pngFileId,
+        jpgFileId,
+        formats,
       };
+
       const res = await fetch(`/api/assets/${localAsset.id}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
@@ -181,9 +304,10 @@ export default function AssetPreviewDialog({
       setLocalAsset(updated);
       setEditMode(false);
       setEditForm(null);
+      setEditSlots([]);
       onAssetUpdated?.(updated);
-    } catch {
-      // TODO: surface error to user
+    } catch (err) {
+      setSaveError(err instanceof Error ? err.message : 'Save failed. Please try again.');
     } finally {
       setSaving(false);
     }
@@ -212,7 +336,7 @@ export default function AssetPreviewDialog({
     >
       <DialogContent
         showCloseButton={false}
-        className="!max-w-[92vw] w-[1400px] h-[88vh] p-0 overflow-hidden bg-white rounded-2xl shadow-2xl ring-0 flex flex-col gap-0 relative"
+        className="!max-w-[92vw] w-[1400px] h-[88vh] p-0 overflow-hidden bg-white rounded-2xl shadow-2xl ring-0 flex flex-col gap-0"
       >
         <DialogTitle className="sr-only">{localAsset.name}</DialogTitle>
 
@@ -404,105 +528,237 @@ export default function AssetPreviewDialog({
                   </button>
                 </div>
 
-                <div className="flex-1 overflow-y-auto p-5 space-y-4">
+                <div className="flex-1 overflow-y-auto p-5 space-y-5">
+
+                  {/* FILE SLOTS */}
                   <div>
-                    <Label htmlFor="edit-name" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Name
-                    </Label>
-                    <Input
-                      id="edit-name"
-                      value={editForm.name}
-                      onChange={(e) => setEditForm((f) => f ? { ...f, name: e.target.value } : f)}
-                      className="h-9 text-sm"
-                      required
-                    />
+                    <p className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">Files</p>
+                    <div className="space-y-3">
+                      {editSlots.map((slot) => (
+                        <div key={slot.format} className="space-y-1.5">
+                          <div className="flex items-center gap-1.5">
+                            <Badge variant="outline" className={`text-xs font-semibold px-1.5 py-0 ${FORMAT_BADGE[slot.format]}`}>
+                              {slot.format}
+                            </Badge>
+                            <span className="text-xs text-slate-400">
+                              {slot.format === 'SVG' ? 'Required' : 'Optional'}
+                            </span>
+                          </div>
+
+                          {slot.removed ? (
+                            /* Removed state */
+                            <div className="flex items-center justify-between px-3 py-2 rounded-lg bg-red-50 border border-red-100">
+                              <span className="text-xs text-red-500 line-through">Removed</span>
+                              <button
+                                type="button"
+                                onClick={() => handleSlotRestore(slot.format)}
+                                className="text-xs text-slate-600 hover:text-slate-900 font-medium"
+                              >
+                                Restore
+                              </button>
+                            </div>
+                          ) : slot.file ? (
+                            /* New file queued */
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-emerald-50 border border-emerald-100">
+                              {slot.previewUrl ? (
+                                <div className="w-8 h-8 flex-shrink-0 rounded overflow-hidden border border-emerald-200 bg-white flex items-center justify-center">
+                                  <Image src={slot.previewUrl} alt={slot.format} width={32} height={32} className="w-full h-full object-contain" unoptimized />
+                                </div>
+                              ) : (
+                                <FileImage className="h-4 w-4 text-emerald-600 flex-shrink-0" />
+                              )}
+                              <div className="flex-1 min-w-0">
+                                <p className="text-xs font-medium text-emerald-800 truncate">{slot.file.name}</p>
+                                <p className="text-xs text-emerald-600">{formatFileSize(slot.file.size)}</p>
+                              </div>
+                              <button
+                                type="button"
+                                onClick={() => handleSlotRemoveNew(slot.format)}
+                                className="h-5 w-5 flex-shrink-0 flex items-center justify-center rounded text-emerald-500 hover:text-red-500 hover:bg-red-50 transition-colors"
+                              >
+                                <X className="h-3 w-3" />
+                              </button>
+                            </div>
+                          ) : slot.existingFileId ? (
+                            /* Existing file */
+                            <div className="flex items-center gap-2 px-3 py-2 rounded-lg bg-slate-50 border border-slate-200">
+                              {slot.existingUrl ? (
+                                <div className="w-8 h-8 flex-shrink-0 rounded overflow-hidden border border-slate-200 bg-white flex items-center justify-center">
+                                  <Image src={slot.existingUrl} alt={slot.format} width={32} height={32} className="w-full h-full object-contain" unoptimized />
+                                </div>
+                              ) : (
+                                <FileImage className="h-4 w-4 text-slate-400 flex-shrink-0" />
+                              )}
+                              <span className="flex-1 text-xs text-slate-600 font-medium">Current file</span>
+                              <div className="flex items-center gap-1">
+                                <button
+                                  type="button"
+                                  onClick={() => formatRefs[slot.format].current?.click()}
+                                  className="text-xs text-blue-600 hover:text-blue-800 font-medium"
+                                >
+                                  Replace
+                                </button>
+                                <span className="text-slate-300">·</span>
+                                <button
+                                  type="button"
+                                  onClick={() => handleSlotRemoveExisting(slot.format)}
+                                  className="text-xs text-red-500 hover:text-red-700 font-medium"
+                                >
+                                  Remove
+                                </button>
+                              </div>
+                            </div>
+                          ) : (
+                            /* Empty — drop zone */
+                            <div
+                              className="border-2 border-dashed border-slate-200 hover:border-slate-300 rounded-lg p-4 text-center cursor-pointer transition-colors hover:bg-slate-50"
+                              onClick={() => formatRefs[slot.format].current?.click()}
+                              role="button"
+                              tabIndex={0}
+                              onKeyDown={(e) => e.key === 'Enter' && formatRefs[slot.format].current?.click()}
+                            >
+                              <CloudUpload className="h-5 w-5 text-slate-300 mx-auto mb-1" />
+                              <p className="text-xs text-slate-400">
+                                Drop {slot.format} or <span className="text-blue-600 font-medium">browse</span>
+                              </p>
+                            </div>
+                          )}
+
+                          <input
+                            ref={formatRefs[slot.format] as React.RefObject<HTMLInputElement>}
+                            type="file"
+                            accept={FORMAT_ACCEPT[slot.format]}
+                            className="hidden"
+                            onChange={(e) => {
+                              const file = e.target.files?.[0];
+                              if (file) handleSlotFile(slot.format, file);
+                              e.target.value = '';
+                            }}
+                          />
+                        </div>
+                      ))}
+                    </div>
                   </div>
 
-                  <div>
-                    <Label htmlFor="edit-description" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Description
-                    </Label>
-                    <Textarea
-                      id="edit-description"
-                      value={editForm.description}
-                      onChange={(e) => setEditForm((f) => f ? { ...f, description: e.target.value } : f)}
-                      className="text-sm resize-none"
-                      rows={3}
-                    />
-                  </div>
+                  <Separator />
 
-                  <div>
-                    <Label htmlFor="edit-category" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Category
-                    </Label>
-                    <Input
-                      id="edit-category"
-                      value={editForm.category}
-                      onChange={(e) => setEditForm((f) => f ? { ...f, category: e.target.value } : f)}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Status
-                    </Label>
-                    <Select
-                      value={editForm.status}
-                      onValueChange={(v) => setEditForm((f) => f ? { ...f, status: v as AssetStatus } : f)}
-                    >
-                      <SelectTrigger className="h-9 text-sm w-full">
-                        <SelectValue />
-                      </SelectTrigger>
-                      <SelectContent>
-                        <SelectItem value="Active">Active</SelectItem>
-                        <SelectItem value="Draft">Draft</SelectItem>
-                        <SelectItem value="Deprecated">Deprecated</SelectItem>
-                      </SelectContent>
-                    </Select>
-                  </div>
-
-                  {editForm.status === 'Deprecated' && (
+                  {/* METADATA FIELDS */}
+                  <div className="space-y-4">
                     <div>
-                      <Label htmlFor="edit-dep-reason" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                        Deprecation reason
+                      <Label htmlFor="edit-name" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Name
                       </Label>
-                      <Textarea
-                        id="edit-dep-reason"
-                        value={editForm.deprecationReason}
-                        onChange={(e) => setEditForm((f) => f ? { ...f, deprecationReason: e.target.value } : f)}
-                        className="text-sm resize-none"
-                        rows={2}
-                        placeholder="Why is this deprecated?"
+                      <Input
+                        id="edit-name"
+                        value={editForm.name}
+                        onChange={(e) => setEditForm((f) => f ? { ...f, name: e.target.value } : f)}
+                        className="h-9 text-sm"
+                        required
                       />
                     </div>
+
+                    <div>
+                      <Label htmlFor="edit-description" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Description
+                      </Label>
+                      <Textarea
+                        id="edit-description"
+                        value={editForm.description}
+                        onChange={(e) => setEditForm((f) => f ? { ...f, description: e.target.value } : f)}
+                        className="text-sm resize-none"
+                        rows={3}
+                      />
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Category
+                      </Label>
+                      <Select
+                        value={editForm.category}
+                        onValueChange={(v) => setEditForm((f) => f ? { ...f, category: v } : f)}
+                      >
+                        <SelectTrigger className="h-9 text-sm w-full">
+                          <SelectValue placeholder="Select category" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {categories.map((cat) => (
+                            <SelectItem key={cat.id} value={cat.name}>
+                              {cat.name}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Status
+                      </Label>
+                      <Select
+                        value={editForm.status}
+                        onValueChange={(v) => setEditForm((f) => f ? { ...f, status: v as AssetStatus } : f)}
+                      >
+                        <SelectTrigger className="h-9 text-sm w-full">
+                          <SelectValue />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="Active">Active</SelectItem>
+                          <SelectItem value="Draft">Draft</SelectItem>
+                          <SelectItem value="Deprecated">Deprecated</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+
+                    {editForm.status === 'Deprecated' && (
+                      <div>
+                        <Label htmlFor="edit-dep-reason" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                          Deprecation reason
+                        </Label>
+                        <Textarea
+                          id="edit-dep-reason"
+                          value={editForm.deprecationReason}
+                          onChange={(e) => setEditForm((f) => f ? { ...f, deprecationReason: e.target.value } : f)}
+                          className="text-sm resize-none"
+                          rows={2}
+                          placeholder="Why is this deprecated?"
+                        />
+                      </div>
+                    )}
+
+                    <div>
+                      <Label htmlFor="edit-owner" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Owner
+                      </Label>
+                      <Input
+                        id="edit-owner"
+                        value={editForm.owner}
+                        onChange={(e) => setEditForm((f) => f ? { ...f, owner: e.target.value } : f)}
+                        className="h-9 text-sm"
+                      />
+                    </div>
+
+                    <div>
+                      <Label htmlFor="edit-tags" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Tags
+                      </Label>
+                      <Input
+                        id="edit-tags"
+                        value={editForm.tags}
+                        onChange={(e) => setEditForm((f) => f ? { ...f, tags: e.target.value } : f)}
+                        className="h-9 text-sm"
+                        placeholder="logo, icon, brand"
+                      />
+                      <p className="text-xs text-slate-400 mt-1">Separate tags with commas</p>
+                    </div>
+                  </div>
+
+                  {saveError && (
+                    <div className="flex items-start gap-2 p-3 bg-red-50 border border-red-100 rounded-lg text-xs text-red-700">
+                      <AlertTriangle className="h-3.5 w-3.5 flex-shrink-0 mt-0.5" />
+                      {saveError}
+                    </div>
                   )}
-
-                  <div>
-                    <Label htmlFor="edit-owner" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Owner
-                    </Label>
-                    <Input
-                      id="edit-owner"
-                      value={editForm.owner}
-                      onChange={(e) => setEditForm((f) => f ? { ...f, owner: e.target.value } : f)}
-                      className="h-9 text-sm"
-                    />
-                  </div>
-
-                  <div>
-                    <Label htmlFor="edit-tags" className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
-                      Tags
-                    </Label>
-                    <Input
-                      id="edit-tags"
-                      value={editForm.tags}
-                      onChange={(e) => setEditForm((f) => f ? { ...f, tags: e.target.value } : f)}
-                      className="h-9 text-sm"
-                      placeholder="logo, icon, brand"
-                    />
-                    <p className="text-xs text-slate-400 mt-1">Separate tags with commas</p>
-                  </div>
                 </div>
 
                 <div className="border-t border-slate-100 p-4 flex gap-2 flex-shrink-0">
