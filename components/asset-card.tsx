@@ -69,7 +69,8 @@ const iconBtnBase =
 
 export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const previewUrl = asset.thumbnailUrl ?? (asset.formats.some(isImageFormat) ? asset.fileUrl : undefined);
+  const [imgError, setImgError] = useState(false);
+  const previewUrl = imgError ? undefined : (asset.thumbnailUrl ?? (asset.formats.some(isImageFormat) ? asset.fileUrl : undefined));
   const primaryFormat = asset.formats[0];
 
   if (viewMode === 'list') {
@@ -89,6 +90,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
                 height={64}
                 className="w-full h-full object-contain"
                 unoptimized
+                onError={() => setImgError(true)}
               />
             ) : (
               <FileImage className="w-8 h-8 text-slate-300" />
@@ -176,6 +178,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
               sizes="(max-width: 640px) 50vw, (max-width: 1024px) 33vw, 25vw"
               className="object-contain p-4"
               unoptimized
+              onError={() => setImgError(true)}
             />
           ) : (
             <div className="flex flex-col items-center gap-2 text-slate-300">

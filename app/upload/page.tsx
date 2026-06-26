@@ -200,7 +200,9 @@ export default function UploadPage() {
   });
 
   const handleFileSelect = useCallback((format: AssetFormat, file: File) => {
-    const previewUrl = file.type.startsWith('image/') ? URL.createObjectURL(file) : null;
+    const ext = file.name.split('.').pop()?.toLowerCase() ?? '';
+    const isImg = file.type.startsWith('image/') || ['svg', 'png', 'jpg', 'jpeg'].includes(ext);
+    const previewUrl = isImg ? URL.createObjectURL(file) : null;
     setSlots((prev) =>
       prev.map((s) => {
         if (s.format !== format) return s;

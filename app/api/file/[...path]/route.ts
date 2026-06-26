@@ -42,10 +42,9 @@ export async function GET(
       return new Response('Not found', { status: 404 });
     }
 
-    const contentType =
-      !file.contentType || file.contentType === 'application/octet-stream'
-        ? (mimeFromKey(key) ?? file.contentType)
-        : file.contentType;
+    // Always use extension-based MIME for known image types — stored MIME may be
+    // wrong (text/xml, application/xml, empty, etc.) depending on upload source.
+    const contentType = mimeFromKey(key) ?? file.contentType;
 
     return new Response(file.body, {
       headers: {
