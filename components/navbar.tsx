@@ -88,11 +88,12 @@ export default function Navbar() {
   const pathname = usePathname();
   const router = useRouter();
 
-  if (pathname === '/brand-guidelines') return null;
   const [searchOpen, setSearchOpen] = useState(false);
   const [searchValue, setSearchValue] = useState('');
   const [mobileOpen, setMobileOpen] = useState(false);
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
+
+  if (pathname === '/brand-guidelines') return null;
 
   useEffect(() => {
     fetch('/api/auth/me')
