@@ -210,7 +210,7 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
         onClick={() => isLinkAsset ? window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer') : setDialogOpen(true)}
       >
         {/* Thumbnail area */}
-        <div className="relative aspect-square bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
+        <div className="relative aspect-video bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
           {previewUrl ? (
             <Image
               src={previewUrl}
@@ -227,14 +227,6 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
               {primaryFormat && (
                 <span className="text-xs font-medium uppercase tracking-wide">{primaryFormat}</span>
               )}
-            </div>
-          )}
-
-          {/* Link asset badge */}
-          {isLinkAsset && (
-            <div className="absolute top-2 right-2 bg-blue-500 text-white rounded-full px-1.5 py-0.5 flex items-center gap-1 text-[10px] font-medium">
-              <ExternalLink className="w-2.5 h-2.5" />
-              Link
             </div>
           )}
 
@@ -283,21 +275,15 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
           </h3>
           <div className="flex items-center gap-1.5 flex-wrap">
             <span className="text-xs text-slate-500 truncate flex-1 min-w-0">{currentAsset.category}</span>
-            {isLinkAsset ? (
-              <Badge variant="outline" className="text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 bg-blue-50 text-blue-700 border-blue-200">
-                Link
+            {!isLinkAsset && currentAsset.formats.map((fmt) => (
+              <Badge
+                key={fmt}
+                variant="outline"
+                className={`text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 ${FORMAT_COLORS[fmt]}`}
+              >
+                {fmt}
               </Badge>
-            ) : (
-              currentAsset.formats.map((fmt) => (
-                <Badge
-                  key={fmt}
-                  variant="outline"
-                  className={`text-xs px-1.5 py-0 h-4 leading-none flex-shrink-0 ${FORMAT_COLORS[fmt]}`}
-                >
-                  {fmt}
-                </Badge>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </div>
