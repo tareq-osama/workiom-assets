@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
-import { Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart } from 'lucide-react';
+import { Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart, Pencil, Upload, Loader2, Plus, Minus, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -15,8 +15,27 @@ const NAV = [
   { id: 'logo',         label: 'Logo' },
   { id: 'typography',   label: 'Typography' },
   { id: 'color',        label: 'Color' },
+  { id: 'brand-in-use', label: 'Brand in Use' },
   { id: 'resources',    label: 'Resources' },
 ];
+
+/* ─────────────────────────────────────────────
+   Brand in Use types
+───────────────────────────────────────────── */
+type BIUCell = { id: string; imageUrl: string | null };
+type BIURow  = { id: string; cells: BIUCell[] };
+type BIUGrid = { rows: BIURow[] };
+
+const GRID_COLS: Record<number, string> = {
+  1: 'grid-cols-1',
+  2: 'grid-cols-1 sm:grid-cols-2',
+  3: 'grid-cols-1 sm:grid-cols-2 md:grid-cols-3',
+  4: 'grid-cols-2 md:grid-cols-4',
+};
+
+function uid() {
+  return Date.now().toString(36) + Math.random().toString(36).slice(2);
+}
 
 /* ─────────────────────────────────────────────
    LLM copy payloads
@@ -210,6 +229,14 @@ export default function BrandGuidelinesPage() {
   const [active, setActive] = useState('introduction');
   const [mobileOpen, setMobileOpen] = useState(false);
 
+  /* Brand in Use state */
+  const [biu, setBiu] = useState<BIUGrid>({ rows: [] });
+  const [biuLoading, setBiuLoading] = useState(true);
+  const [editMode, setEditMode] = useState(false);
+  const [editUser, setEditUser] = useState<{ name: string } | null>(null);
+  const [uploadingCell, setUploadingCell] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+
   useEffect(() => {
     const obs: IntersectionObserver[] = [];
     NAV.forEach(({ id }) => {
@@ -224,6 +251,86 @@ export default function BrandGuidelinesPage() {
     });
     return () => obs.forEach((o) => o.disconnect());
   }, []);
+
+  useEffect(() => {
+    fetch('/api/auth/me').then(r => r.json()).then(d => setEditUser(d.user ?? null)).catch(() => {});
+    fetch('/api/brand-applications')
+      .then(r => r.json())
+      .then(d => setBiu(d))
+      .catch(() => {})
+      .finally(() => setBiuLoading(false));
+  }, []);
+
+  async function biuSave(next: BIUGrid) {
+    setBiu(next);
+    setSaving(true);
+    try {
+      await fetch('/api/brand-applications', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(next),
+      });
+    } finally {
+      setSaving(false);
+    }
+  }
+
+  function biuAddRow(cols: number) {
+    const cells: BIUCell[] = Array.from({ length: cols }, () => ({ id: uid(), imageUrl: null }));
+    biuSave({ rows: [...biu.rows, { id: uid(), cells }] });
+  }
+
+  function biuRemoveRow(rowId: string) {
+    biuSave({ rows: biu.rows.filter(r => r.id !== rowId) });
+  }
+
+  function biuAddCell(rowId: string) {
+    biuSave({
+      rows: biu.rows.map(r =>
+        r.id === rowId && r.cells.length < 4
+          ? { ...r, cells: [...r.cells, { id: uid(), imageUrl: null }] }
+          : r
+      ),
+    });
+  }
+
+  function biuRemoveCell(rowId: string, cellId: string) {
+    biuSave({
+      rows: biu.rows
+        .map(r => r.id === rowId ? { ...r, cells: r.cells.filter(c => c.id !== cellId) } : r)
+        .filter(r => r.cells.length > 0),
+    });
+  }
+
+  async function biuUpload(rowId: string, cellId: string, file: File) {
+    setUploadingCell(cellId);
+    try {
+      const fd = new FormData();
+      fd.append('file', file);
+      const res = await fetch('/api/upload', { method: 'POST', body: fd });
+      const { fileUrl } = await res.json();
+      if (!fileUrl) return;
+      biuSave({
+        rows: biu.rows.map(r =>
+          r.id === rowId
+            ? { ...r, cells: r.cells.map(c => c.id === cellId ? { ...c, imageUrl: fileUrl } : c) }
+            : r
+        ),
+      });
+    } finally {
+      setUploadingCell(null);
+    }
+  }
+
+  function biuClearImage(rowId: string, cellId: string) {
+    biuSave({
+      rows: biu.rows.map(r =>
+        r.id === rowId
+          ? { ...r, cells: r.cells.map(c => c.id === cellId ? { ...c, imageUrl: null } : c) }
+          : r
+      ),
+    });
+  }
 
   function scrollTo(id: string) {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
@@ -603,6 +710,188 @@ export default function BrandGuidelinesPage() {
               <ColorSwatch name="Black" hex="#000000" rgb="0, 0, 0" />
               <ColorSwatch name="White" hex="#FFFFFF" rgb="255, 255, 255" light />
             </div>
+          </div>
+        </section>
+
+        {/* ── Brand in Use ── */}
+        <section id="brand-in-use" className="border-t border-[#EDEDED]">
+          <SectionBanner title="Brand in Use" />
+
+          <div className="px-10 sm:px-16 pt-12 pb-20">
+
+            {/* Header row */}
+            <div className="flex items-start justify-between gap-4 mb-10">
+              <p className="text-base text-slate-500 max-w-xl leading-relaxed">
+                Workiom&apos;s visual identity applied across real touchpoints — digital products, marketing, presentations, and print.
+              </p>
+              <div className="flex items-center gap-3 flex-shrink-0">
+                {saving && <span className="text-[11px] text-slate-400 animate-pulse">Saving…</span>}
+                {editUser && (
+                  <button
+                    onClick={() => setEditMode(m => !m)}
+                    className={cn(
+                      'inline-flex items-center gap-2 px-4 py-2 rounded-lg text-sm font-semibold transition-colors',
+                      editMode
+                        ? 'bg-[#9635F0] text-white hover:bg-[#8028d8]'
+                        : 'bg-slate-100 text-slate-700 hover:bg-slate-200'
+                    )}
+                  >
+                    {editMode ? <Check className="h-4 w-4" /> : <Pencil className="h-3.5 w-3.5" />}
+                    {editMode ? 'Done' : 'Edit'}
+                  </button>
+                )}
+              </div>
+            </div>
+
+            {/* Grid */}
+            {biuLoading ? (
+              <div className="h-48 flex items-center justify-center">
+                <Loader2 className="h-6 w-6 text-slate-300 animate-spin" />
+              </div>
+            ) : biu.rows.length === 0 && !editMode ? (
+              <div className="h-48 flex flex-col items-center justify-center gap-3 border-2 border-dashed border-[#EAEAEA] rounded-2xl">
+                <p className="text-sm text-slate-400">No images added yet.</p>
+                {editUser && (
+                  <button
+                    onClick={() => setEditMode(true)}
+                    className="text-xs font-semibold text-[#9635F0] hover:underline"
+                  >
+                    Start adding images →
+                  </button>
+                )}
+              </div>
+            ) : (
+              <div className="space-y-3">
+                {biu.rows.map(row => {
+                  const visibleCells = editMode ? row.cells : row.cells.filter(c => c.imageUrl);
+                  if (!editMode && visibleCells.length === 0) return null;
+                  const colClass = GRID_COLS[Math.min(visibleCells.length, 4)] ?? 'grid-cols-1';
+
+                  return (
+                    <div key={row.id}>
+                      {/* Edit row controls */}
+                      {editMode && (
+                        <div className="flex items-center justify-between mb-2">
+                          <div className="flex items-center gap-2">
+                            <button
+                              onClick={() => biuAddCell(row.id)}
+                              disabled={row.cells.length >= 4}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Plus className="h-3 w-3" /> Column
+                            </button>
+                            <button
+                              onClick={() => biuRemoveCell(row.id, row.cells[row.cells.length - 1].id)}
+                              disabled={row.cells.length <= 1}
+                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors"
+                            >
+                              <Minus className="h-3 w-3" /> Column
+                            </button>
+                          </div>
+                          <button
+                            onClick={() => biuRemoveRow(row.id)}
+                            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50 rounded-md transition-colors"
+                          >
+                            <Trash2 className="h-3 w-3" /> Remove row
+                          </button>
+                        </div>
+                      )}
+
+                      {/* Cells grid */}
+                      <div className={cn('grid gap-3', colClass)}>
+                        {visibleCells.map(cell => (
+                          <div key={cell.id} className="relative group/cell rounded-xl overflow-hidden bg-[#F4F4F4] aspect-video">
+                            {cell.imageUrl ? (
+                              <>
+                                {/* eslint-disable-next-line @next/next/no-img-element */}
+                                <img
+                                  src={cell.imageUrl}
+                                  alt="Brand application"
+                                  className="w-full h-full object-cover"
+                                />
+                                {editMode && (
+                                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/cell:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-150">
+                                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                                      <Upload className="h-3 w-3" />
+                                      Change
+                                      <input
+                                        type="file"
+                                        accept="image/*"
+                                        className="hidden"
+                                        onChange={e => { const f = e.target.files?.[0]; if (f) biuUpload(row.id, cell.id, f); }}
+                                      />
+                                    </label>
+                                    <button
+                                      onClick={() => biuClearImage(row.id, cell.id)}
+                                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors"
+                                    >
+                                      <Trash2 className="h-3 w-3" />
+                                      Remove
+                                    </button>
+                                  </div>
+                                )}
+                              </>
+                            ) : editMode ? (
+                              <label className="absolute inset-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#D0D0D0] rounded-xl cursor-pointer hover:border-[#9635F0] hover:bg-[#9635F0]/5 transition-all">
+                                {uploadingCell === cell.id ? (
+                                  <Loader2 className="h-6 w-6 text-slate-400 animate-spin" />
+                                ) : (
+                                  <Upload className="h-6 w-6 text-slate-400" />
+                                )}
+                                <span className="text-xs font-medium text-slate-400">
+                                  {uploadingCell === cell.id ? 'Uploading…' : 'Click to upload'}
+                                </span>
+                                <input
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={e => { const f = e.target.files?.[0]; if (f) biuUpload(row.id, cell.id, f); }}
+                                />
+                              </label>
+                            ) : null}
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  );
+                })}
+
+                {/* Add row controls */}
+                {editMode && (
+                  <div className="flex flex-wrap items-center gap-3 pt-5 border-t border-[#EAEAEA]">
+                    <span className="text-xs font-semibold text-slate-400">Add row:</span>
+                    {[1, 2, 3, 4].map(n => (
+                      <button
+                        key={n}
+                        onClick={() => biuAddRow(n)}
+                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#EAEAEA] text-slate-600 hover:border-[#9635F0] hover:text-[#9635F0] hover:bg-[#9635F0]/5 transition-all"
+                      >
+                        <Plus className="h-3 w-3" />
+                        {n} {n === 1 ? 'column' : 'columns'}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* Empty grid but in edit mode — show add row bar directly */}
+            {!biuLoading && biu.rows.length === 0 && editMode && (
+              <div className="flex flex-wrap items-center gap-3 pt-6 border-t border-[#EAEAEA] mt-4">
+                <span className="text-xs font-semibold text-slate-400">Add first row:</span>
+                {[1, 2, 3, 4].map(n => (
+                  <button
+                    key={n}
+                    onClick={() => biuAddRow(n)}
+                    className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold border border-[#EAEAEA] text-slate-600 hover:border-[#9635F0] hover:text-[#9635F0] hover:bg-[#9635F0]/5 transition-all"
+                  >
+                    <Plus className="h-3 w-3" />
+                    {n} {n === 1 ? 'column' : 'columns'}
+                  </button>
+                ))}
+              </div>
+            )}
+
           </div>
         </section>
 
