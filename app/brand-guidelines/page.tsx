@@ -199,6 +199,29 @@ function PageNav({ prev, next, onNavigate }: {
 }
 
 /* ─────────────────────────────────────────────
+   BIU image cell with skeleton while loading
+───────────────────────────────────────────── */
+function BiuImageCell({ src, onClick }: { src: string; onClick: () => void }) {
+  const [loaded, setLoaded] = useState(false);
+  return (
+    <div className="relative overflow-hidden rounded-xl">
+      {!loaded && (
+        <div className="aspect-video w-full bg-slate-200 animate-pulse" />
+      )}
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={src}
+        alt="Brand application"
+        className={cn('w-full h-auto block cursor-pointer', !loaded && 'absolute inset-0 opacity-0 pointer-events-none')}
+        loading="lazy"
+        onLoad={() => setLoaded(true)}
+        onClick={onClick}
+      />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
    Lightbox — self-contained so navigation
    doesn't re-render the image grid above
 ───────────────────────────────────────────── */
@@ -223,7 +246,7 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
 
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-2xl p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-8"
       onClick={() => onCloseRef.current()}
     >
       <div
@@ -268,7 +291,7 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
           <img
             src={images[idx]}
             alt={`Brand in use ${idx + 1}`}
-            className="max-h-full max-w-full object-contain select-none p-4 sm:p-6 drop-shadow-2xl"
+            className="max-h-full max-w-full object-contain select-none p-4 sm:p-6"
           />
           {images.length > 1 && (
             <button
@@ -502,7 +525,7 @@ export default function BrandGuidelinesPage() {
                 <Image src="/workiom-logo.png" alt="Workiom" width={110} height={30} className="w-4/5 h-auto brightness-0 invert" unoptimized />
               </div>
               <div className="aspect-square rounded-2xl flex items-center justify-center bg-[#F4F4F4] overflow-hidden">
-                <span className="text-[52px] sm:text-[72px] font-black text-slate-200 leading-none tracking-tighter select-none" style={{ fontFamily: "'General Sans', sans-serif" }}>Aa</span>
+                <span className="text-[52px] sm:text-[72px] font-black leading-none tracking-tighter select-none" style={{ fontFamily: "'General Sans', sans-serif", color: 'rgba(150, 53, 240, 0.45)' }}>Aa</span>
               </div>
               <div className="aspect-square rounded-2xl overflow-hidden flex flex-col">
                 {['#9635F0', '#3C84FD', '#FDBC0B', '#360C73'].map((c) => (
@@ -847,12 +870,8 @@ export default function BrandGuidelinesPage() {
                                     /* eslint-disable-next-line @next/next/no-img-element */
                                     <img src={cell.imageUrl} alt="Brand application" className="w-full h-full object-cover" />
                                   ) : (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img
+                                    <BiuImageCell
                                       src={cell.imageUrl}
-                                      alt="Brand application"
-                                      className="w-full h-auto block cursor-pointer"
-                                      loading="lazy"
                                       onClick={() => openLightbox(cell.imageUrl!)}
                                     />
                                   )}
