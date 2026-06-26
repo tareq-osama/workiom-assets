@@ -3,10 +3,8 @@
 import { Checkbox } from '@/components/ui/checkbox';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
 import { Badge } from '@/components/ui/badge';
 import { X } from 'lucide-react';
-import { STATUS_OPTIONS, FILE_TYPES } from '@/lib/constants';
 
 export interface FilterState {
   categories: string[];
@@ -33,8 +31,8 @@ function FilterGroup({
 }) {
   return (
     <div>
-      <h3 className="text-sm font-semibold text-slate-700 mb-3">{title}</h3>
-      <div className="space-y-2">
+      {title && <h3 className="text-sm font-semibold text-slate-700 mb-3">{title}</h3>}
+      <div className="space-y-3.5">
         {options.map((option) => {
           const id = `filter-${title}-${option}`.replace(/\s+/g, '-').toLowerCase();
           return (
@@ -59,8 +57,7 @@ function FilterGroup({
 }
 
 export default function FilterSidebar({ filters, setFilters, categories }: FilterSidebarProps) {
-  const activeCount =
-    filters.categories.length + filters.statuses.length + filters.fileTypes.length;
+  const activeCount = filters.categories.length;
 
   function toggleCategory(cat: string) {
     setFilters({
@@ -68,24 +65,6 @@ export default function FilterSidebar({ filters, setFilters, categories }: Filte
       categories: filters.categories.includes(cat)
         ? filters.categories.filter((c) => c !== cat)
         : [...filters.categories, cat],
-    });
-  }
-
-  function toggleStatus(st: string) {
-    setFilters({
-      ...filters,
-      statuses: filters.statuses.includes(st)
-        ? filters.statuses.filter((s) => s !== st)
-        : [...filters.statuses, st],
-    });
-  }
-
-  function toggleFileType(ft: string) {
-    setFilters({
-      ...filters,
-      fileTypes: filters.fileTypes.includes(ft)
-        ? filters.fileTypes.filter((f) => f !== ft)
-        : [...filters.fileTypes, ft],
     });
   }
 
@@ -97,7 +76,7 @@ export default function FilterSidebar({ filters, setFilters, categories }: Filte
     <div className="w-full">
       <div className="flex items-center justify-between mb-4">
         <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-slate-900">Filters</h2>
+          <h2 className="text-base font-semibold text-slate-900">Filter by Category</h2>
           {activeCount > 0 && (
             <Badge variant="secondary" className="text-xs h-5 px-1.5 bg-blue-100 text-blue-700 border-blue-200">
               {activeCount}
@@ -112,34 +91,14 @@ export default function FilterSidebar({ filters, setFilters, categories }: Filte
         )}
       </div>
 
-      <div className="space-y-5">
-        {categories.length > 0 && (
-          <FilterGroup
-            title="Category"
-            options={categories}
-            selected={filters.categories}
-            onToggle={toggleCategory}
-          />
-        )}
-
-        <Separator />
-
+      {categories.length > 0 && (
         <FilterGroup
-          title="Status"
-          options={STATUS_OPTIONS}
-          selected={filters.statuses}
-          onToggle={toggleStatus}
+          title=""
+          options={categories}
+          selected={filters.categories}
+          onToggle={toggleCategory}
         />
-
-        <Separator />
-
-        <FilterGroup
-          title="File Type"
-          options={FILE_TYPES}
-          selected={filters.fileTypes}
-          onToggle={toggleFileType}
-        />
-      </div>
+      )}
     </div>
   );
 }

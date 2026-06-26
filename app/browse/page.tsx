@@ -105,8 +105,7 @@ export default function BrowsePage({
   }, [search, filters, router]);
 
   const totalPages = Math.ceil(totalCount / LIMIT);
-  const activeFilterCount =
-    filters.categories.length + filters.statuses.length + filters.fileTypes.length;
+  const activeFilterCount = filters.categories.length;
 
   function handlePageChange(newPage: number) {
     setPage(newPage);
@@ -206,59 +205,25 @@ export default function BrowsePage({
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Active filter chips */}
-            {activeFilterCount > 0 && (
-              <div className="flex flex-wrap gap-2 mb-4">
-                {filters.categories.map((cat) => (
-                  <Badge
-                    key={cat}
-                    variant="secondary"
-                    className="gap-1 bg-blue-50 text-blue-700 border-blue-200 cursor-pointer"
-                    onClick={() =>
-                      setFilters({
-                        ...filters,
-                        categories: filters.categories.filter((c) => c !== cat),
-                      })
-                    }
-                  >
-                    {cat}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                ))}
-                {filters.statuses.map((st) => (
-                  <Badge
-                    key={st}
-                    variant="secondary"
-                    className="gap-1 bg-green-50 text-green-700 border-green-200 cursor-pointer"
-                    onClick={() =>
-                      setFilters({
-                        ...filters,
-                        statuses: filters.statuses.filter((s) => s !== st),
-                      })
-                    }
-                  >
-                    {st}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                ))}
-                {filters.fileTypes.map((ft) => (
-                  <Badge
-                    key={ft}
-                    variant="secondary"
-                    className="gap-1 bg-slate-100 text-slate-700 border-slate-200 cursor-pointer"
-                    onClick={() =>
-                      setFilters({
-                        ...filters,
-                        fileTypes: filters.fileTypes.filter((f) => f !== ft),
-                      })
-                    }
-                  >
-                    {ft}
-                    <X className="h-3 w-3" />
-                  </Badge>
-                ))}
-              </div>
-            )}
+            {/* Active filter chips — always reserve row height to prevent layout shift */}
+            <div className="flex flex-wrap gap-2 mb-4 min-h-[28px]">
+              {filters.categories.map((cat) => (
+                <Badge
+                  key={cat}
+                  variant="secondary"
+                  className="gap-1 bg-blue-50 text-blue-700 border-blue-200 cursor-pointer"
+                  onClick={() =>
+                    setFilters({
+                      ...filters,
+                      categories: filters.categories.filter((c) => c !== cat),
+                    })
+                  }
+                >
+                  {cat}
+                  <X className="h-3 w-3" />
+                </Badge>
+              ))}
+            </div>
 
             {/* Assets grid/list */}
             {loading ? (
