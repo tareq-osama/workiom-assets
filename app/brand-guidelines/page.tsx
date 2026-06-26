@@ -394,28 +394,60 @@ export default function BrandGuidelinesPage() {
               </div>
             </div>
 
-            {/* Do / Don't */}
+            {/* Do / Don't visual comparison */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-8">
-                <p className="text-xs font-bold text-emerald-700 mb-5">Do</p>
-                <ul className="space-y-3">
-                  {['Use on white or very light backgrounds', 'Maintain clear space around the logo', 'Use SVG format for all digital outputs', 'Use the white version on dark / colored backgrounds', 'Use the icon mark for small app contexts'].map((i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
-                      <span className="text-emerald-500 mt-0.5 flex-shrink-0">✓</span>{i}
-                    </li>
-                  ))}
-                </ul>
+
+              {/* ✓ Do */}
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6 flex flex-col gap-4">
+                <p className="text-xs font-bold text-emerald-700 flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-emerald-500 text-white text-[9px]">✓</span>
+                  Do
+                </p>
+                <div className="flex flex-col gap-3 flex-1">
+                  <div className="flex-1 rounded-xl bg-white border border-emerald-100 flex flex-col items-center justify-center gap-3 py-8 px-6">
+                    <Image src="/workiom-logo.png" alt="Correct usage on white" width={160} height={44} className="h-9 w-auto object-contain" unoptimized />
+                    <p className="text-[11px] text-slate-400">Correct proportions on white</p>
+                  </div>
+                  <div className="flex-1 rounded-xl flex flex-col items-center justify-center gap-3 py-8 px-6" style={{ background: 'linear-gradient(135deg, #231F61, #52009F)' }}>
+                    <Image src="/workiom-logo.png" alt="Correct usage on dark" width={160} height={44} className="h-9 w-auto object-contain brightness-0 invert" unoptimized />
+                    <p className="text-[11px] text-white/50">White version on dark background</p>
+                  </div>
+                </div>
               </div>
-              <div className="rounded-2xl border border-red-100 bg-red-50/60 p-8">
-                <p className="text-xs font-bold text-red-600 mb-5">Don't</p>
-                <ul className="space-y-3">
-                  {["Stretch, skew, or distort the logo", "Place on busy or low-contrast backgrounds", "Add shadows, outlines, glows, or effects", "Use unofficial colors on the mark", "Recreate the logo in a different typeface"].map((i) => (
-                    <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
-                      <span className="text-red-400 mt-0.5 flex-shrink-0">✕</span>{i}
-                    </li>
+
+              {/* ✕ Don't */}
+              <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6 flex flex-col gap-4">
+                <p className="text-xs font-bold text-red-600 flex items-center gap-1.5">
+                  <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-red-500 text-white text-[9px]">✕</span>
+                  Don't
+                </p>
+                <div className="grid grid-cols-2 gap-3">
+                  {[
+                    { label: 'Stretched',        style: { transform: 'scaleX(1.9)'       }, bg: '#F9F9F9', cls: '' },
+                    { label: 'Skewed',           style: { transform: 'skewX(-22deg)'     }, bg: '#F9F9F9', cls: '' },
+                    { label: 'Squished',         style: { transform: 'scaleY(0.35)'      }, bg: '#F9F9F9', cls: '' },
+                    { label: 'Rotated',          style: { transform: 'rotate(18deg)'     }, bg: '#F9F9F9', cls: '' },
+                    { label: 'Wrong background', style: {},                                bg: '#231F61', cls: '' },
+                    { label: 'Added glow',       style: { filter: 'drop-shadow(0 0 7px #9635F0) drop-shadow(0 0 14px #3C84FD)' }, bg: '#F9F9F9', cls: '' },
+                  ].map(({ label, style, bg, cls }) => (
+                    <div key={label} className="rounded-xl flex flex-col items-center justify-center gap-2.5 py-5 px-3 overflow-hidden" style={{ backgroundColor: bg }}>
+                      <div className="h-8 flex items-center justify-center overflow-hidden w-full">
+                        <Image
+                          src="/workiom-logo.png"
+                          alt={label}
+                          width={100}
+                          height={28}
+                          className={cn('h-6 w-auto object-contain flex-shrink-0', cls)}
+                          style={style}
+                          unoptimized
+                        />
+                      </div>
+                      <p className="text-[10px] font-medium text-red-400 text-center leading-tight">{label}</p>
+                    </div>
                   ))}
-                </ul>
+                </div>
               </div>
+
             </div>
           </div>
         </section>
