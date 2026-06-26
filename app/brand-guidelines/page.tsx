@@ -893,7 +893,7 @@ export default function BrandGuidelinesPage() {
         >
           <div
             className="relative flex flex-col bg-[#0F0F0F] rounded-2xl overflow-hidden w-full max-w-5xl shadow-2xl"
-            style={{ maxHeight: '92vh' }}
+            style={{ height: '90vh' }}
             onClick={e => e.stopPropagation()}
           >
             {/* Header */}
