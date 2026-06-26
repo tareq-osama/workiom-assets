@@ -3,19 +3,19 @@
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import { Check, Copy, ExternalLink, Menu, X } from 'lucide-react';
+import { useRouter } from 'next/navigation';
+import { Check, Copy, ExternalLink, Menu, X, ArrowLeft, Heart } from 'lucide-react';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
    Navigation
 ───────────────────────────────────────────── */
 const NAV = [
-  { id: 'introduction', num: '01', label: 'Introduction' },
-  { id: 'strategy',     num: '02', label: 'Strategy' },
-  { id: 'logo',         num: '03', label: 'Logo' },
-  { id: 'typography',   num: '04', label: 'Typography' },
-  { id: 'color',        num: '05', label: 'Color' },
-  { id: 'resources',    num: '06', label: 'Resources' },
+  { id: 'introduction', label: 'Introduction' },
+  { id: 'logo',         label: 'Logo' },
+  { id: 'typography',   label: 'Typography' },
+  { id: 'color',        label: 'Color' },
+  { id: 'resources',    label: 'Resources' },
 ];
 
 /* ─────────────────────────────────────────────
@@ -47,25 +47,8 @@ Typography:
 • Latin/English: General Sans (Bold, SemiBold, Medium, Regular, Light)
 • Arabic:        IBM Plex Sans Arabic
 
-Brand Principles: Clear · Intelligent · Flexible · Human
-
 Mission: Help modern teams build, automate, and scale without complexity.
 Vision:  A future where every team creates the software they need.`,
-
-  strategy: `Workiom Brand Strategy
-──────────────────────
-Brand Essence: "Workflows made simple."
-
-Mission: To help modern teams build, automate, and scale their operations without complexity.
-Vision: A future where every team can create the software they need to work better.
-
-Brand Principles:
-• Clear       — Simple, direct communication. No jargon.
-• Intelligent — Data-informed, purposeful, always precise.
-• Flexible    — Adapts to every team's unique way of working.
-• Human       — Warm and approachable, never robotic.
-
-Positioning: AI-powered work management and no-code platform. Visual direction: minimal, modern, product-focused, spacious, editorial.`,
 
   logo: `Workiom Logo Usage Guidelines
 ──────────────────────────────
@@ -134,7 +117,7 @@ function CopyLLMButton({ text, className }: { text: string; className?: string }
     <button
       onClick={handleCopy}
       className={cn(
-        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold tracking-wide',
+        'inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-[11px] font-semibold',
         'bg-black text-white hover:bg-neutral-800 transition-all duration-150',
         'opacity-0 group-hover:opacity-100 whitespace-nowrap',
         className
@@ -163,16 +146,13 @@ function ColorCopyButton({ hex, name, rgb }: { hex: string; name: string; rgb: s
   );
 }
 
-function SectionBanner({ num, title }: { num: string; title: string }) {
+function SectionBanner({ title }: { title: string }) {
   return (
     <div
       className="h-44 sm:h-52 flex items-end px-10 sm:px-16 pb-10"
       style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
     >
-      <div className="flex items-baseline gap-5">
-        <span className="text-7xl font-black text-white/15 leading-none tabular-nums">{num}</span>
-        <h2 className="text-4xl sm:text-5xl font-bold text-white leading-none tracking-tight">{title}</h2>
-      </div>
+      <h2 className="text-4xl sm:text-5xl font-semibold text-white leading-none tracking-tight">{title}</h2>
     </div>
   );
 }
@@ -202,6 +182,7 @@ function ColorSwatch({
    Page
 ───────────────────────────────────────────── */
 export default function BrandGuidelinesPage() {
+  const router = useRouter();
   const [active, setActive] = useState('introduction');
   const [mobileOpen, setMobileOpen] = useState(false);
 
@@ -225,17 +206,18 @@ export default function BrandGuidelinesPage() {
     setMobileOpen(false);
   }
 
+  function goBack() {
+    if (window.history.length > 1) router.back();
+    else router.push('/');
+  }
+
   return (
     <div className="flex-1 flex">
 
       {/* ── Sidebar ── */}
-      <aside className="hidden lg:flex flex-col fixed left-0 top-16 bottom-0 w-[210px] bg-white border-r border-[#EBEBEB] z-20 overflow-y-auto">
+      <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-[210px] bg-white border-r border-[#EBEBEB] z-20 overflow-y-auto">
         <div className="px-6 py-7 border-b border-[#EBEBEB]">
-          <Image src="/workiom-logo.png" alt="Workiom" width={100} height={28} className="h-7 w-auto object-contain mb-5" unoptimized />
-          <p className="text-xs font-semibold text-slate-500 leading-relaxed">
-            Visual Identity<br />Guidelines
-          </p>
-          <p className="text-xs text-slate-300 mt-0.5">Updated May 2026</p>
+          <Image src="/workiom-logo.png" alt="Workiom" width={100} height={28} className="h-7 w-auto object-contain" unoptimized />
         </div>
 
         <nav className="flex-1 py-3">
@@ -244,13 +226,12 @@ export default function BrandGuidelinesPage() {
               key={s.id}
               onClick={() => scrollTo(s.id)}
               className={cn(
-                'w-full flex items-center gap-3.5 px-6 py-3 text-left transition-all',
+                'w-full flex items-center px-6 py-3 text-left transition-all',
                 active === s.id
                   ? 'text-slate-900 bg-slate-50 border-r-[3px] border-[#9635F0] font-semibold'
                   : 'text-slate-400 hover:text-slate-700 hover:bg-slate-50/70'
               )}
             >
-              <span className="text-[10px] font-mono font-bold w-4 flex-shrink-0 text-slate-300">{s.num}</span>
               <span className="text-[13px]">{s.label}</span>
             </button>
           ))}
@@ -284,9 +265,8 @@ export default function BrandGuidelinesPage() {
                 <button
                   key={s.id}
                   onClick={() => scrollTo(s.id)}
-                  className="w-full flex items-center gap-3.5 px-6 py-3 text-left text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
+                  className="w-full flex items-center px-6 py-3 text-left text-slate-600 hover:text-slate-900 hover:bg-slate-50 transition-colors"
                 >
-                  <span className="text-[10px] font-mono text-slate-300">{s.num}</span>
                   <span className="text-sm font-medium">{s.label}</span>
                 </button>
               ))}
@@ -299,34 +279,45 @@ export default function BrandGuidelinesPage() {
       <main className="flex-1 lg:pl-[210px] min-w-0">
 
         {/* Mobile section nav */}
-        <div className="lg:hidden sticky top-16 z-30 flex items-center gap-3 px-5 py-3 bg-white border-b border-[#EBEBEB]">
+        <div className="lg:hidden sticky top-0 z-30 flex items-center gap-3 px-5 py-3 bg-white border-b border-[#EBEBEB]">
           <button
             onClick={() => setMobileOpen(true)}
             className="flex items-center gap-2 text-sm font-medium text-slate-600 hover:text-slate-900"
           >
             <Menu className="h-4 w-4" /> Sections
           </button>
-          <span className="text-slate-300">·</span>
-          <span className="text-xs font-mono text-slate-300">Visual Identity Guidelines</span>
         </div>
 
-        {/* ── 01 Introduction ── */}
+        {/* ── Introduction ── */}
         <section id="introduction">
           {/* Hero */}
           <div
             className="relative h-72 sm:h-80 flex flex-col justify-end px-10 sm:px-16 pb-12 overflow-hidden"
             style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
           >
-            <p className="text-xs font-semibold text-white/40 mb-3">Visual Identity Guidelines</p>
-            <h1 className="text-5xl sm:text-6xl font-black text-white leading-none tracking-tight">
-              Workiom<br />Brand
+            {/* Back button */}
+            <button
+              onClick={goBack}
+              className="absolute top-6 left-10 sm:left-16 flex items-center gap-2 text-white/60 hover:text-white transition-colors text-sm font-medium"
+            >
+              <ArrowLeft className="h-4 w-4" />
+              Back
+            </button>
+
+            {/* Title */}
+            <h1 className="text-4xl sm:text-5xl lg:text-6xl font-semibold text-white leading-none tracking-tight whitespace-nowrap">
+              Workiom Brand Guidelines
             </h1>
-            <p className="text-xs text-white/30 mt-3">Version 1.0  ·  May 2026</p>
+
+            {/* Version — bottom right */}
+            <p className="absolute bottom-10 right-10 sm:right-16 text-xs text-white/30">Version 1.0  ·  May 2026</p>
+
+            {/* Decorative blobs */}
             <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-[#FDBC0B]/8 blur-3xl pointer-events-none" />
             <div className="absolute bottom-0 right-20 w-48 h-48 rounded-full bg-[#3C84FD]/10 blur-2xl pointer-events-none" />
           </div>
 
-          {/* Intro paragraph + full brief copy */}
+          {/* Intro paragraph */}
           <div className="group relative px-10 sm:px-16 py-14 border-b border-[#EDEDED]">
             <div className="absolute top-5 right-8">
               <CopyLLMButton text={LLM.full} />
@@ -339,7 +330,7 @@ export default function BrandGuidelinesPage() {
           {/* Overview tiles */}
           <div className="px-10 sm:px-16 py-12 grid grid-cols-2 sm:grid-cols-4 gap-3 border-b border-[#EDEDED]">
             <div className="aspect-square rounded-2xl flex items-center justify-center p-6" style={{ background: 'linear-gradient(135deg, #3C84FD, #9635F0)' }}>
-              <p className="text-white font-bold text-center text-sm leading-snug">Transforming ideas into workflows</p>
+              <p className="text-white font-semibold text-center text-sm leading-snug">Transforming ideas into workflows</p>
             </div>
             <div className="aspect-square rounded-2xl flex items-center justify-center p-6 bg-[#231F61]">
               <Image src="/workiom-logo.png" alt="Workiom" width={110} height={30} className="w-[80%] h-auto brightness-0 invert" unoptimized />
@@ -355,92 +346,55 @@ export default function BrandGuidelinesPage() {
           </div>
         </section>
 
-        {/* ── 02 Strategy ── */}
-        <section id="strategy">
-          <SectionBanner num="02" title="Strategy" />
-
-          <div className="group relative px-10 sm:px-16 pt-12 pb-20 space-y-10">
-            <div className="absolute top-4 right-8">
-              <CopyLLMButton text={LLM.strategy} />
-            </div>
-
-            <div className="rounded-2xl px-12 py-14" style={{ background: 'linear-gradient(135deg, #52009F, #9635F0)' }}>
-              <p className="text-xs font-semibold text-white/40 mb-4">Brand Essence</p>
-              <p className="text-4xl sm:text-5xl font-black text-white leading-tight tracking-tight">
-                Workflows<br />made simple.
-              </p>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              {[
-                { label: 'Mission', copy: 'To help modern teams build, automate, and scale their operations without complexity.' },
-                { label: 'Vision',  copy: 'A future where every team can create the software they need to work better.' },
-              ].map((c) => (
-                <div key={c.label} className="border border-[#EAEAEA] rounded-2xl p-8 bg-white">
-                  <p className="text-xs font-semibold text-slate-400 mb-4">{c.label}</p>
-                  <p className="text-lg text-slate-700 leading-relaxed">{c.copy}</p>
-                </div>
-              ))}
-            </div>
-
-            <div>
-              <p className="text-xs font-semibold text-slate-400 mb-5">Brand Principles</p>
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                {[
-                  { word: 'Clear',       desc: 'Simple, direct communication. No jargon, no fluff.' },
-                  { word: 'Intelligent', desc: 'Data-informed, purposeful, always precise.' },
-                  { word: 'Flexible',    desc: "Adapts to every team's unique way of working." },
-                  { word: 'Human',       desc: 'Warm and approachable — never robotic.' },
-                ].map((p) => (
-                  <div key={p.word} className="border border-[#EAEAEA] rounded-xl p-6">
-                    <p className="text-sm font-bold text-[#9635F0] mb-2">{p.word}</p>
-                    <p className="text-sm text-slate-500 leading-relaxed">{p.desc}</p>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        </section>
-
-        {/* ── 03 Logo ── */}
+        {/* ── Logo ── */}
         <section id="logo" className="border-t border-[#EDEDED]">
-          <SectionBanner num="03" title="Logo" />
+          <SectionBanner title="Logo" />
 
           <div className="group relative px-10 sm:px-16 pt-12 pb-20 space-y-10">
             <div className="absolute top-4 right-8">
               <CopyLLMButton text={LLM.logo} />
             </div>
 
+            {/* Wordmark on light / dark */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] flex items-center justify-center min-h-[180px] p-12">
-                <Image src="/workiom-logo.png" alt="Workiom wordmark" width={200} height={52} className="h-12 w-auto object-contain" unoptimized />
+                <Image src="/workiom-logo.png" alt="Workiom wordmark on light" width={220} height={56} className="h-12 w-auto max-w-full object-contain" unoptimized />
               </div>
               <div className="rounded-2xl flex items-center justify-center min-h-[180px] p-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 100%)' }}>
-                <Image src="/workiom-logo.png" alt="Workiom wordmark inverted" width={200} height={52} className="h-12 w-auto object-contain brightness-0 invert" unoptimized />
+                <Image src="/workiom-logo.png" alt="Workiom wordmark on dark" width={220} height={56} className="h-12 w-auto max-w-full object-contain brightness-0 invert" unoptimized />
               </div>
             </div>
 
+            {/* Color usage */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 mb-4">Color Usage</p>
+              <p className="text-xs font-semibold text-slate-400 mb-4">Color usage</p>
               <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 {[
-                  { bg: '#FFFFFF', border: true,  label: 'On White',      invert: false },
-                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', invert: false },
-                  { bg: '#9635F0', border: false, label: 'On Purple',     invert: true },
-                  { bg: '#231F61', border: false, label: 'On Navy',       invert: true },
+                  { bg: '#FFFFFF', border: true,  label: 'On White',      filter: ''                        },
+                  { bg: '#F4F4F4', border: false, label: 'On Light Gray', filter: ''                        },
+                  { bg: '#9635F0', border: false, label: 'On Purple',     filter: 'brightness-0 invert'     },
+                  { bg: '#231F61', border: false, label: 'On Navy',       filter: 'brightness-0 invert'     },
                 ].map((v) => (
                   <div
                     key={v.label}
-                    className="rounded-xl flex flex-col items-center justify-center gap-4 py-9 px-5"
+                    className="rounded-xl flex flex-col items-center justify-center gap-5 py-10 px-6"
                     style={{ backgroundColor: v.bg, border: v.border ? '1px solid #EAEAEA' : undefined }}
                   >
-                    <Image src="/workiom-icon.png" alt="Workiom icon" width={40} height={40} className={cn('h-10 w-10 object-contain', v.invert && 'brightness-0 invert')} unoptimized />
-                    <p className={cn('text-[10px] font-semibold text-center', v.invert ? 'text-white/40' : 'text-slate-400')}>{v.label}</p>
+                    <Image
+                      src="/workiom-logo.png"
+                      alt={`Workiom logo ${v.label}`}
+                      width={120}
+                      height={32}
+                      className={cn('h-7 w-auto max-w-full object-contain', v.filter)}
+                      unoptimized
+                    />
+                    <p className={cn('text-[11px] font-medium text-center', v.filter ? 'text-white/50' : 'text-slate-400')}>{v.label}</p>
                   </div>
                 ))}
               </div>
             </div>
 
+            {/* Do / Don't */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/60 p-8">
                 <p className="text-xs font-bold text-emerald-700 mb-5">Do</p>
@@ -455,7 +409,7 @@ export default function BrandGuidelinesPage() {
               <div className="rounded-2xl border border-red-100 bg-red-50/60 p-8">
                 <p className="text-xs font-bold text-red-600 mb-5">Don't</p>
                 <ul className="space-y-3">
-                  {['Stretch, skew, or distort the logo', 'Place on busy or low-contrast backgrounds', 'Add shadows, outlines, glows, or effects', 'Use unofficial colors on the mark', 'Recreate the logo in a different typeface'].map((i) => (
+                  {["Stretch, skew, or distort the logo", "Place on busy or low-contrast backgrounds", "Add shadows, outlines, glows, or effects", "Use unofficial colors on the mark", "Recreate the logo in a different typeface"].map((i) => (
                     <li key={i} className="flex items-start gap-2.5 text-sm text-slate-700">
                       <span className="text-red-400 mt-0.5 flex-shrink-0">✕</span>{i}
                     </li>
@@ -466,32 +420,34 @@ export default function BrandGuidelinesPage() {
           </div>
         </section>
 
-        {/* ── 04 Typography ── */}
+        {/* ── Typography ── */}
         <section id="typography" className="border-t border-[#EDEDED]">
-          <SectionBanner num="04" title="Typography" />
+          <SectionBanner title="Typography" />
 
           <div className="group relative px-10 sm:px-16 pt-12 pb-20 space-y-10">
             <div className="absolute top-4 right-8">
               <CopyLLMButton text={LLM.typography} />
             </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-              <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] p-10 flex flex-col justify-between min-h-[160px]">
+            {/* Font cards — stacked */}
+            <div className="space-y-4">
+              <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] px-10 py-8 flex flex-col justify-between min-h-[140px]">
                 <p className="text-xs font-semibold text-slate-400">Latin / English</p>
-                <div>
-                  <p className="text-4xl font-bold text-slate-900 tracking-tight mt-4">General Sans</p>
+                <div className="mt-4">
+                  <p className="text-4xl font-bold text-slate-900 tracking-tight">General Sans</p>
                   <p className="text-sm text-slate-400 mt-1.5">For all Latin and English text</p>
                 </div>
               </div>
-              <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] p-10 flex flex-col justify-between min-h-[160px]" dir="rtl">
+              <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] px-10 py-8 flex flex-col justify-between min-h-[140px]" dir="rtl">
                 <p className="text-xs font-semibold text-slate-400 text-right">عربي / Arabic</p>
-                <div>
-                  <p className="text-4xl font-bold text-slate-900 mt-4 text-right">IBM Plex Sans Arabic</p>
+                <div className="mt-4">
+                  <p className="text-4xl font-bold text-slate-900 text-right">IBM Plex Sans Arabic</p>
                   <p className="text-sm text-slate-400 mt-1.5 text-right">للنصوص العربية في كل مكان</p>
                 </div>
               </div>
             </div>
 
+            {/* Weight specimens EN */}
             <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]">
               {[
                 { w: 700, label: 'Bold',     sample: 'Workiom AI will do the work' },
@@ -507,6 +463,7 @@ export default function BrandGuidelinesPage() {
               ))}
             </div>
 
+            {/* Weight specimens AR */}
             <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]" dir="rtl">
               {[
                 { w: 700, sample: 'استفد الآن من ميزات الذكاء الاصطناعي' },
@@ -519,8 +476,9 @@ export default function BrandGuidelinesPage() {
               ))}
             </div>
 
+            {/* Usage chart */}
             <div>
-              <p className="text-xs font-semibold text-slate-400 mb-4">Screen Usage Chart</p>
+              <p className="text-xs font-semibold text-slate-400 mb-4">Screen usage chart</p>
               <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden">
                 <div className="grid grid-cols-4 bg-[#F6F6F6] px-7 py-3 border-b border-[#EAEAEA]">
                   {['Size', 'Line Height', 'Kerning', 'Tracking'].map((h) => (
@@ -543,9 +501,9 @@ export default function BrandGuidelinesPage() {
           </div>
         </section>
 
-        {/* ── 05 Color ── */}
+        {/* ── Color ── */}
         <section id="color" className="border-t border-[#EDEDED]">
-          <SectionBanner num="05" title="Color" />
+          <SectionBanner title="Color" />
 
           <div className="group relative px-10 sm:px-16 pt-10 pb-20 space-y-4">
             <div className="absolute top-4 right-8">
@@ -577,9 +535,9 @@ export default function BrandGuidelinesPage() {
           </div>
         </section>
 
-        {/* ── 06 Resources ── */}
+        {/* ── Resources ── */}
         <section id="resources" className="border-t border-[#EDEDED]">
-          <SectionBanner num="06" title="Resources" />
+          <SectionBanner title="Resources" />
 
           <div className="px-10 sm:px-16 pt-12 pb-20 space-y-10">
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -592,7 +550,7 @@ export default function BrandGuidelinesPage() {
                 { title: 'Social Templates',       desc: 'Formatted templates for LinkedIn, Instagram, and X.' },
               ].map((r) => (
                 <div key={r.title} className="border border-[#EAEAEA] rounded-2xl p-7 bg-white hover:border-[#9635F0]/40 transition-colors">
-                  <p className="text-sm font-bold text-slate-900 mb-2">{r.title}</p>
+                  <p className="text-sm font-semibold text-slate-900 mb-2">{r.title}</p>
                   <p className="text-sm text-slate-400 leading-relaxed mb-5">{r.desc}</p>
                   <Link
                     href="/browse"
@@ -609,7 +567,7 @@ export default function BrandGuidelinesPage() {
               style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
             >
               <div>
-                <p className="text-xl font-bold text-white mb-1">Need help applying the Workiom brand?</p>
+                <p className="text-xl font-semibold text-white mb-1">Need help applying the Workiom brand?</p>
                 <p className="text-white/50 text-sm">Contact the brand team for guidance, approvals, or custom assets.</p>
               </div>
               <a
@@ -627,15 +585,26 @@ export default function BrandGuidelinesPage() {
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/10">
             <div>
               <p className="text-xs font-semibold text-white/60 mb-1">Visual Identity Guidelines</p>
-              <p className="text-[10px] text-white/25 tracking-wider">Version 1.0</p>
+              <p className="text-[10px] text-white/25">Version 1.0</p>
             </div>
             <p className="text-xs text-white/25">brand@workiom.com</p>
           </div>
-          <div className="flex items-center justify-between pt-8">
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-8">
             <div className="flex items-center gap-3">
               <Image src="/workiom-icon.png" alt="Workiom" width={20} height={20} className="h-5 w-5 object-contain opacity-40" unoptimized />
               <span className="text-[11px] text-white/25">© 2026 Workiom. All rights reserved.</span>
             </div>
+            <p className="flex items-center gap-1.5 text-[11px] text-white/25">
+              Made with <Heart className="h-3 w-3 text-red-400 fill-red-400" /> by{' '}
+              <a
+                href="https://diginsider.net"
+                target="_blank"
+                rel="noopener noreferrer"
+                className="text-white/40 hover:text-white/70 underline underline-offset-2 transition-colors"
+              >
+                Insider
+              </a>
+            </p>
           </div>
         </footer>
 
