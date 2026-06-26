@@ -204,15 +204,18 @@ function PageNav({ prev, next, onNavigate }: {
 function BiuImageCell({ src, onClick }: { src: string; onClick: () => void }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className="relative overflow-hidden rounded-xl">
+    <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-200">
       {!loaded && (
-        <div className="aspect-video w-full bg-slate-200 animate-pulse" />
+        <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200" />
       )}
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
         src={src}
         alt="Brand application"
-        className={cn('w-full h-auto block cursor-pointer', !loaded && 'absolute inset-0 opacity-0 pointer-events-none')}
+        className={cn(
+          'absolute inset-0 w-full h-full object-cover cursor-pointer transition-[opacity,transform] duration-500 ease-out',
+          loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none',
+        )}
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onClick={onClick}
@@ -244,9 +247,18 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
     return () => window.removeEventListener('keydown', handleKey);
   }, [images]);
 
+  // Preload prev + next so navigation feels instant
+  useEffect(() => {
+    const srcs = [
+      images[(idx - 1 + images.length) % images.length],
+      images[(idx + 1) % images.length],
+    ];
+    srcs.forEach(src => { const i = new window.Image(); i.src = src; });
+  }, [idx, images]);
+
   return (
     <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-md p-4 sm:p-8"
+      className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 p-4 sm:p-8"
       onClick={() => onCloseRef.current()}
     >
       <div
@@ -289,9 +301,10 @@ function BrandInUseLightbox({ images, startIdx, onClose }: {
           )}
           {/* eslint-disable-next-line @next/next/no-img-element */}
           <img
+            key={images[idx]}
             src={images[idx]}
             alt={`Brand in use ${idx + 1}`}
-            className="max-h-full max-w-full object-contain select-none p-4 sm:p-6"
+            className="max-h-full max-w-full object-contain select-none p-4 sm:p-6 animate-in fade-in duration-200 fill-mode-both"
           />
           {images.length > 1 && (
             <button
@@ -416,11 +429,9 @@ export default function BrandGuidelinesPage() {
       {/* ── Desktop sidebar ── */}
       <aside className="hidden lg:flex flex-col fixed left-0 top-0 bottom-0 w-[210px] bg-white border-r border-[#EBEBEB] z-20 overflow-y-auto">
         <div className="px-6 py-7 border-b border-[#EBEBEB]">
-          <Image src="/workiom-logo.png" alt="Workiom" width={100} height={28} className="h-7 w-auto object-contain" unoptimized />
-        </div>
-        <div className="px-6 pt-5 pb-2">
-          <p className="text-[10px] font-semibold text-slate-300 uppercase tracking-widest leading-tight">Visual Identity</p>
-          <p className="text-[10px] text-slate-300 mt-0.5">Updated May 2026</p>
+          <Link href="/">
+            <Image src="/workiom-logo.png" alt="Workiom" width={100} height={28} className="h-7 w-auto object-contain" unoptimized />
+          </Link>
         </div>
         <nav className="flex-1 py-2">
           {NAV.map((s) => (
@@ -453,7 +464,9 @@ export default function BrandGuidelinesPage() {
           <div className="absolute inset-0 bg-black/40" onClick={() => setMobileOpen(false)} />
           <aside className="relative z-50 w-64 bg-white flex flex-col h-full shadow-2xl">
             <div className="px-6 py-6 border-b border-[#EBEBEB] flex items-center justify-between">
-              <Image src="/workiom-logo.png" alt="Workiom" width={90} height={24} className="h-6 w-auto object-contain" unoptimized />
+              <Link href="/">
+                <Image src="/workiom-logo.png" alt="Workiom" width={90} height={24} className="h-6 w-auto object-contain" unoptimized />
+              </Link>
               <button onClick={() => setMobileOpen(false)} className="text-slate-400 hover:text-slate-700"><X className="h-5 w-5" /></button>
             </div>
             <nav className="flex-1 py-3">
