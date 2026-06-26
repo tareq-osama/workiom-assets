@@ -70,20 +70,18 @@ export default function FilterSidebar({ filters, setFilters, categories }: Filte
 
   return (
     <div className="w-full">
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <h2 className="text-base font-semibold text-slate-900">Filter by Category</h2>
-          {activeCount > 0 && (
-            <Badge variant="secondary" className="text-xs h-5 px-1.5 bg-blue-100 text-blue-700 border-blue-200">
-              {activeCount}
-            </Badge>
-          )}
-        </div>
+      {activeCount > 0 && (
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900 mb-3 -ml-2" onClick={clearAll}>
+          <X className="h-3 w-3 mr-1" />
+          Clear All
+        </Button>
+      )}
+      <div className="flex items-center gap-2 mb-4">
+        <h2 className="text-base font-semibold text-slate-900">Filter by Category</h2>
         {activeCount > 0 && (
-          <Button variant="ghost" size="sm" className="h-7 px-2 text-xs text-slate-500 hover:text-slate-900" onClick={clearAll}>
-            <X className="h-3 w-3 mr-1" />
-            Clear All
-          </Button>
+          <Badge variant="secondary" className="text-xs h-5 px-1.5 bg-blue-100 text-blue-700 border-blue-200">
+            {activeCount}
+          </Badge>
         )}
       </div>
 

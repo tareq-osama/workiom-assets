@@ -205,26 +205,6 @@ export default function BrowsePage({
 
           {/* Main content */}
           <div className="flex-1 min-w-0">
-            {/* Active filter chips — always reserve row height to prevent layout shift */}
-            <div className="flex flex-wrap gap-2 mb-4 min-h-[28px]">
-              {filters.categories.map((cat) => (
-                <Badge
-                  key={cat}
-                  variant="secondary"
-                  className="gap-1 bg-blue-50 text-blue-700 border-blue-200 cursor-pointer"
-                  onClick={() =>
-                    setFilters({
-                      ...filters,
-                      categories: filters.categories.filter((c) => c !== cat),
-                    })
-                  }
-                >
-                  {cat}
-                  <X className="h-3 w-3" />
-                </Badge>
-              ))}
-            </div>
-
             {/* Assets grid/list */}
             {loading ? (
               viewMode === 'grid' ? (
