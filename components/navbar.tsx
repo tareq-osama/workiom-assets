@@ -100,9 +100,10 @@ export default function Navbar() {
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
         if (data?.user) setCurrentUser(data.user);
+        else setCurrentUser(null);
       })
       .catch(() => {});
-  }, []);
+  }, [pathname]);
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' });

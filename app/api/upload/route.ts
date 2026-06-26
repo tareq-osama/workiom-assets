@@ -11,7 +11,18 @@ export async function POST(request: NextRequest) {
     }
 
     const buffer = Buffer.from(await file.arrayBuffer());
-    const result = await uploadAssetFile(buffer, file.name, file.type);
+
+    // Browsers occasionally report empty or generic MIME types for SVG/PNG/JPG.
+    // Derive the correct type from the file extension so R2 stores it correctly.
+    let mimeType = file.type;
+    if (!mimeType || mimeType === 'application/octet-stream') {
+      const ext = file.name.split('.').pop()?.toLowerCase();
+      if (ext === 'svg') mimeType = 'image/svg+xml';
+      else if (ext === 'png') mimeType = 'image/png';
+      else if (ext === 'jpg' || ext === 'jpeg') mimeType = 'image/jpeg';
+    }
+
+    const result = await uploadAssetFile(buffer, file.name, mimeType);
 
     return Response.json(result);
   } catch (error) {

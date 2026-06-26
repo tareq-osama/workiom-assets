@@ -2,6 +2,18 @@ import { NextRequest } from 'next/server';
 import { r2Download, r2Configured } from '@/lib/r2';
 import { APPWRITE_BUCKET_ID } from '@/lib/appwrite';
 
+const MIME_BY_EXT: Record<string, string> = {
+  svg: 'image/svg+xml',
+  png: 'image/png',
+  jpg: 'image/jpeg',
+  jpeg: 'image/jpeg',
+};
+
+function mimeFromKey(key: string): string | null {
+  const ext = key.split('.').pop()?.toLowerCase() ?? '';
+  return MIME_BY_EXT[ext] ?? null;
+}
+
 // File IDs are stored as either:
 //   "r2/{objectKey}"   → fetch from Cloudflare R2
 //   "{appwriteFileId}" → fetch from Appwrite Storage (legacy / fallback)
@@ -30,9 +42,14 @@ export async function GET(
       return new Response('Not found', { status: 404 });
     }
 
+    const contentType =
+      !file.contentType || file.contentType === 'application/octet-stream'
+        ? (mimeFromKey(key) ?? file.contentType)
+        : file.contentType;
+
     return new Response(file.body, {
       headers: {
-        'Content-Type': file.contentType,
+        'Content-Type': contentType,
         'Cache-Control': 'public, max-age=31536000, immutable',
         'X-Content-Type-Options': 'nosniff',
       },
