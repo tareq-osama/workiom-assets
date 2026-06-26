@@ -1,10 +1,16 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Download, Link2, FileImage, ExternalLink } from 'lucide-react';
+import { Download, Link2, FileImage, ExternalLink, Pencil, Type, Copy, Trash2, Loader2 } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogClose,
+} from '@/components/ui/dialog';
+import { Input } from '@/components/ui/input';
+import { Label } from '@/components/ui/label';
+import { Button } from '@/components/ui/button';
 import StatusBadge from '@/components/status-badge';
 import AssetPreviewDialog from '@/components/asset-preview-dialog';
 import type { Asset, AssetFormat } from '@/types/asset';
@@ -67,11 +73,34 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
 const iconBtnBase =
   'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none disabled:pointer-events-none disabled:opacity-50 cursor-pointer border-0 p-0 bg-transparent';
 
+const menuItemCls =
+  'w-full flex items-center gap-2.5 px-3 py-2 text-sm text-slate-700 hover:bg-slate-50 transition-colors text-left';
+
 export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [imgError, setImgError] = useState(false);
   const [currentAsset, setCurrentAsset] = useState(asset);
   const [isDeleted, setIsDeleted] = useState(false);
+
+  const [contextMenu, setContextMenu] = useState<{ x: number; y: number } | null>(null);
+  const [renameOpen, setRenameOpen] = useState(false);
+  const [renameValue, setRenameValue] = useState('');
+  const [editOpen, setEditOpen] = useState(false);
+  const [editName, setEditName] = useState('');
+  const [editUrl, setEditUrl] = useState('');
+  const [busy, setBusy] = useState(false);
+
+  useEffect(() => {
+    if (!contextMenu) return;
+    const close = () => setContextMenu(null);
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') close(); };
+    window.addEventListener('click', close);
+    window.addEventListener('keydown', onKey);
+    return () => {
+      window.removeEventListener('click', close);
+      window.removeEventListener('keydown', onKey);
+    };
+  }, [contextMenu]);
 
   const previewUrl = imgError
     ? undefined
@@ -81,12 +110,215 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
 
   if (isDeleted) return null;
 
+  function openContextMenu(e: React.MouseEvent) {
+    e.preventDefault();
+    e.stopPropagation();
+    const x = Math.min(e.clientX, window.innerWidth - 192);
+    const y = Math.min(e.clientY, window.innerHeight - 180);
+    setContextMenu({ x, y });
+  }
+
+  function openEdit() {
+    setContextMenu(null);
+    if (isLinkAsset) {
+      setEditName(currentAsset.name);
+      setEditUrl(currentAsset.linkUrl ?? '');
+      setEditOpen(true);
+    } else {
+      setDialogOpen(true);
+    }
+  }
+
+  function openRename() {
+    setContextMenu(null);
+    setRenameValue(currentAsset.name);
+    setRenameOpen(true);
+  }
+
+  async function handleRename() {
+    if (!renameValue.trim()) return;
+    setBusy(true);
+    try {
+      const res = await fetch(`/api/assets/${currentAsset.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: renameValue.trim() }),
+      });
+      if (res.ok) setCurrentAsset(await res.json());
+    } finally {
+      setBusy(false);
+      setRenameOpen(false);
+    }
+  }
+
+  async function handleEditSave() {
+    if (!editName.trim()) return;
+    setBusy(true);
+    try {
+      const body: Record<string, unknown> = { name: editName.trim() };
+      if (isLinkAsset) body.description = `[LINK]${editUrl.trim()}`;
+      const res = await fetch(`/api/assets/${currentAsset.id}`, {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(body),
+      });
+      if (res.ok) setCurrentAsset(await res.json());
+    } finally {
+      setBusy(false);
+      setEditOpen(false);
+    }
+  }
+
+  async function handleDuplicate() {
+    setContextMenu(null);
+    setBusy(true);
+    try {
+      await fetch('/api/assets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          name: `Copy of ${currentAsset.name}`,
+          description: currentAsset.linkUrl
+            ? `[LINK]${currentAsset.linkUrl}`
+            : (currentAsset.description ?? ''),
+          category: currentAsset.category,
+          tags: currentAsset.tags,
+          status: currentAsset.status,
+          owner: currentAsset.owner,
+          formats: currentAsset.formats,
+          fileSize: currentAsset.fileSize,
+          svgFileId: currentAsset.svgFileId,
+          pngFileId: currentAsset.pngFileId,
+          jpgFileId: currentAsset.jpgFileId,
+          thumbnailFileId: currentAsset.thumbnailFileId,
+        }),
+      });
+      window.location.reload();
+    } finally {
+      setBusy(false);
+    }
+  }
+
+  async function handleDelete() {
+    setContextMenu(null);
+    if (!confirm(`Delete "${currentAsset.name}"? This cannot be undone.`)) return;
+    const res = await fetch(`/api/assets/${currentAsset.id}`, { method: 'DELETE' });
+    if (res.ok) setIsDeleted(true);
+  }
+
+  const ContextMenuPopup = contextMenu ? (
+    <div
+      className="fixed z-[9999] bg-white border border-slate-200 rounded-xl shadow-xl py-1.5 w-48 select-none"
+      style={{ top: contextMenu.y, left: contextMenu.x }}
+      onClick={(e) => e.stopPropagation()}
+    >
+      <button className={menuItemCls} onClick={openEdit}>
+        <Pencil className="h-3.5 w-3.5 text-slate-400" />
+        Edit
+      </button>
+      <button className={menuItemCls} onClick={openRename}>
+        <Type className="h-3.5 w-3.5 text-slate-400" />
+        Rename
+      </button>
+      <button className={menuItemCls} onClick={handleDuplicate}>
+        <Copy className="h-3.5 w-3.5 text-slate-400" />
+        Duplicate
+      </button>
+      <div className="my-1 border-t border-slate-100" />
+      <button className={cn(menuItemCls, 'text-red-600 hover:bg-red-50')} onClick={handleDelete}>
+        <Trash2 className="h-3.5 w-3.5" />
+        Delete
+      </button>
+    </div>
+  ) : null;
+
+  const Modals = (
+    <>
+      {/* Rename dialog */}
+      <Dialog open={renameOpen} onOpenChange={setRenameOpen}>
+        <DialogContent showCloseButton={false} className="max-w-sm">
+          <DialogHeader>
+            <DialogTitle>Rename</DialogTitle>
+          </DialogHeader>
+          <Input
+            value={renameValue}
+            onChange={(e) => setRenameValue(e.target.value)}
+            onKeyDown={(e) => e.key === 'Enter' && handleRename()}
+            autoFocus
+            className="h-10"
+          />
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" className="h-9" />}>
+              Cancel
+            </DialogClose>
+            <Button
+              onClick={handleRename}
+              disabled={busy || !renameValue.trim()}
+              className="h-9 bg-[#4E86F7] hover:bg-[#3a72e3] text-white"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Rename'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit link asset dialog */}
+      <Dialog open={editOpen} onOpenChange={setEditOpen}>
+        <DialogContent showCloseButton={false} className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Edit Link Asset</DialogTitle>
+          </DialogHeader>
+          <div className="space-y-4 py-1">
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">Name</Label>
+              <Input
+                value={editName}
+                onChange={(e) => setEditName(e.target.value)}
+                autoFocus
+                className="h-10"
+              />
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-sm font-medium text-slate-700">External URL</Label>
+              <div className="relative">
+                <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                <Input
+                  value={editUrl}
+                  onChange={(e) => setEditUrl(e.target.value)}
+                  type="url"
+                  placeholder="https://"
+                  className="h-10 pl-9"
+                />
+              </div>
+            </div>
+          </div>
+          <DialogFooter>
+            <DialogClose render={<Button variant="outline" className="h-9" />}>
+              Cancel
+            </DialogClose>
+            <Button
+              onClick={handleEditSave}
+              disabled={busy || !editName.trim()}
+              className="h-9 bg-[#4E86F7] hover:bg-[#3a72e3] text-white"
+            >
+              {busy ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Save'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+    </>
+  );
+
+  // ── List view ────────────────────────────────────────────────────────────────
   if (viewMode === 'list') {
     return (
       <>
+        {ContextMenuPopup}
+        {Modals}
         <div
           className="flex items-center gap-4 p-4 bg-white border border-slate-200 rounded-xl hover:shadow-md transition-shadow group cursor-pointer"
           onClick={() => isLinkAsset ? window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer') : setDialogOpen(true)}
+          onContextMenu={openContextMenu}
         >
           {/* Thumbnail */}
           <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative">
@@ -96,17 +328,12 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
                 alt={currentAsset.name}
                 width={64}
                 height={64}
-                className="w-full h-full object-contain"
+                className={isLinkAsset ? 'w-full h-full object-cover' : 'w-full h-full object-contain'}
                 unoptimized
                 onError={() => setImgError(true)}
               />
             ) : (
               <FileImage className="w-8 h-8 text-slate-300" />
-            )}
-            {isLinkAsset && (
-              <div className="absolute bottom-0.5 right-0.5 bg-blue-500 rounded-full p-0.5">
-                <ExternalLink className="w-2.5 h-2.5 text-white" />
-              </div>
             )}
           </div>
 
@@ -202,12 +429,15 @@ export default function AssetCard({ asset, viewMode = 'grid' }: AssetCardProps) 
     );
   }
 
-  // Grid view
+  // ── Grid view ────────────────────────────────────────────────────────────────
   return (
     <>
+      {ContextMenuPopup}
+      {Modals}
       <div
         className="group relative bg-white border border-slate-200 rounded-xl overflow-hidden hover:shadow-lg hover:border-slate-300 transition-all duration-200 cursor-pointer"
         onClick={() => isLinkAsset ? window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer') : setDialogOpen(true)}
+        onContextMenu={openContextMenu}
       >
         {/* Thumbnail area */}
         <div className="relative aspect-video bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
