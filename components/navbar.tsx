@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname, useRouter } from 'next/navigation';
-import { Menu, Search, Upload, X, LayoutGrid, LogOut, ChevronDown, FolderOpen, BookOpen } from 'lucide-react';
+import { Menu, Search, Upload, X, LayoutGrid, LogOut, ChevronDown, BookOpen } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import {
@@ -35,7 +35,6 @@ interface AuthUser {
 
 const navLinks = [
   { href: '/', label: 'Browse', icon: LayoutGrid },
-  { href: '/collections', label: 'Collections', icon: FolderOpen },
   { href: '/brand-guidelines', label: 'Brand Guidelines', icon: BookOpen },
 ];
 
