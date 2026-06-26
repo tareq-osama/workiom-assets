@@ -17,7 +17,7 @@ const LIMIT = 24;
 
 function AssetGridSkeleton({ count = 12 }: { count?: number }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4">
+    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="rounded-xl border border-slate-100 overflow-hidden">
           <Skeleton className="aspect-square w-full" />
@@ -235,7 +235,7 @@ export default function BrowsePage({
                 </Button>
               </div>
             ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-4">
+              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                 {assets.map((asset) => (
                   <AssetCard key={asset.id} asset={asset} viewMode="grid" />
                 ))}
