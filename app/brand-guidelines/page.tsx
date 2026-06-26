@@ -1035,7 +1035,7 @@ export default function BrandGuidelinesPage() {
           </div>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3 pt-6 sm:pt-8">
             <div className="flex items-center gap-3">
-              <Image src="/workiom-icon.png" alt="Workiom" width={32} height={32} className="h-8 w-8 object-contain brightness-0 invert" unoptimized />
+              <Image src="/api/file/r2/6a3e9a4e0007fdbc5842/icon.png?v=2" alt="Workiom" width={32} height={32} className="h-8 w-8 object-contain brightness-0 invert" unoptimized />
               <span className="text-[11px] text-white">© 2026 Workiom. All rights reserved.</span>
             </div>
             <p className="flex items-center gap-1.5 text-[11px] text-white">
