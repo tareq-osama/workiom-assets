@@ -581,7 +581,7 @@ export default function BrandGuidelinesPage() {
         </section>
 
         {/* Footer */}
-        <footer className="bg-[#0A0A0A] px-10 sm:px-16 py-12">
+        <footer className="px-10 sm:px-16 py-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/10">
             <div>
               <p className="text-xs font-semibold text-white/60 mb-1">Visual Identity Guidelines</p>
