@@ -2,18 +2,17 @@ import { NextResponse } from 'next/server'
 import type { NextRequest } from 'next/server'
 import { verifyToken } from '@/lib/auth'
 
-const PUBLIC_PATHS = ['/login', '/signup']
+// Only these paths require a valid session
+const PROTECTED_PATHS = ['/upload', '/api/upload']
 
 export async function proxy(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Allow public paths and API auth routes and static files
+  // Static assets and auth API never need a token check
   if (
-    PUBLIC_PATHS.some((p) => pathname.startsWith(p)) ||
     pathname.startsWith('/api/auth') ||
     pathname.startsWith('/_next') ||
-    pathname.startsWith('/favicon') ||
-    pathname === '/'
+    pathname.startsWith('/favicon')
   ) {
     return NextResponse.next()
   }
@@ -21,16 +20,26 @@ export async function proxy(request: NextRequest) {
   const token = request.cookies.get('auth-token')?.value
   const payload = token ? await verifyToken(token) : null
 
-  if (!payload) {
+  // Enforce auth only on upload routes
+  const requiresAuth = PROTECTED_PATHS.some(
+    (p) => pathname === p || pathname.startsWith(p + '/')
+  )
+
+  if (requiresAuth && !payload) {
+    if (pathname.startsWith('/api/')) {
+      return new NextResponse('Unauthorized', { status: 401 })
+    }
     return NextResponse.redirect(new URL('/login', request.url))
   }
 
-  // Inject user info into headers for server components
+  // Inject user headers for server components whenever a valid session exists
   const res = NextResponse.next()
-  res.headers.set('x-user-id', payload.id)
-  res.headers.set('x-user-email', payload.email)
-  res.headers.set('x-user-name', payload.name)
-  res.headers.set('x-user-role', payload.role)
+  if (payload) {
+    res.headers.set('x-user-id', payload.id)
+    res.headers.set('x-user-email', payload.email)
+    res.headers.set('x-user-name', payload.name)
+    res.headers.set('x-user-role', payload.role)
+  }
   return res
 }
 
