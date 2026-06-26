@@ -6,10 +6,18 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart,
-  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight,
+  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight, GripVertical,
 } from 'lucide-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
+import {
+  DndContext, closestCenter, PointerSensor, useSensor, useSensors,
+  type DragEndEvent,
+} from '@dnd-kit/core';
+import {
+  SortableContext, useSortable, verticalListSortingStrategy, arrayMove,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -206,7 +214,7 @@ function PageNav({ prev, next, onNavigate }: {
 function BiuImageCell({ src, onClick }: { src: string; onClick: () => void }) {
   const [loaded, setLoaded] = useState(false);
   return (
-    <div className="relative aspect-video overflow-hidden rounded-xl bg-slate-200">
+    <div className="relative overflow-hidden rounded-xl bg-slate-100 min-h-[80px]">
       {!loaded && (
         <div className="absolute inset-0 animate-pulse bg-gradient-to-r from-slate-200 via-slate-100 to-slate-200" />
       )}
@@ -215,13 +223,117 @@ function BiuImageCell({ src, onClick }: { src: string; onClick: () => void }) {
         src={src}
         alt="Brand application"
         className={cn(
-          'absolute inset-0 w-full h-full object-cover cursor-pointer transition-[opacity,transform] duration-500 ease-out',
-          loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none',
+          'w-full h-auto block cursor-pointer transition-[opacity,transform] duration-500 ease-out',
+          loaded ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-2 pointer-events-none',
         )}
         loading="lazy"
         onLoad={() => setLoaded(true)}
         onClick={onClick}
       />
+    </div>
+  );
+}
+
+/* ─────────────────────────────────────────────
+   Sortable BIU row (drag-to-reorder)
+───────────────────────────────────────────── */
+interface SortableBiuRowProps {
+  row: BIURow;
+  editMode: boolean;
+  uploadingCell: string | null;
+  onAddCell: (rowId: string) => void;
+  onRemoveCell: (rowId: string, cellId: string) => void;
+  onRemoveRow: (rowId: string) => void;
+  onUpload: (rowId: string, cellId: string, file: File) => void;
+  onClearImage: (rowId: string, cellId: string) => void;
+  onOpenLightbox: (url: string) => void;
+}
+
+function SortableBiuRow({
+  row, editMode, uploadingCell,
+  onAddCell, onRemoveCell, onRemoveRow, onUpload, onClearImage, onOpenLightbox,
+}: SortableBiuRowProps) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
+    useSortable({ id: row.id });
+
+  const style: React.CSSProperties = {
+    transform: CSS.Transform.toString(transform),
+    transition,
+    opacity: isDragging ? 0.4 : 1,
+  };
+
+  const visibleCells = editMode ? row.cells : row.cells.filter(c => c.imageUrl);
+  if (!editMode && visibleCells.length === 0) return null;
+  const colClass = GRID_COLS[Math.min(visibleCells.length, 4)] ?? 'grid-cols-1';
+
+  return (
+    <div ref={setNodeRef} style={style} {...attributes}>
+      {editMode && (
+        <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
+          <div className="flex items-center gap-2">
+            {/* Drag handle */}
+            <button
+              {...listeners}
+              className="cursor-grab active:cursor-grabbing p-1 text-slate-300 hover:text-slate-500 transition-colors touch-none"
+              aria-label="Drag to reorder"
+            >
+              <GripVertical className="h-4 w-4" />
+            </button>
+            <button onClick={() => onAddCell(row.id)} disabled={row.cells.length >= 4}
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <Plus className="h-3 w-3" /> Column
+            </button>
+            <button onClick={() => onRemoveCell(row.id, row.cells[row.cells.length - 1].id)} disabled={row.cells.length <= 1}
+              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
+              <Minus className="h-3 w-3" /> Column
+            </button>
+          </div>
+          <button onClick={() => onRemoveRow(row.id)}
+            className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50 rounded-md transition-colors">
+            <Trash2 className="h-3 w-3" /> Remove row
+          </button>
+        </div>
+      )}
+
+      <div className={cn('grid gap-3 items-start', colClass)}>
+        {visibleCells.map(cell => (
+          <div key={cell.id} className={cn(
+            'relative group/cell rounded-xl overflow-hidden',
+            editMode && !cell.imageUrl ? 'min-h-[120px] bg-[#F4F4F4]' : '',
+          )}>
+            {cell.imageUrl ? (
+              <>
+                {editMode ? (
+                  /* eslint-disable-next-line @next/next/no-img-element */
+                  <img src={cell.imageUrl} alt="Brand application" className="w-full h-auto block rounded-xl" />
+                ) : (
+                  <BiuImageCell src={cell.imageUrl} onClick={() => onOpenLightbox(cell.imageUrl!)} />
+                )}
+                {editMode && (
+                  <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/cell:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-150 rounded-xl">
+                    <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
+                      <Upload className="h-3 w-3" /> Change
+                      <input type="file" accept="image/*" className="hidden"
+                        onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(row.id, cell.id, f); }} />
+                    </label>
+                    <button onClick={() => onClearImage(row.id, cell.id)}
+                      className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors">
+                      <Trash2 className="h-3 w-3" /> Remove
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : editMode ? (
+              <label className="absolute inset-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#D0D0D0] rounded-xl cursor-pointer hover:border-[#9635F0] hover:bg-[#9635F0]/5 transition-all">
+                {uploadingCell === cell.id ? <Loader2 className="h-6 w-6 text-slate-400 animate-spin" /> : <Upload className="h-6 w-6 text-slate-400" />}
+                <span className="text-xs font-medium text-slate-400">{uploadingCell === cell.id ? 'Uploading…' : 'Click to upload'}</span>
+                <input type="file" accept="image/*" className="hidden"
+                  onChange={e => { const f = e.target.files?.[0]; if (f) onUpload(row.id, cell.id, f); }} />
+              </label>
+            ) : null}
+          </div>
+        ))}
+      </div>
     </div>
   );
 }
@@ -243,6 +355,17 @@ export default function BrandGuidelinesPage() {
   const [saving, setSaving] = useState(false);
   const [lightboxOpen, setLightboxOpen] = useState(false);
   const [lightboxIdx, setLightboxIdx] = useState(0);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  function handleDragEnd(event: DragEndEvent) {
+    const { active, over } = event;
+    if (over && active.id !== over.id) {
+      const oldIndex = biu.rows.findIndex(r => r.id === active.id);
+      const newIndex = biu.rows.findIndex(r => r.id === over.id);
+      biuSave({ rows: arrayMove(biu.rows, oldIndex, newIndex) });
+    }
+  }
 
   useEffect(() => {
     fetch('/api/auth/me').then(r => r.json()).then(d => setEditUser(d.user ?? null)).catch(() => {});
@@ -730,75 +853,24 @@ export default function BrandGuidelinesPage() {
                 </div>
               ) : (
                 <div className="space-y-3">
-                  {biu.rows.map(row => {
-                    const visibleCells = editMode ? row.cells : row.cells.filter(c => c.imageUrl);
-                    if (!editMode && visibleCells.length === 0) return null;
-                    const colClass = GRID_COLS[Math.min(visibleCells.length, 4)] ?? 'grid-cols-1';
-                    return (
-                      <div key={row.id}>
-                        {editMode && (
-                          <div className="flex flex-wrap items-center justify-between gap-2 mb-2">
-                            <div className="flex items-center gap-2">
-                              <button onClick={() => biuAddCell(row.id)} disabled={row.cells.length >= 4}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-                                <Plus className="h-3 w-3" /> Column
-                              </button>
-                              <button onClick={() => biuRemoveCell(row.id, row.cells[row.cells.length - 1].id)} disabled={row.cells.length <= 1}
-                                className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-slate-600 bg-slate-100 hover:bg-slate-200 rounded-md disabled:opacity-30 disabled:cursor-not-allowed transition-colors">
-                                <Minus className="h-3 w-3" /> Column
-                              </button>
-                            </div>
-                            <button onClick={() => biuRemoveRow(row.id)}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold text-red-500 hover:bg-red-50 rounded-md transition-colors">
-                              <Trash2 className="h-3 w-3" /> Remove row
-                            </button>
-                          </div>
-                        )}
-                        <div className={cn('grid gap-3 items-start', colClass)}>
-                          {visibleCells.map(cell => (
-                            <div key={cell.id} className={cn(
-                              'relative group/cell rounded-xl overflow-hidden',
-                              editMode ? 'bg-[#F4F4F4] aspect-video' : '',
-                            )}>
-                              {cell.imageUrl ? (
-                                <>
-                                  {editMode ? (
-                                    /* eslint-disable-next-line @next/next/no-img-element */
-                                    <img src={cell.imageUrl} alt="Brand application" className="w-full h-full object-cover" />
-                                  ) : (
-                                    <BiuImageCell
-                                      src={cell.imageUrl}
-                                      onClick={() => openLightbox(cell.imageUrl!)}
-                                    />
-                                  )}
-                                  {editMode && (
-                                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover/cell:opacity-100 flex items-center justify-center gap-2 transition-opacity duration-150">
-                                      <label className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg cursor-pointer hover:bg-slate-100 transition-colors">
-                                        <Upload className="h-3 w-3" /> Change
-                                        <input type="file" accept="image/*" className="hidden"
-                                          onChange={e => { const f = e.target.files?.[0]; if (f) biuUpload(row.id, cell.id, f); }} />
-                                      </label>
-                                      <button onClick={() => biuClearImage(row.id, cell.id)}
-                                        className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-red-500 text-white text-xs font-semibold rounded-lg hover:bg-red-600 transition-colors">
-                                        <Trash2 className="h-3 w-3" /> Remove
-                                      </button>
-                                    </div>
-                                  )}
-                                </>
-                              ) : editMode ? (
-                                <label className="absolute inset-0 flex flex-col items-center justify-center gap-2 border-2 border-dashed border-[#D0D0D0] rounded-xl cursor-pointer hover:border-[#9635F0] hover:bg-[#9635F0]/5 transition-all">
-                                  {uploadingCell === cell.id ? <Loader2 className="h-6 w-6 text-slate-400 animate-spin" /> : <Upload className="h-6 w-6 text-slate-400" />}
-                                  <span className="text-xs font-medium text-slate-400">{uploadingCell === cell.id ? 'Uploading…' : 'Click to upload'}</span>
-                                  <input type="file" accept="image/*" className="hidden"
-                                    onChange={e => { const f = e.target.files?.[0]; if (f) biuUpload(row.id, cell.id, f); }} />
-                                </label>
-                              ) : null}
-                            </div>
-                          ))}
-                        </div>
-                      </div>
-                    );
-                  })}
+                  <DndContext sensors={sensors} collisionDetection={closestCenter} onDragEnd={handleDragEnd}>
+                    <SortableContext items={biu.rows.map(r => r.id)} strategy={verticalListSortingStrategy}>
+                      {biu.rows.map(row => (
+                        <SortableBiuRow
+                          key={row.id}
+                          row={row}
+                          editMode={editMode}
+                          uploadingCell={uploadingCell}
+                          onAddCell={biuAddCell}
+                          onRemoveCell={biuRemoveCell}
+                          onRemoveRow={biuRemoveRow}
+                          onUpload={biuUpload}
+                          onClearImage={biuClearImage}
+                          onOpenLightbox={openLightbox}
+                        />
+                      ))}
+                    </SortableContext>
+                  </DndContext>
 
                   {editMode && (
                     <div className="flex flex-wrap items-center gap-3 pt-5 border-t border-[#EAEAEA]">
