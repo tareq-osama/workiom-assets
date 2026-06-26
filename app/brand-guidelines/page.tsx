@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect, useMemo, useRef } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -8,6 +8,8 @@ import {
   Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart,
   Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight,
 } from 'lucide-react';
+import Lightbox from 'yet-another-react-lightbox';
+import 'yet-another-react-lightbox/styles.css';
 import { cn } from '@/lib/utils';
 
 /* ─────────────────────────────────────────────
@@ -220,122 +222,6 @@ function BiuImageCell({ src, onClick }: { src: string; onClick: () => void }) {
         onLoad={() => setLoaded(true)}
         onClick={onClick}
       />
-    </div>
-  );
-}
-
-/* ─────────────────────────────────────────────
-   Lightbox — self-contained so navigation
-   doesn't re-render the image grid above
-───────────────────────────────────────────── */
-function BrandInUseLightbox({ images, startIdx, onClose }: {
-  images: string[];
-  startIdx: number;
-  onClose: () => void;
-}) {
-  const [idx, setIdx] = useState(startIdx);
-  const onCloseRef = useRef(onClose);
-  onCloseRef.current = onClose;
-
-  useEffect(() => {
-    function handleKey(e: KeyboardEvent) {
-      if (e.key === 'Escape') onCloseRef.current();
-      if (e.key === 'ArrowLeft') setIdx(i => (i - 1 + images.length) % images.length);
-      if (e.key === 'ArrowRight') setIdx(i => (i + 1) % images.length);
-    }
-    window.addEventListener('keydown', handleKey);
-    return () => window.removeEventListener('keydown', handleKey);
-  }, [images]);
-
-  return (
-    <div
-      className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4 sm:p-8"
-      onClick={() => onCloseRef.current()}
-    >
-      <div
-        className="relative flex flex-col w-full max-w-5xl"
-        style={{ height: '90vh' }}
-        onClick={e => e.stopPropagation()}
-      >
-        {/* Header */}
-        <div className="flex items-center justify-between px-5 py-3 flex-shrink-0">
-          <span className="text-white/60 text-sm tabular-nums font-medium">
-            {idx + 1} / {images.length}
-          </span>
-          <div className="flex items-center gap-2">
-            <a
-              href={images[idx]}
-              download
-              className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg text-xs font-semibold bg-white/10 text-white hover:bg-white/20 transition-colors"
-              onClick={e => e.stopPropagation()}
-            >
-              <Download className="h-3.5 w-3.5" /> Download
-            </a>
-            <button
-              onClick={() => onCloseRef.current()}
-              className="p-1.5 rounded-lg text-white/60 hover:text-white hover:bg-white/10 transition-colors"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
-        </div>
-
-        {/* Main image */}
-        <div className="relative flex-1 min-h-0 flex items-center justify-center overflow-hidden">
-          {images.length > 1 && (
-            <button
-              onClick={() => setIdx(i => (i - 1 + images.length) % images.length)}
-              className="absolute left-3 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
-            >
-              <ChevronLeft className="h-6 w-6" />
-            </button>
-          )}
-          {/* Render all images; toggle opacity so no remount/refetch on nav */}
-          {images.map((url, i) => (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              key={url}
-              src={url}
-              alt={`Brand in use ${i + 1}`}
-              className={cn(
-                'absolute inset-0 m-auto max-h-full max-w-full object-contain select-none p-4 sm:p-6 transition-opacity duration-150',
-                i === idx ? 'opacity-100' : 'opacity-0 pointer-events-none',
-              )}
-            />
-          ))}
-          {images.length > 1 && (
-            <button
-              onClick={() => setIdx(i => (i + 1) % images.length)}
-              className="absolute right-3 z-10 p-2 rounded-full bg-black/40 text-white hover:bg-black/60 transition-colors"
-            >
-              <ChevronRight className="h-6 w-6" />
-            </button>
-          )}
-        </div>
-
-        {/* Thumbnail strip */}
-        {images.length > 1 && (
-          <div className="flex-shrink-0 px-4 py-3 overflow-x-auto">
-            <div className="flex gap-2 justify-center">
-              {images.map((url, i) => (
-                <button
-                  key={i}
-                  onClick={() => setIdx(i)}
-                  className={cn(
-                    'flex-shrink-0 w-16 h-11 sm:w-20 sm:h-14 rounded-lg overflow-hidden border-2 transition-all',
-                    i === idx
-                      ? 'border-[#9635F0] opacity-100'
-                      : 'border-transparent opacity-40 hover:opacity-70',
-                  )}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img src={url} alt="" className="w-full h-full object-cover" />
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-      </div>
     </div>
   );
 }
@@ -1013,13 +899,13 @@ export default function BrandGuidelinesPage() {
 
       </main>
 
-      {lightboxOpen && allBiuImages.length > 0 && (
-        <BrandInUseLightbox
-          images={allBiuImages}
-          startIdx={lightboxIdx}
-          onClose={() => setLightboxOpen(false)}
-        />
-      )}
+      <Lightbox
+        open={lightboxOpen}
+        close={() => setLightboxOpen(false)}
+        index={lightboxIdx}
+        slides={allBiuImages.map(src => ({ src }))}
+        styles={{ root: { '--yarl__color_backdrop': 'rgba(0,0,0,0.75)', backdropFilter: 'blur(12px)' } }}
+      />
     </div>
   );
 }
