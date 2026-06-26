@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart,
-  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight, GripVertical, Play,
+  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight, GripVertical,
 } from 'lucide-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -952,33 +952,25 @@ export default function BrandGuidelinesPage() {
                     <span className="text-base leading-none">🇹🇷</span>
                     <p className="text-sm font-semibold text-slate-900">Turkish</p>
                   </div>
-                  <a
-                    href="https://drive.google.com/drive/folders/10C1QY84sfwhMOVur2qu0TKVc7vtwhbIg?usp=sharing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="group block relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-[#F7F7F7] hover:border-[#9635F0]/40 transition-colors"
+                  <div
+                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
                     style={{ aspectRatio: '16/9' }}
                   >
-                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
-                      <div
-                        className="h-16 w-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
-                        style={{ background: 'linear-gradient(135deg, #360C73 0%, #9635F0 100%)' }}
-                      >
-                        <Play className="h-7 w-7 text-white translate-x-0.5" />
-                      </div>
-                      <div className="text-center px-4">
-                        <p className="text-sm font-semibold text-slate-700">Workiom Tanıtım Videosu</p>
-                        <p className="text-xs text-slate-400 mt-1">Google Drive&apos;da İzle</p>
-                      </div>
-                    </div>
-                  </a>
+                    <iframe
+                      src="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/preview"
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay"
+                      allowFullScreen
+                      title="Workiom Marketing Video — Turkish"
+                    />
+                  </div>
                   <a
-                    href="https://drive.google.com/drive/folders/10C1QY84sfwhMOVur2qu0TKVc7vtwhbIg?usp=sharing"
+                    href="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/view?usp=sharing"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
                   >
-                    <ExternalLink className="h-3 w-3" /> Open folder in Google Drive
+                    <ExternalLink className="h-3 w-3" /> Open in Google Drive
                   </a>
                 </div>
               </div>
