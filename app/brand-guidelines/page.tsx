@@ -6,7 +6,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import {
   Check, Copy, Download, ExternalLink, Menu, X, ArrowLeft, Heart,
-  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight, GripVertical,
+  Pencil, Upload, Loader2, Plus, Minus, Trash2, ChevronLeft, ChevronRight, GripVertical, Play,
 } from 'lucide-react';
 import Lightbox from 'yet-another-react-lightbox';
 import 'yet-another-react-lightbox/styles.css';
@@ -24,12 +24,13 @@ import { cn } from '@/lib/utils';
    Navigation
 ───────────────────────────────────────────── */
 const NAV = [
-  { id: 'introduction', label: 'Introduction', num: '01' },
-  { id: 'logo',         label: 'Logo',         num: '02' },
-  { id: 'typography',   label: 'Typography',   num: '03' },
-  { id: 'color',        label: 'Color',        num: '04' },
-  { id: 'brand-in-use', label: 'Brand in Use', num: '05' },
-  { id: 'resources',    label: 'Resources',    num: '06' },
+  { id: 'introduction',    label: 'Introduction',    num: '01' },
+  { id: 'logo',            label: 'Logo',            num: '02' },
+  { id: 'typography',      label: 'Typography',      num: '03' },
+  { id: 'color',           label: 'Color',           num: '04' },
+  { id: 'brand-in-use',   label: 'Brand in Use',    num: '05' },
+  { id: 'marketing-video', label: 'Marketing Video', num: '06' },
+  { id: 'resources',       label: 'Resources',       num: '07' },
 ];
 
 /* ─────────────────────────────────────────────
@@ -904,7 +905,91 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            06 · Resources
+            06 · Marketing Video
+        ════════════════════════════════════════ */}
+        {activePage === 'marketing-video' && (
+          <section>
+            <SectionBanner title="Marketing Video" />
+
+            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-8">
+              <p className="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
+                Official Workiom marketing video — available in English and Turkish.
+                Use these for presentations, pitches, websites, and social channels.
+              </p>
+
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                {/* English */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base leading-none">🇬🇧</span>
+                    <p className="text-sm font-semibold text-slate-900">English</p>
+                  </div>
+                  <div
+                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
+                    style={{ aspectRatio: '16/9' }}
+                  >
+                    <iframe
+                      src="https://drive.google.com/file/d/1hgkimhA9nsJKyl1rLSHZDLsM3Tc7_-zS/preview"
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay"
+                      allowFullScreen
+                      title="Workiom Marketing Video — English"
+                    />
+                  </div>
+                  <a
+                    href="https://drive.google.com/file/d/1hgkimhA9nsJKyl1rLSHZDLsM3Tc7_-zS/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" /> Open in Google Drive
+                  </a>
+                </div>
+
+                {/* Turkish */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base leading-none">🇹🇷</span>
+                    <p className="text-sm font-semibold text-slate-900">Turkish</p>
+                  </div>
+                  <a
+                    href="https://drive.google.com/drive/folders/10C1QY84sfwhMOVur2qu0TKVc7vtwhbIg?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="group block relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-[#F7F7F7] hover:border-[#9635F0]/40 transition-colors"
+                    style={{ aspectRatio: '16/9' }}
+                  >
+                    <div className="absolute inset-0 flex flex-col items-center justify-center gap-4">
+                      <div
+                        className="h-16 w-16 rounded-full flex items-center justify-center transition-transform group-hover:scale-110"
+                        style={{ background: 'linear-gradient(135deg, #360C73 0%, #9635F0 100%)' }}
+                      >
+                        <Play className="h-7 w-7 text-white translate-x-0.5" />
+                      </div>
+                      <div className="text-center px-4">
+                        <p className="text-sm font-semibold text-slate-700">Workiom Tanıtım Videosu</p>
+                        <p className="text-xs text-slate-400 mt-1">Google Drive&apos;da İzle</p>
+                      </div>
+                    </div>
+                  </a>
+                  <a
+                    href="https://drive.google.com/drive/folders/10C1QY84sfwhMOVur2qu0TKVc7vtwhbIg?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" /> Open folder in Google Drive
+                  </a>
+                </div>
+              </div>
+            </div>
+
+            <PageNav prev={prev} next={next} onNavigate={navigate} />
+          </section>
+        )}
+
+        {/* ════════════════════════════════════════
+            07 · Resources
         ════════════════════════════════════════ */}
         {activePage === 'resources' && (
           <section>
