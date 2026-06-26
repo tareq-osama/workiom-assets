@@ -33,15 +33,15 @@ Workiom helps teams automate workflows, build internal tools, manage operations,
 Colors:
 • Workiom Purple  #9635F0  RGB(150,53,240)   — primary brand color
 • Blue            #3C84FD  RGB(60,132,253)   — secondary / CTAs
-• Dark Purple     #52009F  RGB(82,0,159)     — deep accent
+• Dark Purple     #360C73  RGB(54,12,115)    — deep accent
 • Violet          #8201AD  RGB(130,1,173)    — accent
 • Yellow          #FDBC0B  RGB(253,188,11)   — highlight / warning
 • Deep Navy       #231F61  RGB(35,31,97)     — text / backgrounds
 • Light Gray      #D9D9D9  RGB(217,217,217)  — neutral
 • Black #000000 / White #FFFFFF
 
-Primary gradient:  linear-gradient(135deg, #52009F 0%, #8201AD 45%, #9635F0 100%)
-Dark gradient:     linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)
+Primary gradient:  linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
+Dark gradient:     linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)
 
 Typography:
 • Latin/English: General Sans (Bold, SemiBold, Medium, Regular, Light)
@@ -92,7 +92,7 @@ Primary:
 • Blue            #3C84FD  RGB(60,132,253)
 
 Extended palette:
-• Dark Purple     #52009F  RGB(82,0,159)
+• Dark Purple     #360C73  RGB(54,12,115)
 • Violet          #8201AD  RGB(130,1,173)
 • Yellow Accent   #FDBC0B  RGB(253,188,11)
 • Deep Navy       #231F61  RGB(35,31,97)
@@ -101,8 +101,8 @@ Extended palette:
 • White           #FFFFFF
 
 Gradients:
-Primary:  linear-gradient(135deg, #52009F 0%, #8201AD 45%, #9635F0 100%)
-Dark:     linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)`,
+Primary:  linear-gradient(135deg, #360C73 0%, #8201AD 45%, #9635F0 100%)
+Dark:     linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)`,
 };
 
 /* ─────────────────────────────────────────────
@@ -150,7 +150,7 @@ function SectionBanner({ title }: { title: string }) {
   return (
     <div
       className="h-44 sm:h-52 flex items-end px-10 sm:px-16 pb-10"
-      style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
+      style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
     >
       <h2 className="text-4xl sm:text-5xl font-semibold text-white leading-none tracking-tight">{title}</h2>
     </div>
@@ -293,7 +293,7 @@ export default function BrandGuidelinesPage() {
           {/* Hero */}
           <div
             className="relative h-72 sm:h-80 flex flex-col justify-end px-10 sm:px-16 pb-12 overflow-hidden"
-            style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
+            style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
           >
             {/* Back button */}
             <button
@@ -360,7 +360,7 @@ export default function BrandGuidelinesPage() {
               <div className="rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] flex items-center justify-center min-h-[180px] p-12">
                 <Image src="/workiom-logo.png" alt="Workiom wordmark on light" width={220} height={56} className="h-12 w-auto max-w-full object-contain" unoptimized />
               </div>
-              <div className="rounded-2xl flex items-center justify-center min-h-[180px] p-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 100%)' }}>
+              <div className="rounded-2xl flex items-center justify-center min-h-[180px] p-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 100%)' }}>
                 <Image src="/workiom-logo.png" alt="Workiom wordmark on dark" width={220} height={56} className="h-12 w-auto max-w-full object-contain brightness-0 invert" unoptimized />
               </div>
             </div>
@@ -395,7 +395,7 @@ export default function BrandGuidelinesPage() {
             </div>
 
             {/* Do / Don't visual comparison */}
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+            <div className="space-y-5">
 
               {/* ✓ Do */}
               <div className="rounded-2xl border border-emerald-100 bg-emerald-50/40 p-6 flex flex-col gap-4">
@@ -403,25 +403,25 @@ export default function BrandGuidelinesPage() {
                   <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-emerald-500 text-white text-[9px]">✓</span>
                   Do
                 </p>
-                <div className="flex flex-col gap-3 flex-1">
-                  <div className="flex-1 rounded-xl bg-white border border-emerald-100 flex flex-col items-center justify-center gap-3 py-8 px-6">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  <div className="rounded-xl bg-white border border-emerald-100 flex flex-col items-center justify-center gap-3 py-8 px-6">
                     <Image src="/workiom-logo.png" alt="Correct usage on white" width={160} height={44} className="h-9 w-auto object-contain" unoptimized />
                     <p className="text-[11px] text-slate-400">Correct proportions on white</p>
                   </div>
-                  <div className="flex-1 rounded-xl flex flex-col items-center justify-center gap-3 py-8 px-6" style={{ background: 'linear-gradient(135deg, #231F61, #52009F)' }}>
+                  <div className="rounded-xl flex flex-col items-center justify-center gap-3 py-8 px-6" style={{ background: 'linear-gradient(135deg, #231F61, #360C73)' }}>
                     <Image src="/workiom-logo.png" alt="Correct usage on dark" width={160} height={44} className="h-9 w-auto object-contain brightness-0 invert" unoptimized />
                     <p className="text-[11px] text-white/50">White version on dark background</p>
                   </div>
                 </div>
               </div>
 
-              {/* ✕ Don't */}
+              {/* ✕ Don't — full-width row */}
               <div className="rounded-2xl border border-red-100 bg-red-50/40 p-6 flex flex-col gap-4">
                 <p className="text-xs font-bold text-red-600 flex items-center gap-1.5">
                   <span className="inline-flex items-center justify-center h-4 w-4 rounded-full bg-red-500 text-white text-[9px]">✕</span>
                   Don't
                 </p>
-                <div className="grid grid-cols-2 gap-3">
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {[
                     { label: 'Stretched',        style: { transform: 'scaleX(1.9)'       }, bg: '#F9F9F9', cls: '' },
                     { label: 'Skewed',           style: { transform: 'skewX(-22deg)'     }, bg: '#F9F9F9', cls: '' },
@@ -446,8 +446,8 @@ export default function BrandGuidelinesPage() {
                     </div>
                   ))}
                 </div>
-                {/* Original don't sentences */}
-                <ul className="flex flex-col gap-1.5 pt-1 border-t border-red-100">
+                {/* Advice list below the cards */}
+                <ul className="grid grid-cols-1 sm:grid-cols-2 gap-x-8 gap-y-1.5 pt-1 border-t border-red-100">
                   {[
                     'Stretch, skew, or distort the logo',
                     'Place on busy or low-contrast backgrounds',
@@ -565,7 +565,7 @@ export default function BrandGuidelinesPage() {
 
             <div className="grid grid-cols-3 gap-4">
               <ColorSwatch name="Blue"        hex="#3C84FD" rgb="60, 132, 253" />
-              <ColorSwatch name="Dark Purple" hex="#52009F" rgb="82, 0, 159" />
+              <ColorSwatch name="Dark Purple" hex="#360C73" rgb="54, 12, 115" />
               <ColorSwatch name="Violet"      hex="#8201AD" rgb="130, 1, 173" />
             </div>
 
@@ -611,7 +611,7 @@ export default function BrandGuidelinesPage() {
 
             <div
               className="rounded-2xl px-10 py-12 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6"
-              style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}
+              style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
             >
               <div>
                 <p className="text-xl font-semibold text-white mb-1">Need help applying the Workiom brand?</p>
@@ -628,7 +628,7 @@ export default function BrandGuidelinesPage() {
         </section>
 
         {/* Footer */}
-        <footer className="px-10 sm:px-16 py-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #52009F 55%, #9635F0 100%)' }}>
+        <footer className="px-10 sm:px-16 py-12" style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}>
           <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 pb-8 border-b border-white/20">
             <div>
               <p className="text-xs font-semibold text-white mb-1">Visual Identity Guidelines</p>
