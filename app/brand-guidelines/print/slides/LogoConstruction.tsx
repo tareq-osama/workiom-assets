@@ -15,7 +15,7 @@ export function LogoConstructionSlide() {
           <img
             src="/logo-construction.svg"
             alt="Workiom logo construction grid"
-            className="w-full h-auto"
+            className="w-full h-auto max-h-full"
           />
         </div>
       </div>
