@@ -33,6 +33,8 @@ interface AuthUser {
   avatarUrl?: string;
 }
 
+const HIDDEN_NAVBAR_ROUTES = ['/brand-guidelines', '/brand-guidelines/print'];
+
 const navLinks = [
   { href: '/', label: 'Browse', icon: LayoutGrid },
   { href: '/brand-guidelines', label: 'Brand Guidelines', icon: BookOpen },
@@ -94,7 +96,7 @@ export default function Navbar() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    if (pathname === '/brand-guidelines' || pathname === '/brand-guidelines/print') return;
+    if (HIDDEN_NAVBAR_ROUTES.includes(pathname)) return;
     fetch('/api/auth/me')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -104,7 +106,7 @@ export default function Navbar() {
       .catch(() => {});
   }, [pathname]);
 
-  if (pathname === '/brand-guidelines' || pathname === '/brand-guidelines/print') return null;
+  if (HIDDEN_NAVBAR_ROUTES.includes(pathname)) return null;
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' });

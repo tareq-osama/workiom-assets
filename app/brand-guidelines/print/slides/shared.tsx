@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react';
+import { COLOR_PURPLE } from '@/lib/brand';
 
 export function Slide({
   children,
@@ -39,7 +40,10 @@ export function SlideHeader({
       }`}
     >
       <span className="flex items-center gap-2.5 font-medium">
-        <span className={`h-3 w-3 rounded-full ${dark ? 'bg-white' : 'bg-[#9635F0]'}`} />
+        <span
+          className={`h-3 w-3 rounded-full ${dark ? 'bg-white' : ''}`}
+          style={dark ? undefined : { backgroundColor: COLOR_PURPLE.hex }}
+        />
         Brand Guidelines
       </span>
       <span className="font-medium">{section}</span>
