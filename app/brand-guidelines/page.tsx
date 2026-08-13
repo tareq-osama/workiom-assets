@@ -19,7 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
-import { COLOR_PURPLE } from '@/lib/brand';
+import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW, COLOR_LIGHT_GRAY, COLOR_BLACK, COLOR_WHITE, TYPOGRAPHY_SAMPLES } from '@/lib/brand';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -898,16 +898,10 @@ export default function BrandGuidelinesPage() {
                 </div>
 
                 <div className="border border-[#EAEAEA] rounded-2xl overflow-hidden divide-y divide-[#EAEAEA]" style={{ fontFamily: "'General Sans', sans-serif" }}>
-                  {[
-                    { w: 700, label: 'Bold',     sample: 'Workiom AI will do the work' },
-                    { w: 600, label: 'SemiBold', sample: 'Transforming ideas into workflows' },
-                    { w: 500, label: 'Medium',   sample: 'Build, automate, and scale operations' },
-                    { w: 400, label: 'Regular',  sample: 'A future where every team creates the software they need' },
-                    { w: 300, label: 'Light',    sample: 'Minimal, modern, product-focused, spacious' },
-                  ].map((r) => (
+                  {TYPOGRAPHY_SAMPLES.map((r) => (
                     <div key={r.label} className="flex items-center gap-4 sm:gap-6 px-5 sm:px-8 py-4 sm:py-5 bg-white hover:bg-[#FAFAFA] transition-colors">
                       <span className="text-[10px] sm:text-[11px] font-mono text-slate-300 w-16 sm:w-20 flex-shrink-0">{r.label}</span>
-                      <p className="text-slate-800 truncate text-base sm:text-xl leading-tight" style={{ fontWeight: r.w }}>{r.sample}</p>
+                      <p className="text-slate-800 truncate text-base sm:text-xl leading-tight" style={{ fontWeight: r.weight }}>{r.sample}</p>
                     </div>
                   ))}
                 </div>
@@ -963,19 +957,19 @@ export default function BrandGuidelinesPage() {
               <ColorSwatch name={COLOR_PURPLE.name} hex={COLOR_PURPLE.hex} rgb={COLOR_PURPLE.rgb} tall />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
-                <ColorSwatch name="Blue"        hex="#3C84FD" rgb="60, 132, 253" />
-                <ColorSwatch name="Dark Purple" hex="#360C73" rgb="54, 12, 115" />
-                <ColorSwatch name="Violet"      hex="#8201AD" rgb="130, 1, 173" />
+                <ColorSwatch name={COLOR_BLUE.name}        hex={COLOR_BLUE.hex}        rgb={COLOR_BLUE.rgb} />
+                <ColorSwatch name={COLOR_DARK_PURPLE.name} hex={COLOR_DARK_PURPLE.hex} rgb={COLOR_DARK_PURPLE.rgb} />
+                <ColorSwatch name={COLOR_VIOLET.name}      hex={COLOR_VIOLET.hex}      rgb={COLOR_VIOLET.rgb} />
               </div>
 
               <div className="grid grid-cols-2 gap-3 sm:gap-4">
-                <ColorSwatch name="Yellow"     hex="#FDBC0B" rgb="253, 188, 11" />
-                <ColorSwatch name="Light Gray" hex="#D9D9D9" rgb="217, 217, 217" light />
+                <ColorSwatch name={COLOR_YELLOW.name}     hex={COLOR_YELLOW.hex}     rgb={COLOR_YELLOW.rgb} />
+                <ColorSwatch name={COLOR_LIGHT_GRAY.name} hex={COLOR_LIGHT_GRAY.hex} rgb={COLOR_LIGHT_GRAY.rgb} light />
               </div>
 
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 sm:gap-4">
-                <ColorSwatch name="Black" hex="#000000" rgb="0, 0, 0" />
-                <ColorSwatch name="White" hex="#FFFFFF" rgb="255, 255, 255" light />
+                <ColorSwatch name={COLOR_BLACK.name} hex={COLOR_BLACK.hex} rgb={COLOR_BLACK.rgb} />
+                <ColorSwatch name={COLOR_WHITE.name} hex={COLOR_WHITE.hex} rgb={COLOR_WHITE.rgb} light />
               </div>
             </div>
 
