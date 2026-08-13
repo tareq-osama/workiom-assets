@@ -94,7 +94,7 @@ export default function Navbar() {
   const [currentUser, setCurrentUser] = useState<AuthUser | null>(null);
 
   useEffect(() => {
-    if (pathname === '/brand-guidelines') return;
+    if (pathname === '/brand-guidelines' || pathname === '/brand-guidelines/print') return;
     fetch('/api/auth/me')
       .then((res) => (res.ok ? res.json() : null))
       .then((data) => {
@@ -104,7 +104,7 @@ export default function Navbar() {
       .catch(() => {});
   }, [pathname]);
 
-  if (pathname === '/brand-guidelines') return null;
+  if (pathname === '/brand-guidelines' || pathname === '/brand-guidelines/print') return null;
 
   async function handleSignOut() {
     await fetch('/api/auth/logout', { method: 'POST' });
