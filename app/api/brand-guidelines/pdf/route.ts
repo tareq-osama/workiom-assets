@@ -26,6 +26,12 @@ export async function GET(req: NextRequest) {
         'Content-Disposition': 'attachment; filename="workiom-brand-guidelines.pdf"',
       },
     });
+  } catch (error) {
+    console.error('GET /api/brand-guidelines/pdf error:', error);
+    return Response.json(
+      { error: error instanceof Error ? error.message : 'Failed to generate PDF' },
+      { status: 500 }
+    );
   } finally {
     await browser.close();
   }
