@@ -22,20 +22,29 @@ function tints(hex: string): string[] {
   });
 }
 
-function ColorBlock({ color, light = false }: { color: BrandColor; light?: boolean }) {
-  const textCls = light ? 'text-slate-500' : 'text-white/80';
+function ColorBlock({
+  color,
+  light = false,
+  darkText = false,
+}: {
+  color: BrandColor;
+  light?: boolean;
+  darkText?: boolean;
+}) {
+  const useDarkText = light || darkText;
+  const textCls = useDarkText ? 'text-slate-600' : 'text-white/80';
   return (
-    <div className="flex-1 h-full flex flex-col">
-      <div
-        className="flex-1 relative rounded-t-xl"
-        style={{ backgroundColor: color.hex, border: light ? '1px solid #EAEAEA' : undefined, borderBottom: 'none' }}
-      >
+    <div
+      className="flex-1 h-full flex flex-col rounded-xl overflow-hidden"
+      style={{ border: light ? '1px solid #EAEAEA' : undefined }}
+    >
+      <div className="flex-1 relative" style={{ backgroundColor: color.hex }}>
         <span className={`absolute bottom-4 left-5 text-xs ${textCls}`}>HEX</span>
         <span className={`absolute bottom-4 right-5 text-xs font-mono ${textCls}`}>
           {color.hex.replace('#', '')}
         </span>
       </div>
-      <div className="flex h-10 rounded-b-xl overflow-hidden">
+      <div className="flex h-10">
         {tints(color.hex).map((t, i) => (
           <div key={i} className="flex-1" style={{ backgroundColor: t }} />
         ))}
@@ -63,7 +72,7 @@ export function PrimaryColorSlide() {
             <ColorBlock color={COLOR_VIOLET} />
           </div>
           <div className="flex-1 flex gap-4">
-            <ColorBlock color={COLOR_YELLOW} />
+            <ColorBlock color={COLOR_YELLOW} darkText />
             <ColorBlock color={COLOR_LIGHT_GRAY} light />
             <ColorBlock color={COLOR_BLACK} />
             <ColorBlock color={COLOR_WHITE} light />
