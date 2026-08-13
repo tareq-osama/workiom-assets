@@ -19,6 +19,7 @@ import {
 } from '@dnd-kit/sortable';
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
+import { COLOR_PURPLE } from '@/lib/brand';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -959,7 +960,7 @@ export default function BrandGuidelinesPage() {
                 Our palette combines vibrant purples and blues with a bold yellow accent, grounded by clean neutrals.
               </p>
 
-              <ColorSwatch name="Workiom Purple" hex="#9635F0" rgb="150, 53, 240" tall />
+              <ColorSwatch name={COLOR_PURPLE.name} hex={COLOR_PURPLE.hex} rgb={COLOR_PURPLE.rgb} tall />
 
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 sm:gap-4">
                 <ColorSwatch name="Blue"        hex="#3C84FD" rgb="60, 132, 253" />
