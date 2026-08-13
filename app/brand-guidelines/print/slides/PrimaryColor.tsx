@@ -18,7 +18,7 @@ function Swatch({ color, light = false }: { color: BrandColor; light?: boolean }
       style={{ backgroundColor: color.hex, border: light ? '1px solid #EAEAEA' : undefined }}
     >
       <div className="absolute bottom-4 left-5">
-        <p className={`text-xs font-semibold mb-0.5 ${light ? 'text-slate-400' : 'text-white/70'}`}>
+        <p className={`text-xs font-semibold mb-0.5 ${light ? 'text-slate-500' : 'text-white/70'}`}>
           {color.name}
         </p>
         <p className={`text-sm font-mono font-bold ${light ? 'text-slate-700' : 'text-white'}`}>
