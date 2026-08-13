@@ -11,19 +11,34 @@ import {
   type BrandColor,
 } from '@/lib/brand';
 
-function Swatch({ color, light = false }: { color: BrandColor; light?: boolean }) {
+function tints(hex: string): string[] {
+  const n = parseInt(hex.slice(1), 16);
+  const r = (n >> 16) & 255;
+  const g = (n >> 8) & 255;
+  const b = n & 255;
+  return [0.35, 0.6, 0.85].map((t) => {
+    const mix = (c: number) => Math.round(c + (255 - c) * t);
+    return `rgb(${mix(r)}, ${mix(g)}, ${mix(b)})`;
+  });
+}
+
+function ColorBlock({ color, light = false }: { color: BrandColor; light?: boolean }) {
+  const textCls = light ? 'text-slate-500' : 'text-white/80';
   return (
-    <div
-      className="relative flex-1 rounded-xl overflow-hidden"
-      style={{ backgroundColor: color.hex, border: light ? '1px solid #EAEAEA' : undefined }}
-    >
-      <div className="absolute bottom-4 left-5">
-        <p className={`text-xs font-semibold mb-0.5 ${light ? 'text-slate-500' : 'text-white/70'}`}>
-          {color.name}
-        </p>
-        <p className={`text-sm font-mono font-bold ${light ? 'text-slate-700' : 'text-white'}`}>
-          {color.hex}
-        </p>
+    <div className="flex-1 h-full flex flex-col">
+      <div
+        className="flex-1 relative rounded-t-xl"
+        style={{ backgroundColor: color.hex, border: light ? '1px solid #EAEAEA' : undefined, borderBottom: 'none' }}
+      >
+        <span className={`absolute bottom-4 left-5 text-xs ${textCls}`}>HEX</span>
+        <span className={`absolute bottom-4 right-5 text-xs font-mono ${textCls}`}>
+          {color.hex.replace('#', '')}
+        </span>
+      </div>
+      <div className="flex h-10 rounded-b-xl overflow-hidden">
+        {tints(color.hex).map((t, i) => (
+          <div key={i} className="flex-1" style={{ backgroundColor: t }} />
+        ))}
       </div>
     </div>
   );
@@ -34,23 +49,25 @@ export function PrimaryColorSlide() {
     <Slide>
       <SlideHeader section="Color" page="07" />
       <h2 className="text-5xl font-semibold mb-2">Primary Color</h2>
-      <p className="text-base text-slate-500 leading-relaxed mb-4 max-w-2xl">
-        Our palette combines vibrant purples and blues with a bold yellow accent, grounded by clean neutrals.
-      </p>
-      <div className="flex-1 flex flex-col gap-4 mt-2">
-        <div className="flex" style={{ flexGrow: 1.4 }}>
-          <Swatch color={COLOR_PURPLE} />
-        </div>
-        <div className="flex-1 flex gap-4">
-          <Swatch color={COLOR_BLUE} />
-          <Swatch color={COLOR_DARK_PURPLE} />
-          <Swatch color={COLOR_VIOLET} />
-        </div>
-        <div className="flex-1 flex gap-4">
-          <Swatch color={COLOR_YELLOW} />
-          <Swatch color={COLOR_LIGHT_GRAY} light />
-          <Swatch color={COLOR_BLACK} />
-          <Swatch color={COLOR_WHITE} light />
+      <div className="flex-1 flex items-center gap-10 mt-4">
+        <p className="w-1/5 text-base text-slate-500 leading-relaxed">
+          Our palette combines vibrant purples and blues with a bold yellow accent, grounded by clean neutrals.
+        </p>
+        <div className="flex-1 h-full flex flex-col gap-4">
+          <div className="flex" style={{ flexGrow: 1.4 }}>
+            <ColorBlock color={COLOR_PURPLE} />
+          </div>
+          <div className="flex-1 flex gap-4">
+            <ColorBlock color={COLOR_BLUE} />
+            <ColorBlock color={COLOR_DARK_PURPLE} />
+            <ColorBlock color={COLOR_VIOLET} />
+          </div>
+          <div className="flex-1 flex gap-4">
+            <ColorBlock color={COLOR_YELLOW} />
+            <ColorBlock color={COLOR_LIGHT_GRAY} light />
+            <ColorBlock color={COLOR_BLACK} />
+            <ColorBlock color={COLOR_WHITE} light />
+          </div>
         </div>
       </div>
     </Slide>
