@@ -33,8 +33,8 @@ export function PrimaryColorSlide() {
               </span>
             </div>
             <div className="flex h-10 rounded-b-xl overflow-hidden">
-              {tints(c.hex).map((t) => (
-                <div key={t} className="flex-1" style={{ backgroundColor: t }} />
+              {tints(c.hex).map((t, i) => (
+                <div key={i} className="flex-1" style={{ backgroundColor: t }} />
               ))}
             </div>
           </div>
