@@ -1,5 +1,5 @@
 import { Slide, SlideHeader } from './shared';
-import { COLOR_PURPLE, COLOR_NAVY, type BrandColor } from '@/lib/brand';
+import { COLOR_PURPLE, COLOR_BLUE, type BrandColor } from '@/lib/brand';
 
 function tints(hex: string): string[] {
   const n = parseInt(hex.slice(1), 16);
@@ -12,7 +12,7 @@ function tints(hex: string): string[] {
   });
 }
 
-const COLORS: BrandColor[] = [COLOR_PURPLE, COLOR_NAVY];
+const COLORS: BrandColor[] = [COLOR_PURPLE, COLOR_BLUE];
 
 export function PrimaryColorSlide() {
   return (

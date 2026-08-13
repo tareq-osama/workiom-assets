@@ -1,10 +1,5 @@
 import { Slide, SlideHeader } from './shared';
-
-const SPECS = [
-  { weight: 'Bold', size: '32', tracking: '-2%', lineHeight: '104%' },
-  { weight: 'SemiBold', size: '24', tracking: '-1%', lineHeight: '112%' },
-  { weight: 'Regular', size: '16', tracking: '0%', lineHeight: '150%' },
-] as const;
+import { TYPOGRAPHY_SAMPLES } from '@/lib/brand';
 
 export function TypographySlide() {
   return (
@@ -22,24 +17,18 @@ export function TypographySlide() {
             Sans
           </p>
         </div>
-        <div className="flex-1 flex flex-col gap-3 text-sm">
-          <div className="grid grid-cols-4 gap-4 text-slate-400 border-b border-[#EDEDED] pb-2">
-            <span>Weight</span>
-            <span>Size</span>
-            <span>Tracking</span>
-            <span>Line-height</span>
-          </div>
-          {SPECS.map((s) => (
-            <div key={s.weight} className="grid grid-cols-4 gap-4 text-slate-600">
-              <span>{s.weight}</span>
-              <span>{s.size}</span>
-              <span>{s.tracking}</span>
-              <span>{s.lineHeight}</span>
+        <div className="flex-1 flex flex-col gap-4 text-sm">
+          {TYPOGRAPHY_SAMPLES.map((s) => (
+            <div key={s.label} className="flex items-center gap-6">
+              <span className="w-24 text-xs font-mono text-slate-300 flex-shrink-0">{s.label}</span>
+              <p
+                className="text-slate-800 truncate text-lg leading-tight"
+                style={{ fontWeight: s.weight, fontFamily: "'General Sans', sans-serif" }}
+              >
+                {s.sample}
+              </p>
             </div>
           ))}
-          <p className="mt-4 text-base italic text-slate-400">
-            &quot;Transforming ideas into workflows&quot;
-          </p>
         </div>
       </div>
     </Slide>
