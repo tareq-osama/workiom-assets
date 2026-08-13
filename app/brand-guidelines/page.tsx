@@ -708,7 +708,7 @@ export default function BrandGuidelinesPage() {
                 <span className="text-white/30">Version 1.0 · May 2026</span>
                 <span className="text-white/30">·</span>
                 <a
-                  href="/workiom-brand-guidelines.pdf"
+                  href="/api/brand-guidelines/pdf"
                   download
                   className="flex items-center gap-1 text-white/60 hover:text-white transition-colors font-medium"
                 >
