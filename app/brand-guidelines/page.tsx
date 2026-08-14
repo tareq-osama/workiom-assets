@@ -848,14 +848,14 @@ export default function BrandGuidelinesPage() {
                 style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
               >
                 <p className="text-xs font-semibold uppercase tracking-wide text-white/50 mb-3">Core Message</p>
-                <p className="text-xl sm:text-2xl font-semibold text-white leading-snug max-w-3xl">
+                <h3 className="text-xl sm:text-2xl font-semibold text-white leading-snug max-w-3xl">
                   {KEY_MESSAGING.coreMessage}
-                </p>
+                </h3>
               </div>
 
               <div className="text-center py-6">
                 <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Tagline</p>
-                <p className="text-3xl sm:text-4xl font-semibold text-slate-900">{KEY_MESSAGING.tagline}</p>
+                <h3 className="text-3xl sm:text-4xl font-semibold text-slate-900">{KEY_MESSAGING.tagline}</h3>
               </div>
 
               <div>
