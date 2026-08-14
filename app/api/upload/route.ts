@@ -1,7 +1,16 @@
-import { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
+import { cookies } from 'next/headers';
+import { verifyToken } from '@/lib/auth';
 import { uploadAssetFile } from '@/lib/appwrite-assets';
 
 export async function POST(request: NextRequest) {
+  const cookieStore = await cookies();
+  const rawToken = cookieStore.get('auth-token')?.value;
+  if (!rawToken) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
+  const payload = await verifyToken(rawToken);
+  if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+
   try {
     const formData = await request.formData();
     const file = formData.get('file') as File | null;
