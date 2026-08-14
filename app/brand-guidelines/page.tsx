@@ -20,6 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW, COLOR_LIGHT_GRAY, COLOR_BLACK, COLOR_WHITE, TYPOGRAPHY_SAMPLES } from '@/lib/brand';
+import { BUSINESS_OVERVIEW } from '@/lib/content';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -770,7 +771,75 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            02 · Logo
+            02 · Business Overview
+        ════════════════════════════════════════ */}
+        {activePage === 'business-overview' && (
+          <section>
+            <SectionBanner title="Business Overview" />
+
+            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-14">
+              {/* The Problem */}
+              <div className="space-y-6">
+                <div>
+                  <p className="text-xs font-semibold text-[#9635F0] uppercase tracking-wide mb-2">
+                    {BUSINESS_OVERVIEW.problem.eyebrow}
+                  </p>
+                  <h3 className="text-2xl sm:text-3xl font-semibold text-slate-900 max-w-2xl">
+                    {BUSINESS_OVERVIEW.problem.headline}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {BUSINESS_OVERVIEW.problem.points.map((p) => (
+                    <div key={p.title} className="border border-[#EAEAEA] rounded-2xl p-6 bg-white">
+                      <p className="text-sm font-semibold text-slate-900 mb-2">{p.title}</p>
+                      <p className="text-sm text-slate-500 leading-relaxed">{p.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* What is Workiom */}
+              <div className="space-y-6 pt-8 border-t border-[#EDEDED]">
+                <div>
+                  <p className="text-xs font-semibold text-[#9635F0] uppercase tracking-wide mb-2">
+                    {BUSINESS_OVERVIEW.whatIsWorkiom.eyebrow}
+                  </p>
+                  <h3 className="text-xl sm:text-2xl font-medium text-slate-700 leading-relaxed max-w-3xl">
+                    {BUSINESS_OVERVIEW.whatIsWorkiom.headline}
+                  </h3>
+                </div>
+                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                  {BUSINESS_OVERVIEW.whatIsWorkiom.points.map((p) => (
+                    <div key={p.title} className="border border-[#EAEAEA] rounded-2xl p-6 bg-white">
+                      <p className="text-sm font-semibold text-slate-900 mb-2">{p.title}</p>
+                      <p className="text-sm text-slate-500 leading-relaxed">{p.body}</p>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Mission & Vision */}
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 pt-8 border-t border-[#EDEDED]">
+                <div
+                  className="rounded-2xl p-8 text-white"
+                  style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
+                >
+                  <p className="text-xs font-semibold uppercase tracking-wide text-white/60 mb-3">Mission</p>
+                  <p className="text-lg leading-relaxed">{BUSINESS_OVERVIEW.mission}</p>
+                </div>
+                <div className="rounded-2xl p-8 bg-[#F7F7F7]">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Vision</p>
+                  <p className="text-lg leading-relaxed text-slate-700">{BUSINESS_OVERVIEW.vision}</p>
+                </div>
+              </div>
+            </div>
+
+            <PageNav prev={prev} next={next} onNavigate={navigate} />
+          </section>
+        )}
+
+        {/* ════════════════════════════════════════
+            03 · Logo
         ════════════════════════════════════════ */}
         {activePage === 'logo' && (
           <section>
@@ -880,7 +949,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            03 · Typography
+            04 · Typography
         ════════════════════════════════════════ */}
         {activePage === 'typography' && (
           <section>
@@ -945,7 +1014,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            04 · Color
+            05 · Color
         ════════════════════════════════════════ */}
         {activePage === 'color' && (
           <section>
@@ -982,7 +1051,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            05 · Brand in Use
+            06 · Brand in Use
         ════════════════════════════════════════ */}
         {activePage === 'brand-in-use' && (
           <section>
@@ -1076,7 +1145,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            06 · Marketing Video
+            07 · Marketing Video
         ════════════════════════════════════════ */}
         {activePage === 'marketing-video' && (
           <section>
@@ -1152,7 +1221,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            07 · Resources
+            08 · Resources
         ════════════════════════════════════════ */}
         {activePage === 'resources' && (
           <section>
