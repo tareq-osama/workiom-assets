@@ -20,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW, COLOR_LIGHT_GRAY, COLOR_BLACK, COLOR_WHITE, TYPOGRAPHY_SAMPLES } from '@/lib/brand';
-import { BUSINESS_OVERVIEW } from '@/lib/content';
+import { BUSINESS_OVERVIEW, KEY_MESSAGING } from '@/lib/content';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -830,6 +830,44 @@ export default function BrandGuidelinesPage() {
                 <div className="rounded-2xl p-8 bg-[#F7F7F7]">
                   <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Vision</p>
                   <p className="text-lg leading-relaxed text-slate-700">{BUSINESS_OVERVIEW.vision}</p>
+                </div>
+              </div>
+            </div>
+
+            <PageNav prev={prev} next={next} onNavigate={navigate} />
+          </section>
+        )}
+
+        {activePage === 'key-messaging' && (
+          <section>
+            <SectionBanner title="Key Messaging" />
+
+            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-10">
+              <div
+                className="rounded-2xl p-8 sm:p-10"
+                style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
+              >
+                <p className="text-xs font-semibold uppercase tracking-wide text-white/50 mb-3">Core Message</p>
+                <p className="text-xl sm:text-2xl font-semibold text-white leading-snug max-w-3xl">
+                  {KEY_MESSAGING.coreMessage}
+                </p>
+              </div>
+
+              <div className="text-center py-6">
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-3">Tagline</p>
+                <p className="text-3xl sm:text-4xl font-semibold text-slate-900">{KEY_MESSAGING.tagline}</p>
+              </div>
+
+              <div>
+                <p className="text-xs font-semibold uppercase tracking-wide text-slate-400 mb-4">Supportive Messages</p>
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                  {KEY_MESSAGING.supportiveMessages.map((m) => (
+                    <div key={m.title} className="border border-[#EAEAEA] rounded-2xl p-6 bg-white">
+                      <p className="text-xs font-semibold text-[#9635F0] mb-2">{m.title}</p>
+                      <p className="text-sm font-semibold text-slate-900 mb-1.5">&quot;{m.quote}&quot;</p>
+                      <p className="text-sm text-slate-500 leading-relaxed">{m.body}</p>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
