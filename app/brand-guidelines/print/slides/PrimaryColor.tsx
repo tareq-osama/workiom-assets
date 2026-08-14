@@ -56,7 +56,7 @@ function ColorBlock({
 export function PrimaryColorSlide() {
   return (
     <Slide>
-      <SlideHeader section="Color" page="07" />
+      <SlideHeader section="Color" page="14" />
       <h2 className="text-5xl font-semibold mb-2">Primary Color</h2>
       <div className="flex-1 flex items-center gap-10 mt-4">
         <p className="w-1/5 text-base text-slate-500 leading-relaxed">

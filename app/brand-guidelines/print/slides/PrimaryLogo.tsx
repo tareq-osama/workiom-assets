@@ -5,7 +5,7 @@ import { LOGO_SRC } from '@/lib/brand';
 export function PrimaryLogoSlide() {
   return (
     <Slide>
-      <SlideHeader section="Primary Logo" page="02" />
+      <SlideHeader section="Primary Logo" page="08" />
       <h2 className="text-5xl font-semibold mb-2">Primary Logo</h2>
       <div className="flex-1 flex items-center gap-16 mt-4">
         <p className="w-1/3 text-base text-slate-500 leading-relaxed">

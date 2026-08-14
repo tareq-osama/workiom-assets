@@ -3,7 +3,7 @@ import { Slide, SlideHeader } from './shared';
 export function LogoConstructionSlide() {
   return (
     <Slide>
-      <SlideHeader section="Logo Construction" page="03" />
+      <SlideHeader section="Logo Construction" page="10" />
       <h2 className="text-5xl font-semibold mb-2">Logo Construction</h2>
       <div className="flex-1 flex items-center gap-16 mt-4">
         <p className="w-1/3 text-base text-slate-500 leading-relaxed">

@@ -4,7 +4,7 @@ import { TYPOGRAPHY_SAMPLES } from '@/lib/brand';
 export function TypographySlide() {
   return (
     <Slide>
-      <SlideHeader section="Typography" page="06" />
+      <SlideHeader section="Typography" page="13" />
       <h2 className="text-5xl font-semibold mb-2">Typography</h2>
       <div className="flex-1 flex items-center gap-16 mt-4">
         <div className="w-2/5">
