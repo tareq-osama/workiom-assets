@@ -838,6 +838,9 @@ export default function BrandGuidelinesPage() {
           </section>
         )}
 
+        {/* ════════════════════════════════════════
+            03 · Key Messaging
+        ════════════════════════════════════════ */}
         {activePage === 'key-messaging' && (
           <section>
             <SectionBanner title="Key Messaging" />
@@ -876,6 +879,9 @@ export default function BrandGuidelinesPage() {
           </section>
         )}
 
+        {/* ════════════════════════════════════════
+            04 · Brand Voice & Tone
+        ════════════════════════════════════════ */}
         {activePage === 'brand-voice' && (
           <section>
             <SectionBanner title="Brand Voice & Tone" />
@@ -899,7 +905,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            03 · Logo
+            05 · Logo
         ════════════════════════════════════════ */}
         {activePage === 'logo' && (
           <section>
@@ -1008,6 +1014,9 @@ export default function BrandGuidelinesPage() {
           </section>
         )}
 
+        {/* ════════════════════════════════════════
+            06 · Workiom AI
+        ════════════════════════════════════════ */}
         {activePage === 'workiom-ai' && (
           <section>
             <SectionBanner title="Workiom AI" />
@@ -1051,7 +1060,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            04 · Typography
+            07 · Typography
         ════════════════════════════════════════ */}
         {activePage === 'typography' && (
           <section>
@@ -1116,7 +1125,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            05 · Color
+            08 · Color
         ════════════════════════════════════════ */}
         {activePage === 'color' && (
           <section>
@@ -1153,7 +1162,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            06 · Brand in Use
+            09 · Brand in Use
         ════════════════════════════════════════ */}
         {activePage === 'brand-in-use' && (
           <section>
@@ -1247,7 +1256,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            07 · Marketing Video
+            10 · Marketing Video
         ════════════════════════════════════════ */}
         {activePage === 'marketing-video' && (
           <section>
@@ -1323,7 +1332,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            08 · Resources
+            11 · Resources
         ════════════════════════════════════════ */}
         {activePage === 'resources' && (
           <section>
