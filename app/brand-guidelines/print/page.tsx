@@ -11,6 +11,7 @@ import { LogoScalingSlide } from './slides/LogoScaling';
 import { LogoBackgroundsSlide } from './slides/LogoBackgrounds';
 import { WorkiomAISlide } from './slides/WorkiomAI';
 import { TypographySlide } from './slides/Typography';
+import { TypographyArabicSlide } from './slides/TypographyArabic';
 import { PrimaryColorSlide } from './slides/PrimaryColor';
 import { ClosingSlide } from './slides/Closing';
 
@@ -30,6 +31,7 @@ export default function BrandGuidelinesPrintPage() {
       <LogoBackgroundsSlide />
       <WorkiomAISlide />
       <TypographySlide />
+      <TypographyArabicSlide />
       <PrimaryColorSlide />
       <ClosingSlide />
     </>
