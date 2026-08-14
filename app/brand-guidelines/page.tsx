@@ -20,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW, COLOR_LIGHT_GRAY, COLOR_BLACK, COLOR_WHITE, TYPOGRAPHY_SAMPLES } from '@/lib/brand';
-import { BUSINESS_OVERVIEW, KEY_MESSAGING } from '@/lib/content';
+import { BUSINESS_OVERVIEW, KEY_MESSAGING, BRAND_VOICE_TRAITS } from '@/lib/content';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -869,6 +869,28 @@ export default function BrandGuidelinesPage() {
                     </div>
                   ))}
                 </div>
+              </div>
+            </div>
+
+            <PageNav prev={prev} next={next} onNavigate={navigate} />
+          </section>
+        )}
+
+        {activePage === 'brand-voice' && (
+          <section>
+            <SectionBanner title="Brand Voice & Tone" />
+
+            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16">
+              <p className="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed mb-8">
+                Five traits that define how Workiom sounds — in product copy, support conversations, and marketing.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+                {BRAND_VOICE_TRAITS.map((t) => (
+                  <div key={t.title} className="border border-[#EAEAEA] rounded-2xl p-6 bg-white">
+                    <p className="text-base font-semibold text-slate-900 mb-2">{t.title}</p>
+                    <p className="text-sm text-slate-500 leading-relaxed">{t.body}</p>
+                  </div>
+                ))}
               </div>
             </div>
 
