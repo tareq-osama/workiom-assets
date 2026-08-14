@@ -25,13 +25,17 @@ import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW
    Navigation
 ───────────────────────────────────────────── */
 const NAV = [
-  { id: 'introduction',    label: 'Introduction',    num: '01' },
-  { id: 'logo',            label: 'Logo',            num: '02' },
-  { id: 'typography',      label: 'Typography',      num: '03' },
-  { id: 'color',           label: 'Color',           num: '04' },
-  { id: 'brand-in-use',   label: 'Brand in Use',    num: '05' },
-  { id: 'marketing-video', label: 'Marketing Video', num: '06' },
-  { id: 'resources',       label: 'Resources',       num: '07' },
+  { id: 'introduction',      label: 'Introduction',       num: '01' },
+  { id: 'business-overview', label: 'Business Overview',  num: '02' },
+  { id: 'key-messaging',     label: 'Key Messaging',      num: '03' },
+  { id: 'brand-voice',       label: 'Brand Voice & Tone', num: '04' },
+  { id: 'logo',              label: 'Logo',               num: '05' },
+  { id: 'workiom-ai',        label: 'Workiom AI',         num: '06' },
+  { id: 'typography',        label: 'Typography',         num: '07' },
+  { id: 'color',             label: 'Color',              num: '08' },
+  { id: 'brand-in-use',      label: 'Brand in Use',       num: '09' },
+  { id: 'marketing-video',   label: 'Marketing Video',    num: '10' },
+  { id: 'resources',         label: 'Resources',          num: '11' },
 ];
 
 /* ─────────────────────────────────────────────
