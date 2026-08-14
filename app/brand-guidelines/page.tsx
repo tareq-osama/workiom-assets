@@ -20,7 +20,7 @@ import {
 import { CSS } from '@dnd-kit/utilities';
 import { cn } from '@/lib/utils';
 import { COLOR_PURPLE, COLOR_BLUE, COLOR_DARK_PURPLE, COLOR_VIOLET, COLOR_YELLOW, COLOR_LIGHT_GRAY, COLOR_BLACK, COLOR_WHITE, TYPOGRAPHY_SAMPLES } from '@/lib/brand';
-import { BUSINESS_OVERVIEW, KEY_MESSAGING, BRAND_VOICE_TRAITS } from '@/lib/content';
+import { BUSINESS_OVERVIEW, KEY_MESSAGING, BRAND_VOICE_TRAITS, WORKIOM_AI_INTRO, WORKIOM_AI_LOGO } from '@/lib/content';
 
 /* ─────────────────────────────────────────────
    Navigation
@@ -1000,6 +1000,48 @@ export default function BrandGuidelinesPage() {
                       </div>
                     ))
                   }
+                </div>
+              </div>
+            </div>
+
+            <PageNav prev={prev} next={next} onNavigate={navigate} />
+          </section>
+        )}
+
+        {activePage === 'workiom-ai' && (
+          <section>
+            <SectionBanner title="Workiom AI" />
+
+            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-10">
+              <p className="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
+                {WORKIOM_AI_INTRO}
+              </p>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="group/logo rounded-2xl bg-[#F7F7F7] border border-[#EAEAEA] flex flex-col items-center justify-center gap-4 min-h-[140px] sm:min-h-[180px] p-8 sm:p-10">
+                  <Image
+                    src={WORKIOM_AI_LOGO.colored}
+                    alt="Workiom AI on light"
+                    width={280}
+                    height={64}
+                    className="h-10 sm:h-12 w-auto max-w-full object-contain"
+                    unoptimized
+                  />
+                  <LogoActions src={WORKIOM_AI_LOGO.colored} filename="workiom-ai-colored.svg" />
+                </div>
+                <div
+                  className="group/logo rounded-2xl flex flex-col items-center justify-center gap-4 min-h-[140px] sm:min-h-[180px] p-8 sm:p-10"
+                  style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 100%)' }}
+                >
+                  <Image
+                    src={WORKIOM_AI_LOGO.light}
+                    alt="Workiom AI on dark"
+                    width={280}
+                    height={64}
+                    className="h-10 sm:h-12 w-auto max-w-full object-contain"
+                    unoptimized
+                  />
+                  <LogoActions src={WORKIOM_AI_LOGO.light} filename="workiom-ai-light.svg" dark />
                 </div>
               </div>
             </div>
