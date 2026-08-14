@@ -1,12 +1,15 @@
 // app/api/brand-guidelines/pdf/route.ts
 import { NextRequest, NextResponse } from 'next/server';
+import type { Browser } from 'puppeteer-core';
 import { getBrowser } from '@/lib/pdf/getBrowser';
 
 export const runtime = 'nodejs';
+export const maxDuration = 60;
 
 export async function GET(req: NextRequest) {
-  const browser = await getBrowser();
+  let browser: Browser | undefined;
   try {
+    browser = await getBrowser();
     const page = await browser.newPage();
     await page.setViewport({ width: 1600, height: 900 });
     await page.goto(`${req.nextUrl.origin}/brand-guidelines/print`, {
@@ -33,6 +36,6 @@ export async function GET(req: NextRequest) {
       { status: 500 }
     );
   } finally {
-    await browser.close();
+    if (browser) await browser.close();
   }
 }
