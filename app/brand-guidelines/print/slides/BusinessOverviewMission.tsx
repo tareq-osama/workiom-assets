@@ -1,5 +1,6 @@
 import { Slide, SlideHeader } from './shared';
 import { BUSINESS_OVERVIEW } from '@/lib/content';
+import { BRAND_GRADIENT } from '@/lib/brand';
 
 export function BusinessOverviewMissionSlide() {
   return (
@@ -9,7 +10,7 @@ export function BusinessOverviewMissionSlide() {
       <div className="flex-1 grid grid-cols-2 gap-6">
         <div
           className="rounded-2xl p-10 text-white flex flex-col justify-center"
-          style={{ background: 'linear-gradient(135deg, #231F61 0%, #360C73 55%, #9635F0 100%)' }}
+          style={{ background: BRAND_GRADIENT }}
         >
           <p className="text-xs font-semibold uppercase tracking-wide text-white/60 mb-4">Mission</p>
           <p className="text-2xl leading-relaxed">{BUSINESS_OVERVIEW.mission}</p>

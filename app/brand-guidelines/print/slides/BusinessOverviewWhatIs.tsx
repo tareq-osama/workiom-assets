@@ -11,7 +11,7 @@ export function BusinessOverviewWhatIsSlide() {
       <h2 className="text-3xl font-medium text-slate-700 leading-snug mb-8 max-w-3xl">
         {BUSINESS_OVERVIEW.whatIsWorkiom.headline}
       </h2>
-      <div className="flex-1 grid grid-cols-3 gap-6">
+      <div className="flex-1 grid grid-cols-3 gap-6 content-start">
         {BUSINESS_OVERVIEW.whatIsWorkiom.points.map((p) => (
           <div key={p.title} className="border border-[#EAEAEA] rounded-2xl p-6">
             <p className="text-base font-semibold text-slate-900 mb-2">{p.title}</p>

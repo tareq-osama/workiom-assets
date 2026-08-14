@@ -9,7 +9,7 @@ export function BusinessOverviewProblemSlide() {
         {BUSINESS_OVERVIEW.problem.eyebrow}
       </p>
       <h2 className="text-4xl font-semibold mb-8 max-w-3xl">{BUSINESS_OVERVIEW.problem.headline}</h2>
-      <div className="flex-1 grid grid-cols-3 gap-6">
+      <div className="flex-1 grid grid-cols-3 gap-6 content-start">
         {BUSINESS_OVERVIEW.problem.points.map((p) => (
           <div key={p.title} className="border border-[#EAEAEA] rounded-2xl p-6">
             <p className="text-base font-semibold text-slate-900 mb-2">{p.title}</p>
