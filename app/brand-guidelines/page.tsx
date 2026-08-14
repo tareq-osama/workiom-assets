@@ -709,13 +709,12 @@ export default function BrandGuidelinesPage() {
               <h1 className="text-3xl sm:text-4xl lg:text-5xl font-semibold text-white leading-tight tracking-tight pt-14">
                 Workiom<br className="sm:hidden" /> Brand Guidelines
               </h1>
-              <div className="absolute bottom-5 right-5 sm:right-10 flex items-center gap-1.5 text-xs">
-                <span className="text-white/30">Version 1.0 · May 2026</span>
-                <span className="text-white/30">·</span>
+              <div className="absolute bottom-5 right-5 sm:right-10 flex items-center gap-3">
+                <span className="text-xs text-white/30">Version 1.0 · May 2026</span>
                 <a
                   href="/api/brand-guidelines/pdf"
                   download
-                  className="flex items-center gap-1 text-white/60 hover:text-white transition-colors font-medium"
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg hover:bg-white/90 transition-colors"
                 >
                   <Download className="h-3 w-3" /> Download PDF
                 </a>
