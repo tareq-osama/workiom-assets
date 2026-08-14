@@ -531,6 +531,29 @@ export default function BrandGuidelinesPage() {
   const router = useRouter();
   const [activePage, setActivePage] = useState('introduction');
   const [mobileOpen, setMobileOpen] = useState(false);
+  const [pdfStatus, setPdfStatus] = useState<'idle' | 'downloading' | 'error'>('idle');
+
+  async function downloadGuidelinesPdf() {
+    if (pdfStatus === 'downloading') return;
+    setPdfStatus('downloading');
+    try {
+      const res = await fetch('/api/brand-guidelines/pdf');
+      if (!res.ok) throw new Error('Failed to generate PDF');
+      const blob = await res.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'workiom-brand-guidelines.pdf';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      URL.revokeObjectURL(url);
+      setPdfStatus('idle');
+    } catch {
+      setPdfStatus('error');
+      setTimeout(() => setPdfStatus('idle'), 3000);
+    }
+  }
 
   /* Brand in Use state */
   const [biu, setBiu] = useState<BIUGrid>({ rows: [] });
@@ -711,13 +734,25 @@ export default function BrandGuidelinesPage() {
               </h1>
               <div className="absolute bottom-5 right-5 sm:right-10 flex items-center gap-3">
                 <span className="text-xs text-white/30">Version 1.0 · May 2026</span>
-                <a
-                  href="/api/brand-guidelines/pdf"
-                  download
-                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg hover:bg-white/90 transition-colors"
+                <button
+                  onClick={downloadGuidelinesPdf}
+                  disabled={pdfStatus === 'downloading'}
+                  className="inline-flex items-center gap-1.5 px-3.5 py-1.5 bg-white text-slate-900 text-xs font-semibold rounded-lg hover:bg-white/90 transition-colors disabled:opacity-80 disabled:cursor-wait"
                 >
-                  <Download className="h-3 w-3" /> Download PDF
-                </a>
+                  {pdfStatus === 'downloading' ? (
+                    <>
+                      <Loader2 className="h-3 w-3 animate-spin" /> Downloading…
+                    </>
+                  ) : pdfStatus === 'error' ? (
+                    <>
+                      <Download className="h-3 w-3" /> Failed — retry
+                    </>
+                  ) : (
+                    <>
+                      <Download className="h-3 w-3" /> Download PDF
+                    </>
+                  )}
+                </button>
               </div>
               <div className="absolute -top-10 -right-10 w-72 h-72 rounded-full bg-[#FDBC0B]/8 blur-3xl pointer-events-none" />
             </div>
