@@ -11,7 +11,7 @@ const BACKGROUNDS = [
 export function LogoBackgroundsSlide() {
   return (
     <Slide>
-      <SlideHeader section="Logo Backgrounds" page="12" />
+      <SlideHeader section="Logo Backgrounds" page="11" />
       <h2 className="text-5xl font-semibold mb-2">Logo Backgrounds</h2>
       <div className="flex-1 flex items-center gap-16 mt-4">
         <p className="w-1/4 text-base text-slate-500 leading-relaxed">
