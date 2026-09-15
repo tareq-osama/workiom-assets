@@ -2058,8 +2058,8 @@ export default function BrandGuidelinesPage() {
 
             <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-8">
               <p className="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
-                Official Workiom marketing video — available in English and
-                Turkish. Use these for presentations, pitches, websites, and
+                Official Workiom marketing video — available in English,
+                Turkish, and Arabic (SA). Use these for presentations, pitches, websites, and
                 social channels.
               </p>
 
@@ -2116,6 +2116,36 @@ export default function BrandGuidelinesPage() {
                   </div>
                   <a
                     href="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
+                  >
+                    <ExternalLink className="h-3 w-3" /> Open in Google Drive
+                  </a>
+                </div>
+
+                {/* Arabic (SA) */}
+                <div className="space-y-3">
+                  <div className="flex items-center gap-2.5">
+                    <span className="text-base leading-none">🇸🇦</span>
+                    <p className="text-sm font-semibold text-slate-900">
+                      Arabic (SA)
+                    </p>
+                  </div>
+                  <div
+                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
+                    style={{ aspectRatio: "16/9" }}
+                  >
+                    <iframe
+                      src="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/preview"
+                      className="absolute inset-0 w-full h-full"
+                      allow="autoplay"
+                      allowFullScreen
+                      title="Workiom Marketing Video — Arabic (SA)"
+                    />
+                  </div>
+                  <a
+                    href="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/preview"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
