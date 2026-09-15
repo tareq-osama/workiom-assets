@@ -22,6 +22,7 @@ import {
   ChevronLeft,
   ChevronRight,
   GripVertical,
+  Play,
 } from "lucide-react";
 import Lightbox from "yet-another-react-lightbox";
 import "yet-another-react-lightbox/styles.css";
@@ -2072,18 +2073,18 @@ export default function BrandGuidelinesPage() {
                       English
                     </p>
                   </div>
-                  <div
-                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
+                  <a
+                    href="https://drive.google.com/file/d/1dhnsW6sEIVUAyiNijcYGfyfckl1HkP8i/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Play Workiom Marketing Video — English"
+                    className="relative flex w-full items-center justify-center rounded-2xl overflow-hidden border border-[#EAEAEA] bg-gradient-to-br from-[#2E1B69] via-[#4B2A91] to-[#160D3A] transition-transform hover:scale-[1.01]"
                     style={{ aspectRatio: "16/9" }}
                   >
-                    <iframe
-                      src="https://drive.google.com/file/d/1dhnsW6sEIVUAyiNijcYGfyfckl1HkP8i/preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                      title="Workiom Marketing Video — English"
-                    />
-                  </div>
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#372078] shadow-lg transition-transform hover:scale-105">
+                      <Play className="ml-1 h-7 w-7 fill-current" />
+                    </span>
+                  </a>
                   <a
                     href="https://drive.google.com/file/d/1dhnsW6sEIVUAyiNijcYGfyfckl1HkP8i/view?usp=sharing"
                     target="_blank"
@@ -2102,18 +2103,18 @@ export default function BrandGuidelinesPage() {
                       Turkish
                     </p>
                   </div>
-                  <div
-                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
+                  <a
+                    href="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Play Workiom Marketing Video — Turkish"
+                    className="relative flex w-full items-center justify-center rounded-2xl overflow-hidden border border-[#EAEAEA] bg-gradient-to-br from-[#2E1B69] via-[#4B2A91] to-[#160D3A] transition-transform hover:scale-[1.01]"
                     style={{ aspectRatio: "16/9" }}
                   >
-                    <iframe
-                      src="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                      title="Workiom Marketing Video — Turkish"
-                    />
-                  </div>
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#372078] shadow-lg transition-transform hover:scale-105">
+                      <Play className="ml-1 h-7 w-7 fill-current" />
+                    </span>
+                  </a>
                   <a
                     href="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/view?usp=sharing"
                     target="_blank"
@@ -2132,20 +2133,20 @@ export default function BrandGuidelinesPage() {
                       Arabic (SA)
                     </p>
                   </div>
-                  <div
-                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
+                  <a
+                    href="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/view?usp=sharing"
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    aria-label="Play Workiom Marketing Video — Arabic (SA)"
+                    className="relative flex w-full items-center justify-center rounded-2xl overflow-hidden border border-[#EAEAEA] bg-gradient-to-br from-[#2E1B69] via-[#4B2A91] to-[#160D3A] transition-transform hover:scale-[1.01]"
                     style={{ aspectRatio: "16/9" }}
                   >
-                    <iframe
-                      src="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                      title="Workiom Marketing Video — Arabic (SA)"
-                    />
-                  </div>
+                    <span className="flex h-16 w-16 items-center justify-center rounded-full bg-white text-[#372078] shadow-lg transition-transform hover:scale-105">
+                      <Play className="ml-1 h-7 w-7 fill-current" />
+                    </span>
+                  </a>
                   <a
-                    href="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/preview"
+                    href="https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/view?usp=sharing"
                     target="_blank"
                     rel="noopener noreferrer"
                     className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"

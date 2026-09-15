@@ -6,11 +6,11 @@ Add the Arabic (SA) marketing video to the brand-guidelines Marketing Video sect
 
 ## Design
 
-The page will render a third video card using the same responsive grid, iframe dimensions, border, and title styling already used for English and Turkish. The card title will be `Arabic (SA)`, and the iframe source will be the supplied Google Drive preview URL:
+The page will render a third video card using the same responsive grid, dimensions, border, and title styling already used for English and Turkish. The card title will be `Arabic (SA)`. Each of the three cards will use a simple clickable video placeholder with a dark violet gradient background and centered play button, linking to the video's Google Drive sharing URL:
 
-`https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/preview`
+`https://drive.google.com/file/d/1C8oEp_KRGDJmtfCJz9JWMOVfbP8p61wj/view?usp=sharing`
 
-The section description will be updated from listing two available languages to listing English, Turkish, and Arabic (SA). No asset-storage or API changes are needed because this is an externally hosted direct preview embedded in the static brand-guidelines page.
+The section description will list English, Turkish, and Arabic (SA). No asset-storage or API changes are needed because these are externally hosted sharing links on the static brand-guidelines page.
 
 ## Verification
 
