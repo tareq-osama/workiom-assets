@@ -2,7 +2,12 @@
 
 import { useState, useEffect, useCallback, use } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Search, SlidersHorizontal, LayoutGrid, List, X } from 'lucide-react';
+import { Search, SlidersHorizontal, X } from 'lucide-react';
+import {
+  Squares2X2Icon,
+  ViewColumnsIcon,
+  ListBulletIcon,
+} from '@heroicons/react/24/solid';
 import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -15,9 +20,9 @@ import type { Category } from '@/lib/appwrite-categories';
 
 const LIMIT = 24;
 
-function AssetGridSkeleton({ count = 12 }: { count?: number }) {
+function AssetGridSkeleton({ count = 12, cols }: { count?: number; cols?: string }) {
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-2">
+    <div className={`grid ${cols ?? 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'} gap-2`}>
       {Array.from({ length: count }).map((_, i) => (
         <div key={i} className="rounded-xl border border-slate-100 overflow-hidden">
           <Skeleton className="aspect-square w-full" />
@@ -46,7 +51,7 @@ export default function BrowsePage({
     statuses: resolvedSearchParams.status ? [resolvedSearchParams.status] : [],
     fileTypes: resolvedSearchParams.fileType ? [resolvedSearchParams.fileType] : [],
   });
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid');
+  const [viewMode, setViewMode] = useState<'grid' | 'grid3' | 'list'>('grid3');
   const [assets, setAssets] = useState<Asset[]>([]);
   const [totalCount, setTotalCount] = useState(0);
   const [page, setPage] = useState(1);
@@ -176,11 +181,20 @@ export default function BrowsePage({
               <Button
                 variant="ghost"
                 size="icon"
+                className={`h-7 w-7 rounded-md ${viewMode === 'grid3' ? 'bg-slate-100 text-slate-900' : 'text-slate-400'}`}
+                onClick={() => setViewMode('grid3')}
+                aria-label="Grid view (3 columns)"
+              >
+                <ViewColumnsIcon className="h-3.5 w-3.5" />
+              </Button>
+              <Button
+                variant="ghost"
+                size="icon"
                 className={`h-7 w-7 rounded-md ${viewMode === 'grid' ? 'bg-slate-100 text-slate-900' : 'text-slate-400'}`}
                 onClick={() => setViewMode('grid')}
-                aria-label="Grid view"
+                aria-label="Grid view (4 columns)"
               >
-                <LayoutGrid className="h-3.5 w-3.5" />
+                <Squares2X2Icon className="h-3.5 w-3.5" />
               </Button>
               <Button
                 variant="ghost"
@@ -189,7 +203,7 @@ export default function BrowsePage({
                 onClick={() => setViewMode('list')}
                 aria-label="List view"
               >
-                <List className="h-3.5 w-3.5" />
+                <ListBulletIcon className="h-3.5 w-3.5" />
               </Button>
             </div>
 
@@ -214,14 +228,16 @@ export default function BrowsePage({
           <div className="flex-1 min-w-0">
             {/* Assets grid/list */}
             {loading ? (
-              viewMode === 'grid' ? (
-                <AssetGridSkeleton />
-              ) : (
+              viewMode === 'list' ? (
                 <div className="space-y-2">
                   {Array.from({ length: 8 }).map((_, i) => (
                     <Skeleton key={i} className="h-20 w-full rounded-xl" />
                   ))}
                 </div>
+              ) : (
+                <AssetGridSkeleton
+                  cols={viewMode === 'grid3' ? 'grid-cols-2 sm:grid-cols-3' : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5'}
+                />
               )
             ) : assets.length === 0 ? (
               <div className="text-center py-20">
@@ -241,16 +257,22 @@ export default function BrowsePage({
                   Clear filters
                 </Button>
               </div>
-            ) : viewMode === 'grid' ? (
-              <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4 gap-2">
-                {assets.map((asset) => (
-                  <AssetCard key={asset.id} asset={asset} viewMode="grid" isAuthenticated={isAuthenticated} />
-                ))}
-              </div>
-            ) : (
+            ) : viewMode === 'list' ? (
               <div className="space-y-2">
                 {assets.map((asset) => (
                   <AssetCard key={asset.id} asset={asset} viewMode="list" isAuthenticated={isAuthenticated} />
+                ))}
+              </div>
+            ) : (
+              <div
+                className={`grid gap-2 ${
+                  viewMode === 'grid3'
+                    ? 'grid-cols-2 sm:grid-cols-3'
+                    : 'grid-cols-2 sm:grid-cols-3 lg:grid-cols-3 xl:grid-cols-4'
+                }`}
+              >
+                {assets.map((asset) => (
+                  <AssetCard key={asset.id} asset={asset} viewMode="grid" isAuthenticated={isAuthenticated} />
                 ))}
               </div>
             )}
