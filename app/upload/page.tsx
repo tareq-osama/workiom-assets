@@ -13,6 +13,8 @@ import {
   CloudUpload,
   FileImage,
   ExternalLink,
+  Video,
+  Camera,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -27,16 +29,21 @@ import {
 } from '@/components/ui/select';
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
-import { Switch } from '@/components/ui/switch';
+import CategoryPicker from '@/components/category-picker';
 import { STATUS_OPTIONS } from '@/lib/constants';
+import { cn } from '@/lib/utils';
 import type { Category } from '@/lib/appwrite-categories';
 
 type UploadStep = 'idle' | 'uploading' | 'creating' | 'done' | 'error';
+type AssetMode = 'files' | 'link' | 'video';
+type VideoSource = 'device' | 'link';
+type ThumbSource = 'frame' | 'upload';
 
 const FORMAT_ACCEPT: Record<AssetFormat, string> = {
   SVG: '.svg,image/svg+xml',
   PNG: '.png,image/png',
   JPG: '.jpg,.jpeg,image/jpeg',
+  MP4: '.mp4,.mov,.webm,video/*',
 };
 
 interface FormatSlot {
@@ -79,6 +86,7 @@ function FormatDropZone({
     SVG: 'border-violet-200 bg-violet-50 text-violet-700',
     PNG: 'border-blue-200 bg-blue-50 text-blue-700',
     JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+    MP4: 'border-rose-200 bg-rose-50 text-rose-700',
   };
 
   const labelColor = formatColors[slot.format];
@@ -168,10 +176,14 @@ function CoverImageDropZone({
   slot,
   onChange,
   onRemove,
+  label = 'Cover Image',
+  hint = 'Required — displayed as the asset thumbnail',
 }: {
   slot: CoverSlot;
   onChange: (file: File) => void;
   onRemove: () => void;
+  label?: string;
+  hint?: string;
 }) {
   const inputRef = useRef<HTMLInputElement>(null);
   const [dragging, setDragging] = useState(false);
@@ -187,9 +199,9 @@ function CoverImageDropZone({
     <div className="space-y-2">
       <div className="flex items-center gap-2">
         <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5 border-blue-200 bg-blue-50 text-blue-700">
-          Cover Image
+          {label}
         </Badge>
-        <span className="text-xs text-slate-400">Required — displayed as the asset thumbnail</span>
+        <span className="text-xs text-slate-400">{hint}</span>
       </div>
 
       {slot.file ? (
@@ -257,11 +269,159 @@ function CoverImageDropZone({
   );
 }
 
+function VideoDropZone({
+  file,
+  onChange,
+  onRemove,
+}: {
+  file: File | null;
+  onChange: (file: File) => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) onChange(dropped);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5 border-rose-200 bg-rose-50 text-rose-700">
+          Video File
+        </Badge>
+        <span className="text-xs text-slate-400">Required</span>
+      </div>
+
+      {file ? (
+        <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3 bg-slate-50">
+          <div className="w-12 h-12 flex-shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
+            <Video className="h-5 w-5 text-slate-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate">{file.name}</p>
+            <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+            dragging ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+        >
+          <CloudUpload className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs text-slate-500">
+            Drop a video or <span className="text-blue-600 font-medium">browse</span>
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">MP4, MOV, WebM, or any video file</p>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept="video/*"
+        className="hidden"
+        onChange={(e) => {
+          const selected = e.target.files?.[0];
+          if (selected) onChange(selected);
+          e.target.value = '';
+        }}
+      />
+    </div>
+  );
+}
+
+function VideoFrameCapture({
+  file,
+  capturedPreviewUrl,
+  onCapture,
+}: {
+  file: File;
+  capturedPreviewUrl: string | null;
+  onCapture: (blob: Blob, previewUrl: string) => void;
+}) {
+  const videoRef = useRef<HTMLVideoElement>(null);
+  const [capturing, setCapturing] = useState(false);
+  const [src] = useState(() => URL.createObjectURL(file));
+
+  useEffect(() => () => URL.revokeObjectURL(src), [src]);
+
+  function capture() {
+    const video = videoRef.current;
+    if (!video) return;
+    setCapturing(true);
+    const canvas = document.createElement('canvas');
+    canvas.width = video.videoWidth || 1280;
+    canvas.height = video.videoHeight || 720;
+    const ctx = canvas.getContext('2d');
+    ctx?.drawImage(video, 0, 0, canvas.width, canvas.height);
+    canvas.toBlob(
+      (blob) => {
+        setCapturing(false);
+        if (blob) onCapture(blob, URL.createObjectURL(blob));
+      },
+      'image/jpeg',
+      0.85
+    );
+  }
+
+  return (
+    <div className="space-y-2">
+      <video ref={videoRef} src={src} controls className="w-full max-h-56 rounded-xl border border-slate-200 bg-black" />
+      <p className="text-xs text-slate-400">Scrub to the frame you want, then capture it.</p>
+      <Button type="button" variant="outline" onClick={capture} disabled={capturing} className="w-full h-9">
+        {capturing ? <Loader2 className="h-4 w-4 animate-spin mr-1.5" /> : <Camera className="h-4 w-4 mr-1.5" />}
+        Capture current frame
+      </Button>
+      {capturedPreviewUrl && (
+        <div className="flex items-center gap-2 p-2 rounded-lg bg-emerald-50 border border-emerald-100">
+          <Image
+            src={capturedPreviewUrl}
+            alt="Captured thumbnail"
+            width={48}
+            height={48}
+            className="w-12 h-12 rounded-lg object-cover border border-emerald-200"
+            unoptimized
+          />
+          <span className="text-xs text-emerald-700 font-medium">Frame captured — this will be used as the thumbnail</span>
+        </div>
+      )}
+    </div>
+  );
+}
+
+const MODE_OPTIONS: { key: AssetMode; label: string; desc: string; icon: typeof Upload }[] = [
+  { key: 'files', label: 'Files', desc: 'SVG, PNG, JPG', icon: Upload },
+  { key: 'link', label: 'External Link', desc: 'Canva, Figma, etc.', icon: ExternalLink },
+  { key: 'video', label: 'Video', desc: 'Device or a link', icon: Video },
+];
+
 export default function UploadPage() {
   const router = useRouter();
   const [authChecked, setAuthChecked] = useState(false);
   const [categories, setCategories] = useState<Category[]>([]);
-  const [linkMode, setLinkMode] = useState(false);
+  const [mode, setMode] = useState<AssetMode>('files');
+  const [videoSource, setVideoSource] = useState<VideoSource>('device');
+  const [thumbSource, setThumbSource] = useState<ThumbSource>('frame');
 
   useEffect(() => {
     fetch('/api/auth/me')
@@ -284,6 +444,11 @@ export default function UploadPage() {
   ]);
 
   const [coverSlot, setCoverSlot] = useState<CoverSlot>({ file: null, previewUrl: null });
+  const [videoFile, setVideoFile] = useState<File | null>(null);
+  const [capturedFrame, setCapturedFrame] = useState<{ blob: Blob | null; previewUrl: string | null }>({
+    blob: null,
+    previewUrl: null,
+  });
 
   const [step, setStep] = useState<UploadStep>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -343,17 +508,53 @@ export default function UploadPage() {
     });
   }
 
+  function handleVideoSelect(file: File) {
+    setVideoFile(file);
+    setCapturedFrame((prev) => {
+      if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+      return { blob: null, previewUrl: null };
+    });
+    setThumbSource('frame');
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || file.name.replace(/\.[^.]+$/, ''),
+    }));
+  }
+
+  function handleVideoRemove() {
+    setVideoFile(null);
+    setCapturedFrame((prev) => {
+      if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+      return { blob: null, previewUrl: null };
+    });
+  }
+
+  function handleFrameCapture(blob: Blob, previewUrl: string) {
+    setCapturedFrame((prev) => {
+      if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
+      return { blob, previewUrl };
+    });
+  }
+
   function handleInputChange(field: string, value: string) {
     setFormData((prev) => ({ ...prev, [field]: value }));
   }
 
-  async function uploadFile(file: File): Promise<string> {
+  function handleCategoryCreated(category: Category) {
+    setCategories((prev) => [...prev, category]);
+  }
+
+  async function uploadFileFull(file: File): Promise<{ fileId: string; fileUrl: string }> {
     const form = new FormData();
     form.append('file', file, file.name);
     const res = await fetch('/api/upload', { method: 'POST', body: form });
     if (!res.ok) throw new Error('Failed to upload file');
-    const { fileId } = await res.json();
-    return fileId as string;
+    return res.json();
+  }
+
+  async function uploadFile(file: File): Promise<string> {
+    const { fileId } = await uploadFileFull(file);
+    return fileId;
   }
 
   async function handleSubmit(e: React.FormEvent) {
@@ -369,7 +570,9 @@ export default function UploadPage() {
       return;
     }
 
-    if (linkMode) {
+    const tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
+
+    if (mode === 'link') {
       if (!coverSlot.file) {
         setErrorMessage('Please upload a cover image.');
         return;
@@ -388,7 +591,6 @@ export default function UploadPage() {
         const thumbnailFileId = await uploadFile(coverSlot.file);
         setStep('creating');
 
-        const tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
         const assetRes = await fetch('/api/assets', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
@@ -401,6 +603,102 @@ export default function UploadPage() {
             owner: formData.owner.trim() || undefined,
             thumbnailFileId,
             formats: [],
+            fileSize: coverSlot.file.size,
+          }),
+        });
+
+        if (!assetRes.ok) throw new Error('Failed to create asset record');
+        setStep('done');
+        setTimeout(() => router.push('/'), 1500);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+        setStep('error');
+      }
+      return;
+    }
+
+    if (mode === 'video') {
+      if (videoSource === 'device') {
+        if (!videoFile) {
+          setErrorMessage('Please upload a video file.');
+          return;
+        }
+        const thumbFile = thumbSource === 'upload' ? coverSlot.file : null;
+        if (thumbSource === 'frame' && !capturedFrame.blob) {
+          setErrorMessage('Please capture a frame to use as the thumbnail.');
+          return;
+        }
+        if (thumbSource === 'upload' && !thumbFile) {
+          setErrorMessage('Please upload a thumbnail image.');
+          return;
+        }
+
+        setStep('uploading');
+        try {
+          const { fileUrl } = await uploadFileFull(videoFile);
+          const thumbnailFileId =
+            thumbSource === 'frame' && capturedFrame.blob
+              ? await uploadFile(new File([capturedFrame.blob], 'thumbnail.jpg', { type: 'image/jpeg' }))
+              : await uploadFile(thumbFile!);
+          setStep('creating');
+
+          const assetRes = await fetch('/api/assets', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+              name: formData.name.trim(),
+              description: `[LINK]${fileUrl}`,
+              category: formData.category,
+              tags,
+              status: formData.status,
+              owner: formData.owner.trim() || undefined,
+              thumbnailFileId,
+              formats: ['MP4'],
+              fileSize: videoFile.size,
+            }),
+          });
+
+          if (!assetRes.ok) throw new Error('Failed to create asset record');
+          setStep('done');
+          setTimeout(() => router.push('/'), 1500);
+        } catch (err) {
+          setErrorMessage(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+          setStep('error');
+        }
+        return;
+      }
+
+      // videoSource === 'link'
+      if (!coverSlot.file) {
+        setErrorMessage('Please upload a thumbnail image.');
+        return;
+      }
+      if (!formData.externalUrl.trim()) {
+        setErrorMessage('Please enter the video link URL.');
+        return;
+      }
+      if (!/^https?:\/\/.+/.test(formData.externalUrl.trim())) {
+        setErrorMessage('Please enter a valid URL starting with http:// or https://');
+        return;
+      }
+
+      setStep('uploading');
+      try {
+        const thumbnailFileId = await uploadFile(coverSlot.file);
+        setStep('creating');
+
+        const assetRes = await fetch('/api/assets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            description: `[LINK]${formData.externalUrl.trim()}`,
+            category: formData.category,
+            tags,
+            status: formData.status,
+            owner: formData.owner.trim() || undefined,
+            thumbnailFileId,
+            formats: ['MP4'],
             fileSize: coverSlot.file.size,
           }),
         });
@@ -433,7 +731,6 @@ export default function UploadPage() {
 
       setStep('creating');
 
-      const tags = formData.tags.split(',').map((t) => t.trim()).filter(Boolean);
       const assetRes = await fetch('/api/assets', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -462,7 +759,14 @@ export default function UploadPage() {
   }
 
   const isUploading = step === 'uploading' || step === 'creating';
-  const hasAnyFile = linkMode ? Boolean(coverSlot.file) : slots.some((s) => s.file !== null);
+  const hasAnyFile =
+    mode === 'files'
+      ? slots.some((s) => s.file !== null)
+      : mode === 'link'
+        ? Boolean(coverSlot.file)
+        : videoSource === 'device'
+          ? Boolean(videoFile) && (thumbSource === 'frame' ? Boolean(capturedFrame.blob) : Boolean(coverSlot.file))
+          : Boolean(coverSlot.file);
 
   const stepLabel: Record<string, string> = {
     uploading: 'Uploading files...',
@@ -497,78 +801,186 @@ export default function UploadPage() {
           <form onSubmit={handleSubmit}>
             <div className="bg-white border border-slate-200 rounded-2xl p-6 sm:p-8 space-y-6">
 
-              {/* Link mode toggle */}
-              <div className="flex items-center justify-between p-4 rounded-xl border border-slate-200 bg-slate-50">
-                <div className="flex items-center gap-3">
-                  <div className={`p-2 rounded-lg ${linkMode ? 'bg-blue-100' : 'bg-slate-100'}`}>
-                    <ExternalLink className={`h-4 w-4 ${linkMode ? 'text-blue-600' : 'text-slate-400'}`} />
-                  </div>
-                  <div>
-                    <p className="text-sm font-medium text-slate-900">Link Mode</p>
-                    <p className="text-xs text-slate-500">
-                      {linkMode
-                        ? 'Upload a cover image + external URL — clicking the asset opens the link'
-                        : 'Upload image files (SVG, PNG, JPG) as a downloadable asset'}
-                    </p>
-                  </div>
-                </div>
-                <Switch
-                  checked={linkMode}
-                  onCheckedChange={(checked) => {
-                    setLinkMode(checked);
-                    setErrorMessage('');
-                  }}
-                />
-              </div>
-
-              {/* File upload area */}
+              {/* Asset type selector */}
               <div>
-                <Label className="text-sm font-semibold text-slate-700 mb-4 block">
-                  {linkMode ? 'Cover Image' : 'Files'}
-                  {' '}<span className="text-red-500">*</span>
-                  {!linkMode && <span className="font-normal text-slate-400 ml-1">(at least one required)</span>}
-                </Label>
-
-                {linkMode ? (
-                  <CoverImageDropZone
-                    slot={coverSlot}
-                    onChange={handleCoverChange}
-                    onRemove={handleCoverRemove}
-                  />
-                ) : (
-                  <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                    {slots.map((slot) => (
-                      <FormatDropZone
-                        key={slot.format}
-                        slot={slot}
-                        onFileSelect={handleFileSelect}
-                        onRemove={handleRemove}
-                      />
-                    ))}
-                  </div>
-                )}
+                <Label className="text-sm font-semibold text-slate-700 mb-3 block">Asset Type</Label>
+                <div className="grid grid-cols-3 gap-2">
+                  {MODE_OPTIONS.map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => { setMode(opt.key); setErrorMessage(''); }}
+                      className={cn(
+                        'flex flex-col items-center gap-1.5 rounded-xl border p-3 text-center transition-colors',
+                        mode === opt.key ? 'border-blue-300 bg-blue-50' : 'border-slate-200 hover:bg-slate-50'
+                      )}
+                    >
+                      <opt.icon className={cn('h-4 w-4', mode === opt.key ? 'text-blue-600' : 'text-slate-400')} />
+                      <span className={cn('text-sm font-medium', mode === opt.key ? 'text-blue-700' : 'text-slate-700')}>
+                        {opt.label}
+                      </span>
+                      <span className="text-[11px] text-slate-400">{opt.desc}</span>
+                    </button>
+                  ))}
+                </div>
               </div>
 
-              {/* External URL field (link mode only) */}
-              {linkMode && (
-                <div>
-                  <Label htmlFor="externalUrl" className="text-sm font-medium text-slate-700 mb-1.5 block">
-                    External URL <span className="text-red-500">*</span>
-                    <span className="text-slate-400 font-normal ml-1 text-xs">— clicking the asset will navigate here</span>
-                  </Label>
-                  <div className="relative">
-                    <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
-                    <Input
-                      id="externalUrl"
-                      type="url"
-                      value={formData.externalUrl}
-                      onChange={(e) => handleInputChange('externalUrl', e.target.value)}
-                      placeholder="https://www.canva.com/design/..."
-                      className="h-10 pl-9"
-                    />
-                  </div>
+              {/* Video source sub-toggle */}
+              {mode === 'video' && (
+                <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-100 w-fit">
+                  {([
+                    { key: 'device', label: 'From device' },
+                    { key: 'link', label: 'From a link' },
+                  ] as { key: VideoSource; label: string }[]).map((opt) => (
+                    <button
+                      key={opt.key}
+                      type="button"
+                      onClick={() => { setVideoSource(opt.key); setErrorMessage(''); }}
+                      className={cn(
+                        'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+                        videoSource === opt.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                      )}
+                    >
+                      {opt.label}
+                    </button>
+                  ))}
                 </div>
               )}
+
+              {/* File upload area */}
+              <div className="space-y-5">
+                {mode === 'files' && (
+                  <div>
+                    <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                      Files <span className="text-red-500">*</span>
+                      <span className="font-normal text-slate-400 ml-1">(at least one required)</span>
+                    </Label>
+                    <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                      {slots.map((slot) => (
+                        <FormatDropZone
+                          key={slot.format}
+                          slot={slot}
+                          onFileSelect={handleFileSelect}
+                          onRemove={handleRemove}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {mode === 'link' && (
+                  <>
+                    <div>
+                      <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                        Cover Image <span className="text-red-500">*</span>
+                      </Label>
+                      <CoverImageDropZone slot={coverSlot} onChange={handleCoverChange} onRemove={handleCoverRemove} />
+                    </div>
+                    <div>
+                      <Label htmlFor="externalUrl" className="text-sm font-medium text-slate-700 mb-1.5 block">
+                        External URL <span className="text-red-500">*</span>
+                        <span className="text-slate-400 font-normal ml-1 text-xs">— clicking the asset will navigate here</span>
+                      </Label>
+                      <div className="relative">
+                        <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          id="externalUrl"
+                          type="url"
+                          value={formData.externalUrl}
+                          onChange={(e) => handleInputChange('externalUrl', e.target.value)}
+                          placeholder="https://www.canva.com/design/..."
+                          className="h-10 pl-9"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+
+                {mode === 'video' && videoSource === 'device' && (
+                  <>
+                    <div>
+                      <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                        Video <span className="text-red-500">*</span>
+                      </Label>
+                      <VideoDropZone file={videoFile} onChange={handleVideoSelect} onRemove={handleVideoRemove} />
+                    </div>
+
+                    {videoFile && (
+                      <div>
+                        <Label className="text-sm font-semibold text-slate-700 mb-3 block">
+                          Thumbnail <span className="text-red-500">*</span>
+                        </Label>
+                        <div className="flex items-center gap-2 p-1 rounded-xl bg-slate-100 w-fit mb-3">
+                          {([
+                            { key: 'frame', label: 'Capture from video' },
+                            { key: 'upload', label: 'Upload image' },
+                          ] as { key: ThumbSource; label: string }[]).map((opt) => (
+                            <button
+                              key={opt.key}
+                              type="button"
+                              onClick={() => setThumbSource(opt.key)}
+                              className={cn(
+                                'px-3 py-1.5 rounded-lg text-xs font-semibold transition-colors',
+                                thumbSource === opt.key ? 'bg-white text-slate-900 shadow-sm' : 'text-slate-500 hover:text-slate-700'
+                              )}
+                            >
+                              {opt.label}
+                            </button>
+                          ))}
+                        </div>
+                        {thumbSource === 'frame' ? (
+                          <VideoFrameCapture
+                            key={`${videoFile.name}-${videoFile.size}`}
+                            file={videoFile}
+                            capturedPreviewUrl={capturedFrame.previewUrl}
+                            onCapture={handleFrameCapture}
+                          />
+                        ) : (
+                          <CoverImageDropZone
+                            slot={coverSlot}
+                            onChange={handleCoverChange}
+                            onRemove={handleCoverRemove}
+                            hint="Required — displayed as the video thumbnail"
+                          />
+                        )}
+                      </div>
+                    )}
+                  </>
+                )}
+
+                {mode === 'video' && videoSource === 'link' && (
+                  <>
+                    <div>
+                      <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                        Thumbnail <span className="text-red-500">*</span>
+                      </Label>
+                      <CoverImageDropZone
+                        slot={coverSlot}
+                        onChange={handleCoverChange}
+                        onRemove={handleCoverRemove}
+                        hint="Required — displayed as the video thumbnail"
+                      />
+                    </div>
+                    <div>
+                      <Label htmlFor="externalUrl" className="text-sm font-medium text-slate-700 mb-1.5 block">
+                        Video Link <span className="text-red-500">*</span>
+                        <span className="text-slate-400 font-normal ml-1 text-xs">— e.g. a Google Drive sharing link</span>
+                      </Label>
+                      <div className="relative">
+                        <ExternalLink className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-slate-400" />
+                        <Input
+                          id="externalUrl"
+                          type="url"
+                          value={formData.externalUrl}
+                          onChange={(e) => handleInputChange('externalUrl', e.target.value)}
+                          placeholder="https://drive.google.com/file/d/.../view?usp=sharing"
+                          className="h-10 pl-9"
+                        />
+                      </div>
+                    </div>
+                  </>
+                )}
+              </div>
 
               <Separator />
 
@@ -582,13 +994,13 @@ export default function UploadPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder={linkMode ? 'e.g. Q4 Marketing Presentation' : 'e.g. Primary Logo'}
+                    placeholder={mode === 'video' ? 'e.g. Marketing Video — English' : mode === 'link' ? 'e.g. Q4 Marketing Presentation' : 'e.g. Primary Logo'}
                     required
                     className="h-10"
                   />
                 </div>
 
-                {!linkMode && (
+                {mode === 'files' && (
                   <div className="sm:col-span-2">
                     <Label htmlFor="description" className="text-sm font-medium text-slate-700 mb-1.5 block">
                       Description
@@ -608,22 +1020,13 @@ export default function UploadPage() {
                   <Label htmlFor="category" className="text-sm font-medium text-slate-700 mb-1.5 block">
                     Category <span className="text-red-500">*</span>
                   </Label>
-                  <Select
+                  <CategoryPicker
+                    id="category"
+                    categories={categories}
                     value={formData.category}
-                    onValueChange={(v) => handleInputChange('category', v ?? '')}
-                    required
-                  >
-                    <SelectTrigger id="category" className="h-10">
-                      <SelectValue placeholder="Select category" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {categories.map((cat) => (
-                        <SelectItem key={cat.id} value={cat.name}>
-                          {cat.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
+                    onChange={(v) => handleInputChange('category', v)}
+                    onCategoryCreated={handleCategoryCreated}
+                  />
                 </div>
 
                 <div>
@@ -669,7 +1072,7 @@ export default function UploadPage() {
                     id="tags"
                     value={formData.tags}
                     onChange={(e) => handleInputChange('tags', e.target.value)}
-                    placeholder={linkMode ? 'presentation, canva, q4' : 'logo, brand, primary'}
+                    placeholder={mode === 'video' ? 'marketing, launch, 2026' : mode === 'link' ? 'presentation, canva, q4' : 'logo, brand, primary'}
                     className="h-10"
                   />
                 </div>
@@ -695,10 +1098,20 @@ export default function UploadPage() {
                       <Loader2 className="h-4 w-4 animate-spin" />
                       {stepLabel[step] ?? 'Uploading...'}
                     </>
+                  ) : mode === 'link' ? (
+                    <>
+                      <ExternalLink className="h-4 w-4" />
+                      Add Link Asset
+                    </>
+                  ) : mode === 'video' ? (
+                    <>
+                      <Video className="h-4 w-4" />
+                      Add Video
+                    </>
                   ) : (
                     <>
-                      {linkMode ? <ExternalLink className="h-4 w-4" /> : <Upload className="h-4 w-4" />}
-                      {linkMode ? 'Add Link Asset' : 'Upload Asset'}
+                      <Upload className="h-4 w-4" />
+                      Upload Asset
                     </>
                   )}
                 </Button>

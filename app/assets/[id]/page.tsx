@@ -16,6 +16,7 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   SVG: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100',
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+  MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
 };
 
 function formatFileSize(bytes: number): string {

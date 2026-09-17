@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Download, Link2, FileImage, ExternalLink, Pencil, Type, Copy, Trash2, Loader2 } from 'lucide-react';
+import { Download, Link2, FileImage, ExternalLink, Pencil, Type, Copy, Trash2, Loader2, Play, AlertTriangle } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -69,6 +69,7 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   SVG: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100',
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+  MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
 };
 
 const iconBtnBase =
@@ -90,6 +91,8 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
   const [editName, setEditName] = useState('');
   const [editUrl, setEditUrl] = useState('');
   const [busy, setBusy] = useState(false);
+  const [deleteConfirmOpen, setDeleteConfirmOpen] = useState(false);
+  const [deleting, setDeleting] = useState(false);
 
   useEffect(() => {
     if (!contextMenu) return;
@@ -108,6 +111,7 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
     : (currentAsset.thumbnailUrl ?? (currentAsset.formats.some(isImageFormat) ? currentAsset.fileUrl : undefined));
   const primaryFormat = currentAsset.formats[0];
   const isLinkAsset = Boolean(currentAsset.linkUrl);
+  const isVideoAsset = currentAsset.formats.includes('MP4');
 
   if (isDeleted) return null;
 
@@ -201,11 +205,20 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
     }
   }
 
-  async function handleDelete() {
+  function openDeleteConfirm() {
     setContextMenu(null);
-    if (!confirm(`Delete "${currentAsset.name}"? This cannot be undone.`)) return;
-    const res = await fetch(`/api/assets/${currentAsset.id}`, { method: 'DELETE' });
-    if (res.ok) setIsDeleted(true);
+    setDeleteConfirmOpen(true);
+  }
+
+  async function handleDelete() {
+    setDeleting(true);
+    try {
+      const res = await fetch(`/api/assets/${currentAsset.id}`, { method: 'DELETE' });
+      if (res.ok) setIsDeleted(true);
+    } finally {
+      setDeleting(false);
+      setDeleteConfirmOpen(false);
+    }
   }
 
   const ContextMenuPopup = contextMenu ? (
@@ -227,7 +240,7 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
         Duplicate
       </button>
       <div className="my-1 border-t border-slate-100" />
-      <button className={cn(menuItemCls, 'text-red-600 hover:bg-red-50')} onClick={handleDelete}>
+      <button className={cn(menuItemCls, 'text-red-600 hover:bg-red-50')} onClick={openDeleteConfirm}>
         <Trash2 className="h-3.5 w-3.5" />
         Delete
       </button>
@@ -308,6 +321,35 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete confirmation dialog */}
+      <Dialog open={deleteConfirmOpen} onOpenChange={setDeleteConfirmOpen}>
+        <DialogContent showCloseButton={false} className="max-w-sm">
+          <div className="flex flex-col items-center text-center pt-2">
+            <div className="h-12 w-12 rounded-full bg-red-100 flex items-center justify-center mb-4">
+              <AlertTriangle className="h-6 w-6 text-red-600" />
+            </div>
+            <DialogHeader>
+              <DialogTitle>Delete this asset?</DialogTitle>
+            </DialogHeader>
+            <p className="text-sm text-slate-500 mt-1 mb-2">
+              <span className="font-medium text-slate-700">{currentAsset.name}</span> will be permanently removed. This action cannot be undone.
+            </p>
+          </div>
+          <DialogFooter className="sm:justify-center">
+            <DialogClose render={<Button variant="outline" className="h-9 flex-1" disabled={deleting} />}>
+              Cancel
+            </DialogClose>
+            <Button
+              onClick={handleDelete}
+              disabled={deleting}
+              className="h-9 flex-1 bg-red-600 hover:bg-red-700 text-white border-0"
+            >
+              {deleting ? <Loader2 className="h-4 w-4 animate-spin" /> : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </>
   );
 
@@ -348,7 +390,8 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
                 <>
                   <span className="text-slate-300">•</span>
                   <span className="text-xs text-blue-600 font-medium flex items-center gap-0.5">
-                    <ExternalLink className="w-3 h-3" /> Link
+                    {isVideoAsset ? <Play className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
+                    {isVideoAsset ? 'Video' : 'Link'}
                   </span>
                 </>
               ) : currentAsset.formats.length > 0 && (
@@ -387,10 +430,10 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
                   className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100')}
                   onClick={() => window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer')}
                 >
-                  <ExternalLink className="h-3 w-3 mr-1" />
-                  Visit
+                  {isVideoAsset ? <Play className="h-3 w-3 mr-1" /> : <ExternalLink className="h-3 w-3 mr-1" />}
+                  {isVideoAsset ? 'Play' : 'Visit'}
                 </TooltipTrigger>
-                <TooltipContent>Open link</TooltipContent>
+                <TooltipContent>{isVideoAsset ? 'Play video' : 'Open link'}</TooltipContent>
               </Tooltip>
             ) : (
               currentAsset.formats.map((fmt) => (
@@ -466,8 +509,8 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
             {isLinkAsset ? (
               <span className="h-9 px-4 text-xs font-semibold rounded-md flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
-                <ExternalLink className="h-3.5 w-3.5" />
-                Visit Link
+                {isVideoAsset ? <Play className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
+                {isVideoAsset ? 'Play Video' : 'Visit Link'}
               </span>
             ) : (
               <>

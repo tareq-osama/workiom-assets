@@ -22,8 +22,10 @@ import {
   DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import StatusBadge from '@/components/status-badge';
+import CategoryPicker from '@/components/category-picker';
 import type { Asset, AssetFormat, AssetStatus } from '@/types/asset';
 import type { UserRole } from '@/types/user';
+import type { Category } from '@/lib/appwrite-categories';
 import { cn } from '@/lib/utils';
 
 interface AuthUser {
@@ -93,24 +95,28 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   SVG: 'bg-violet-50 text-violet-700 border-violet-200 hover:bg-violet-100',
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
+  MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
 };
 
 const FORMAT_BADGE: Record<AssetFormat, string> = {
   SVG: 'border-violet-200 bg-violet-50 text-violet-700',
   PNG: 'border-blue-200 bg-blue-50 text-blue-700',
   JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
+  MP4: 'border-rose-200 bg-rose-50 text-rose-700',
 };
 
 const FORMAT_DOT: Record<AssetFormat, string> = {
   SVG: 'bg-violet-500',
   PNG: 'bg-blue-500',
   JPG: 'bg-emerald-500',
+  MP4: 'bg-rose-500',
 };
 
 const FORMAT_ACCEPT: Record<AssetFormat, string> = {
   SVG: '.svg,image/svg+xml',
   PNG: '.png,image/png',
   JPG: '.jpg,.jpeg,image/jpeg',
+  MP4: '.mp4,video/mp4',
 };
 
 function CopyLinkButton({ value }: { value: string }) {
@@ -146,7 +152,7 @@ export default function AssetPreviewDialog({
   const [editMode, setEditMode] = useState(false);
   const [editForm, setEditForm] = useState<EditFormState | null>(null);
   const [editSlots, setEditSlots] = useState<EditFormatSlot[]>([]);
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([]);
+  const [categories, setCategories] = useState<Category[]>([]);
   const [saving, setSaving] = useState(false);
   const [saveError, setSaveError] = useState('');
   const [confirmDelete, setConfirmDelete] = useState(false);
@@ -155,10 +161,12 @@ export default function AssetPreviewDialog({
   const svgInputRef = useRef<HTMLInputElement>(null);
   const pngInputRef = useRef<HTMLInputElement>(null);
   const jpgInputRef = useRef<HTMLInputElement>(null);
+  const mp4InputRef = useRef<HTMLInputElement>(null);
   const formatRefs: Record<AssetFormat, React.RefObject<HTMLInputElement | null>> = {
     SVG: svgInputRef,
     PNG: pngInputRef,
     JPG: jpgInputRef,
+    MP4: mp4InputRef,
   };
 
   useEffect(() => {
@@ -674,21 +682,13 @@ export default function AssetPreviewDialog({
                       <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
                         Category
                       </Label>
-                      <Select
+                      <CategoryPicker
+                        categories={categories}
                         value={editForm.category}
-                        onValueChange={(v) => setEditForm((f) => f ? { ...f, category: v ?? '' } : f)}
-                      >
-                        <SelectTrigger className="h-9 text-sm w-full">
-                          <SelectValue placeholder="Select category" />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {categories.map((cat) => (
-                            <SelectItem key={cat.id} value={cat.name}>
-                              {cat.name}
-                            </SelectItem>
-                          ))}
-                        </SelectContent>
-                      </Select>
+                        onChange={(v) => setEditForm((f) => f ? { ...f, category: v } : f)}
+                        onCategoryCreated={(cat) => setCategories((prev) => [...prev, cat])}
+                        className="h-9 text-sm"
+                      />
                     </div>
 
                     <div>

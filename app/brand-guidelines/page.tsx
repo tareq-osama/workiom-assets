@@ -73,8 +73,7 @@ const NAV = [
   { id: "typography", label: "Typography", num: "07" },
   { id: "color", label: "Color", num: "08" },
   { id: "brand-in-use", label: "Brand in Use", num: "09" },
-  { id: "marketing-video", label: "Marketing Video", num: "10" },
-  { id: "resources", label: "Resources", num: "11" },
+  { id: "resources", label: "Resources", num: "10" },
 ];
 
 /* ─────────────────────────────────────────────
@@ -2050,88 +2049,7 @@ export default function BrandGuidelinesPage() {
         )}
 
         {/* ════════════════════════════════════════
-            10 · Marketing Video
-        ════════════════════════════════════════ */}
-        {activePage === "marketing-video" && (
-          <section>
-            <SectionBanner title="Marketing Video" />
-
-            <div className="px-5 sm:px-10 md:px-16 pt-10 pb-16 space-y-8">
-              <p className="text-sm sm:text-base text-slate-500 max-w-2xl leading-relaxed">
-                Official Workiom marketing video — available in English and
-                Turkish. Use these for presentations, pitches, websites, and
-                social channels.
-              </p>
-
-              <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                {/* English */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-base leading-none">🇬🇧</span>
-                    <p className="text-sm font-semibold text-slate-900">
-                      English
-                    </p>
-                  </div>
-                  <div
-                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
-                    style={{ aspectRatio: "16/9" }}
-                  >
-                    <iframe
-                      src="https://drive.google.com/file/d/1dhnsW6sEIVUAyiNijcYGfyfckl1HkP8i/preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                      title="Workiom Marketing Video — English"
-                    />
-                  </div>
-                  <a
-                    href="https://drive.google.com/file/d/1dhnsW6sEIVUAyiNijcYGfyfckl1HkP8i/view?usp=sharing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
-                  >
-                    <ExternalLink className="h-3 w-3" /> Open in Google Drive
-                  </a>
-                </div>
-
-                {/* Turkish */}
-                <div className="space-y-3">
-                  <div className="flex items-center gap-2.5">
-                    <span className="text-base leading-none">🇹🇷</span>
-                    <p className="text-sm font-semibold text-slate-900">
-                      Turkish
-                    </p>
-                  </div>
-                  <div
-                    className="relative w-full rounded-2xl overflow-hidden border border-[#EAEAEA] bg-black"
-                    style={{ aspectRatio: "16/9" }}
-                  >
-                    <iframe
-                      src="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/preview"
-                      className="absolute inset-0 w-full h-full"
-                      allow="autoplay"
-                      allowFullScreen
-                      title="Workiom Marketing Video — Turkish"
-                    />
-                  </div>
-                  <a
-                    href="https://drive.google.com/file/d/1skf1sQdQcoBw02HsAs0RLigBEMxe_8Zp/view?usp=sharing"
-                    target="_blank"
-                    rel="noopener noreferrer"
-                    className="inline-flex items-center gap-1.5 text-xs font-semibold text-slate-400 hover:text-slate-700 transition-colors"
-                  >
-                    <ExternalLink className="h-3 w-3" /> Open in Google Drive
-                  </a>
-                </div>
-              </div>
-            </div>
-
-            <PageNav prev={prev} next={next} onNavigate={navigate} />
-          </section>
-        )}
-
-        {/* ════════════════════════════════════════
-            11 · Resources
+            10 · Resources
         ════════════════════════════════════════ */}
         {activePage === "resources" && (
           <section>
