@@ -32,6 +32,9 @@ export interface Asset {
   // External link URL — present when the asset is a clickable link (e.g. a Canva presentation)
   linkUrl?: string;
 
+  // Optional background color shown behind the thumbnail (e.g. for light/white logos)
+  backgroundColor?: string;
+
   // Convenience fields (primary format)
   fileUrl: string;
   fileType: string;

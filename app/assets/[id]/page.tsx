@@ -56,12 +56,16 @@ export default async function AssetDetailPage({
           <div className="lg:col-span-3">
             <div
               className="border border-slate-200 rounded-2xl overflow-hidden aspect-video lg:aspect-auto lg:min-h-80 flex items-center justify-center p-8"
-              style={{
-                background: `linear-gradient(45deg,#f0f0f0 25%,transparent 25%),linear-gradient(-45deg,#f0f0f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f0f0f0 75%),linear-gradient(-45deg,transparent 75%,#f0f0f0 75%)`,
-                backgroundSize: '20px 20px',
-                backgroundPosition: '0 0,0 10px,10px -10px,-10px 0px',
-                backgroundColor: '#fafafa',
-              }}
+              style={
+                asset.backgroundColor
+                  ? { background: asset.backgroundColor }
+                  : {
+                      background: `linear-gradient(45deg,#f0f0f0 25%,transparent 25%),linear-gradient(-45deg,#f0f0f0 25%,transparent 25%),linear-gradient(45deg,transparent 75%,#f0f0f0 75%),linear-gradient(-45deg,transparent 75%,#f0f0f0 75%)`,
+                      backgroundSize: '20px 20px',
+                      backgroundPosition: '0 0,0 10px,10px -10px,-10px 0px',
+                      backgroundColor: '#fafafa',
+                    }
+              }
             >
               {previewUrl ? (
                 <div className="relative w-full h-full min-h-64 lg:min-h-96">

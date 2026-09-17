@@ -23,6 +23,7 @@ import {
 } from '@/components/ui/dropdown-menu';
 import StatusBadge from '@/components/status-badge';
 import CategoryPicker from '@/components/category-picker';
+import BackgroundColorPicker from '@/components/background-color-picker';
 import type { Asset, AssetFormat, AssetStatus } from '@/types/asset';
 import type { UserRole } from '@/types/user';
 import type { Category } from '@/lib/appwrite-categories';
@@ -51,6 +52,7 @@ interface EditFormState {
   tags: string;
   owner: string;
   deprecationReason: string;
+  backgroundColor: string;
 }
 
 interface EditFormatSlot {
@@ -205,6 +207,7 @@ export default function AssetPreviewDialog({
       tags: localAsset!.tags.join(', '),
       owner: localAsset!.owner,
       deprecationReason: localAsset!.deprecationReason ?? '',
+      backgroundColor: localAsset!.backgroundColor ?? '',
     });
     setEditSlots([
       { format: 'SVG', file: null, previewUrl: null, existingFileId: localAsset!.svgFileId, existingUrl: localAsset!.svgUrl, removed: false },
@@ -300,6 +303,7 @@ export default function AssetPreviewDialog({
         pngFileId,
         jpgFileId,
         formats,
+        backgroundColor: editForm.backgroundColor,
       };
 
       const res = await fetch(`/api/assets/${localAsset.id}`, {
@@ -485,17 +489,21 @@ export default function AssetPreviewDialog({
           {/* Preview */}
           <div
             className="flex-1 min-w-0 flex items-center justify-center relative overflow-hidden"
-            style={{
-              background: `
+            style={
+              localAsset.backgroundColor
+                ? { background: localAsset.backgroundColor }
+                : {
+                    background: `
                 linear-gradient(45deg, #f0f0f0 25%, transparent 25%),
                 linear-gradient(-45deg, #f0f0f0 25%, transparent 25%),
                 linear-gradient(45deg, transparent 75%, #f0f0f0 75%),
                 linear-gradient(-45deg, transparent 75%, #f0f0f0 75%)
               `,
-              backgroundSize: '20px 20px',
-              backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
-              backgroundColor: '#fafafa',
-            }}
+                    backgroundSize: '20px 20px',
+                    backgroundPosition: '0 0, 0 10px, 10px -10px, -10px 0px',
+                    backgroundColor: '#fafafa',
+                  }
+            }
           >
             {previewUrl ? (
               <Image
@@ -750,6 +758,17 @@ export default function AssetPreviewDialog({
                         placeholder="logo, icon, brand"
                       />
                       <p className="text-xs text-slate-400 mt-1">Separate tags with commas</p>
+                    </div>
+
+                    <div>
+                      <Label className="text-xs font-semibold text-slate-500 uppercase tracking-wider block mb-1.5">
+                        Background Color
+                      </Label>
+                      <BackgroundColorPicker
+                        value={editForm.backgroundColor}
+                        onChange={(v) => setEditForm((f) => f ? { ...f, backgroundColor: v } : f)}
+                      />
+                      <p className="text-xs text-slate-400 mt-1">Useful for light or white logos</p>
                     </div>
                   </div>
 

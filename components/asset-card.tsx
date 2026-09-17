@@ -365,7 +365,10 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
           onContextMenu={openContextMenu}
         >
           {/* Thumbnail */}
-          <div className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative">
+          <div
+            className="w-16 h-16 flex-shrink-0 rounded-lg overflow-hidden bg-slate-50 border border-slate-100 flex items-center justify-center relative"
+            style={currentAsset.backgroundColor ? { background: currentAsset.backgroundColor } : undefined}
+          >
             {previewUrl ? (
               <Image
                 src={previewUrl}
@@ -485,7 +488,10 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
         onContextMenu={openContextMenu}
       >
         {/* Thumbnail area */}
-        <div className="relative aspect-video bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden">
+        <div
+          className="relative aspect-video bg-slate-50 border-b border-slate-100 flex items-center justify-center overflow-hidden"
+          style={currentAsset.backgroundColor ? { background: currentAsset.backgroundColor } : undefined}
+        >
           {previewUrl ? (
             <Image
               src={previewUrl}

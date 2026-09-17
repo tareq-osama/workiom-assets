@@ -30,6 +30,7 @@ import {
 import { Badge } from '@/components/ui/badge';
 import { Separator } from '@/components/ui/separator';
 import CategoryPicker from '@/components/category-picker';
+import BackgroundColorPicker from '@/components/background-color-picker';
 import { STATUS_OPTIONS } from '@/lib/constants';
 import { cn } from '@/lib/utils';
 import type { Category } from '@/lib/appwrite-categories';
@@ -460,6 +461,7 @@ export default function UploadPage() {
     owner: '',
     status: 'Active',
     externalUrl: '',
+    backgroundColor: '',
   });
 
   const handleFileSelect = useCallback((format: AssetFormat, file: File) => {
@@ -604,6 +606,7 @@ export default function UploadPage() {
             thumbnailFileId,
             formats: [],
             fileSize: coverSlot.file.size,
+            backgroundColor: formData.backgroundColor || undefined,
           }),
         });
 
@@ -655,6 +658,7 @@ export default function UploadPage() {
               thumbnailFileId,
               formats: ['MP4'],
               fileSize: videoFile.size,
+              backgroundColor: formData.backgroundColor || undefined,
             }),
           });
 
@@ -700,6 +704,7 @@ export default function UploadPage() {
             thumbnailFileId,
             formats: ['MP4'],
             fileSize: coverSlot.file.size,
+            backgroundColor: formData.backgroundColor || undefined,
           }),
         });
 
@@ -745,6 +750,7 @@ export default function UploadPage() {
           pngFileId: pngFileId ?? undefined,
           jpgFileId: jpgFileId ?? undefined,
           fileSize: slots.find((s) => s.file)?.file?.size ?? 0,
+          backgroundColor: formData.backgroundColor || undefined,
         }),
       });
 
@@ -1074,6 +1080,17 @@ export default function UploadPage() {
                     onChange={(e) => handleInputChange('tags', e.target.value)}
                     placeholder={mode === 'video' ? 'marketing, launch, 2026' : mode === 'link' ? 'presentation, canva, q4' : 'logo, brand, primary'}
                     className="h-10"
+                  />
+                </div>
+
+                <div className="sm:col-span-2">
+                  <Label className="text-sm font-medium text-slate-700 mb-1.5 block">
+                    Background Color
+                    <span className="text-slate-400 font-normal ml-1 text-xs">(optional — useful for light or white logos)</span>
+                  </Label>
+                  <BackgroundColorPicker
+                    value={formData.backgroundColor}
+                    onChange={(v) => handleInputChange('backgroundColor', v)}
                   />
                 </div>
               </div>

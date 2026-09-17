@@ -27,6 +27,7 @@ interface AppwriteAssetDoc {
   thumbnailFileId?: string;
   formats: string[];
   fileSize: number;
+  backgroundColor?: string;
 }
 
 function mapDoc(doc: AppwriteAssetDoc): Asset {
@@ -67,6 +68,7 @@ function mapDoc(doc: AppwriteAssetDoc): Asset {
     fileUrl,
     fileType,
     fileSize: doc.fileSize ?? 0,
+    backgroundColor: doc.backgroundColor || undefined,
   };
 }
 
@@ -152,6 +154,7 @@ export async function createAsset(data: {
   thumbnailFileId?: string;
   formats?: string[];
   fileSize?: number;
+  backgroundColor?: string;
 }): Promise<Asset> {
   const { databases } = createAdminClient();
 
@@ -178,6 +181,7 @@ export async function createAsset(data: {
       thumbnailFileId: data.thumbnailFileId ?? '',
       formats,
       fileSize: data.fileSize ?? 0,
+      backgroundColor: data.backgroundColor ?? '',
     }
   );
 
@@ -201,6 +205,7 @@ export async function updateAsset(
     formats: string[];
     fileSize: number;
     deprecationReason: string;
+    backgroundColor: string;
   }>
 ): Promise<Asset | null> {
   const { databases } = createAdminClient();
