@@ -17,6 +17,10 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
   MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
+  PDF: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+  DOC: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100',
+  XLS: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+  PPT: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
 };
 
 function formatFileSize(bytes: number): string {

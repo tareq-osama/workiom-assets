@@ -15,6 +15,7 @@ import {
   ExternalLink,
   Video,
   Camera,
+  FileText,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -36,16 +37,32 @@ import { cn } from '@/lib/utils';
 import type { Category } from '@/lib/appwrite-categories';
 
 type UploadStep = 'idle' | 'uploading' | 'creating' | 'done' | 'error';
-type AssetMode = 'files' | 'link' | 'video';
+type AssetMode = 'files' | 'link' | 'video' | 'document';
 type VideoSource = 'device' | 'link';
 type ThumbSource = 'frame' | 'upload';
+type DocumentFormat = 'PDF' | 'DOC' | 'XLS' | 'PPT';
 
 const FORMAT_ACCEPT: Record<AssetFormat, string> = {
   SVG: '.svg,image/svg+xml',
   PNG: '.png,image/png',
   JPG: '.jpg,.jpeg,image/jpeg',
   MP4: '.mp4,.mov,.webm,video/*',
+  PDF: '.pdf,application/pdf',
+  DOC: '.doc,.docx',
+  XLS: '.xls,.xlsx',
+  PPT: '.ppt,.pptx',
 };
+
+const DOCUMENT_ACCEPT =
+  '.pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,application/pdf,application/msword,application/vnd.openxmlformats-officedocument.wordprocessingml.document,application/vnd.ms-excel,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet,application/vnd.ms-powerpoint,application/vnd.openxmlformats-officedocument.presentationml.presentation';
+
+function normalizeDocumentFormat(filename: string): DocumentFormat {
+  const ext = filename.split('.').pop()?.toLowerCase() ?? '';
+  if (ext === 'pdf') return 'PDF';
+  if (['xls', 'xlsx', 'csv'].includes(ext)) return 'XLS';
+  if (['ppt', 'pptx'].includes(ext)) return 'PPT';
+  return 'DOC';
+}
 
 interface FormatSlot {
   format: AssetFormat;
@@ -88,6 +105,10 @@ function FormatDropZone({
     PNG: 'border-blue-200 bg-blue-50 text-blue-700',
     JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
     MP4: 'border-rose-200 bg-rose-50 text-rose-700',
+    PDF: 'border-red-200 bg-red-50 text-red-700',
+    DOC: 'border-sky-200 bg-sky-50 text-sky-700',
+    XLS: 'border-green-200 bg-green-50 text-green-700',
+    PPT: 'border-orange-200 bg-orange-50 text-orange-700',
   };
 
   const labelColor = formatColors[slot.format];
@@ -410,10 +431,92 @@ function VideoFrameCapture({
   );
 }
 
+function DocumentDropZone({
+  file,
+  onChange,
+  onRemove,
+}: {
+  file: File | null;
+  onChange: (file: File) => void;
+  onRemove: () => void;
+}) {
+  const inputRef = useRef<HTMLInputElement>(null);
+  const [dragging, setDragging] = useState(false);
+
+  function handleDrop(e: React.DragEvent) {
+    e.preventDefault();
+    setDragging(false);
+    const dropped = e.dataTransfer.files[0];
+    if (dropped) onChange(dropped);
+  }
+
+  return (
+    <div className="space-y-2">
+      <div className="flex items-center gap-2">
+        <Badge variant="outline" className="text-xs font-semibold px-2 py-0.5 border-sky-200 bg-sky-50 text-sky-700">
+          Document
+        </Badge>
+        <span className="text-xs text-slate-400">Required</span>
+      </div>
+
+      {file ? (
+        <div className="border border-slate-200 rounded-xl p-3 flex items-center gap-3 bg-slate-50">
+          <div className="w-12 h-12 flex-shrink-0 rounded-lg bg-white border border-slate-200 flex items-center justify-center">
+            <FileText className="h-5 w-5 text-slate-400" />
+          </div>
+          <div className="flex-1 min-w-0">
+            <p className="text-sm font-medium text-slate-900 truncate">{file.name}</p>
+            <p className="text-xs text-slate-400">{formatFileSize(file.size)}</p>
+          </div>
+          <button
+            type="button"
+            onClick={onRemove}
+            className="h-7 w-7 flex items-center justify-center rounded-md text-slate-400 hover:text-red-500 hover:bg-red-50 transition-colors"
+          >
+            <X className="h-3.5 w-3.5" />
+          </button>
+        </div>
+      ) : (
+        <div
+          className={`border-2 border-dashed rounded-xl p-6 text-center cursor-pointer transition-colors ${
+            dragging ? 'border-blue-400 bg-blue-50' : 'border-slate-200 hover:border-slate-300 hover:bg-slate-50'
+          }`}
+          onDrop={handleDrop}
+          onDragOver={(e) => { e.preventDefault(); setDragging(true); }}
+          onDragLeave={(e) => { e.preventDefault(); setDragging(false); }}
+          onClick={() => inputRef.current?.click()}
+          role="button"
+          tabIndex={0}
+          onKeyDown={(e) => e.key === 'Enter' && inputRef.current?.click()}
+        >
+          <CloudUpload className="h-8 w-8 text-slate-300 mx-auto mb-2" />
+          <p className="text-xs text-slate-500">
+            Drop a file or <span className="text-blue-600 font-medium">browse</span>
+          </p>
+          <p className="text-[11px] text-slate-400 mt-1">PDF, Word, Excel, PowerPoint</p>
+        </div>
+      )}
+
+      <input
+        ref={inputRef}
+        type="file"
+        accept={DOCUMENT_ACCEPT}
+        className="hidden"
+        onChange={(e) => {
+          const selected = e.target.files?.[0];
+          if (selected) onChange(selected);
+          e.target.value = '';
+        }}
+      />
+    </div>
+  );
+}
+
 const MODE_OPTIONS: { key: AssetMode; label: string; desc: string; icon: typeof Upload }[] = [
   { key: 'files', label: 'Files', desc: 'SVG, PNG, JPG', icon: Upload },
   { key: 'link', label: 'External Link', desc: 'Canva, Figma, etc.', icon: ExternalLink },
   { key: 'video', label: 'Video', desc: 'Device or a link', icon: Video },
+  { key: 'document', label: 'Document', desc: 'PDF, Word, Excel', icon: FileText },
 ];
 
 export default function UploadPage() {
@@ -450,6 +553,7 @@ export default function UploadPage() {
     blob: null,
     previewUrl: null,
   });
+  const [documentFile, setDocumentFile] = useState<File | null>(null);
 
   const [step, setStep] = useState<UploadStep>('idle');
   const [errorMessage, setErrorMessage] = useState('');
@@ -536,6 +640,18 @@ export default function UploadPage() {
       if (prev.previewUrl) URL.revokeObjectURL(prev.previewUrl);
       return { blob, previewUrl };
     });
+  }
+
+  function handleDocumentSelect(file: File) {
+    setDocumentFile(file);
+    setFormData((prev) => ({
+      ...prev,
+      name: prev.name || file.name.replace(/\.[^.]+$/, ''),
+    }));
+  }
+
+  function handleDocumentRemove() {
+    setDocumentFile(null);
   }
 
   function handleInputChange(field: string, value: string) {
@@ -718,6 +834,45 @@ export default function UploadPage() {
       return;
     }
 
+    if (mode === 'document') {
+      if (!documentFile) {
+        setErrorMessage('Please upload a document file.');
+        return;
+      }
+
+      setStep('uploading');
+      try {
+        const { fileUrl } = await uploadFileFull(documentFile);
+        const thumbnailFileId = coverSlot.file ? await uploadFile(coverSlot.file) : undefined;
+        setStep('creating');
+
+        const assetRes = await fetch('/api/assets', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            name: formData.name.trim(),
+            description: `[LINK]${fileUrl}`,
+            category: formData.category,
+            tags,
+            status: formData.status,
+            owner: formData.owner.trim() || undefined,
+            thumbnailFileId,
+            formats: [normalizeDocumentFormat(documentFile.name)],
+            fileSize: documentFile.size,
+            backgroundColor: formData.backgroundColor || undefined,
+          }),
+        });
+
+        if (!assetRes.ok) throw new Error('Failed to create asset record');
+        setStep('done');
+        setTimeout(() => router.push('/'), 1500);
+      } catch (err) {
+        setErrorMessage(err instanceof Error ? err.message : 'Upload failed. Please try again.');
+        setStep('error');
+      }
+      return;
+    }
+
     // Standard upload mode
     const hasAnyFile = slots.some((s) => s.file !== null);
     if (!hasAnyFile) {
@@ -770,9 +925,11 @@ export default function UploadPage() {
       ? slots.some((s) => s.file !== null)
       : mode === 'link'
         ? Boolean(coverSlot.file)
-        : videoSource === 'device'
-          ? Boolean(videoFile) && (thumbSource === 'frame' ? Boolean(capturedFrame.blob) : Boolean(coverSlot.file))
-          : Boolean(coverSlot.file);
+        : mode === 'document'
+          ? Boolean(documentFile)
+          : videoSource === 'device'
+            ? Boolean(videoFile) && (thumbSource === 'frame' ? Boolean(capturedFrame.blob) : Boolean(coverSlot.file))
+            : Boolean(coverSlot.file);
 
   const stepLabel: Record<string, string> = {
     uploading: 'Uploading files...',
@@ -810,7 +967,7 @@ export default function UploadPage() {
               {/* Asset type selector */}
               <div>
                 <Label className="text-sm font-semibold text-slate-700 mb-3 block">Asset Type</Label>
-                <div className="grid grid-cols-3 gap-2">
+                <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
                   {MODE_OPTIONS.map((opt) => (
                     <button
                       key={opt.key}
@@ -986,6 +1143,30 @@ export default function UploadPage() {
                     </div>
                   </>
                 )}
+
+                {mode === 'document' && (
+                  <>
+                    <div>
+                      <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                        Document <span className="text-red-500">*</span>
+                      </Label>
+                      <DocumentDropZone file={documentFile} onChange={handleDocumentSelect} onRemove={handleDocumentRemove} />
+                    </div>
+                    <div>
+                      <Label className="text-sm font-semibold text-slate-700 mb-4 block">
+                        Thumbnail
+                        <span className="font-normal text-slate-400 ml-1">(optional)</span>
+                      </Label>
+                      <CoverImageDropZone
+                        slot={coverSlot}
+                        onChange={handleCoverChange}
+                        onRemove={handleCoverRemove}
+                        label="Thumbnail"
+                        hint="Optional — shown as the document thumbnail"
+                      />
+                    </div>
+                  </>
+                )}
               </div>
 
               <Separator />
@@ -1000,7 +1181,15 @@ export default function UploadPage() {
                     id="name"
                     value={formData.name}
                     onChange={(e) => handleInputChange('name', e.target.value)}
-                    placeholder={mode === 'video' ? 'e.g. Marketing Video — English' : mode === 'link' ? 'e.g. Q4 Marketing Presentation' : 'e.g. Primary Logo'}
+                    placeholder={
+                      mode === 'video'
+                        ? 'e.g. Marketing Video — English'
+                        : mode === 'link'
+                          ? 'e.g. Q4 Marketing Presentation'
+                          : mode === 'document'
+                            ? 'e.g. Q3 Financial Report'
+                            : 'e.g. Primary Logo'
+                    }
                     required
                     className="h-10"
                   />
@@ -1078,7 +1267,15 @@ export default function UploadPage() {
                     id="tags"
                     value={formData.tags}
                     onChange={(e) => handleInputChange('tags', e.target.value)}
-                    placeholder={mode === 'video' ? 'marketing, launch, 2026' : mode === 'link' ? 'presentation, canva, q4' : 'logo, brand, primary'}
+                    placeholder={
+                      mode === 'video'
+                        ? 'marketing, launch, 2026'
+                        : mode === 'link'
+                          ? 'presentation, canva, q4'
+                          : mode === 'document'
+                            ? 'report, finance, q3'
+                            : 'logo, brand, primary'
+                    }
                     className="h-10"
                   />
                 </div>
@@ -1124,6 +1321,11 @@ export default function UploadPage() {
                     <>
                       <Video className="h-4 w-4" />
                       Add Video
+                    </>
+                  ) : mode === 'document' ? (
+                    <>
+                      <FileText className="h-4 w-4" />
+                      Add Document
                     </>
                   ) : (
                     <>

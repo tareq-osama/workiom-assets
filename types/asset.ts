@@ -1,4 +1,4 @@
-export type AssetFormat = 'SVG' | 'PNG' | 'JPG' | 'MP4';
+export type AssetFormat = 'SVG' | 'PNG' | 'JPG' | 'MP4' | 'PDF' | 'DOC' | 'XLS' | 'PPT';
 export type AssetStatus = 'Active' | 'Deprecated' | 'Draft';
 export type AssetCategory = string; // dynamic — managed in Appwrite categories collection
 

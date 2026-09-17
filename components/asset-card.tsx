@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import Image from 'next/image';
-import { Download, Link2, FileImage, ExternalLink, Pencil, Type, Copy, Trash2, Loader2, Play, AlertTriangle } from 'lucide-react';
+import { Download, Link2, FileImage, ExternalLink, Pencil, Type, Copy, Trash2, Loader2, Play, AlertTriangle, FileText } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import {
@@ -25,6 +25,8 @@ interface AssetCardProps {
 function isImageFormat(fmt: string) {
   return ['SVG', 'PNG', 'JPG', 'JPEG'].includes(fmt.toUpperCase());
 }
+
+const DOCUMENT_FORMATS = ['PDF', 'DOC', 'XLS', 'PPT'];
 
 function formatFileSize(bytes: number): string {
   if (bytes === 0) return '';
@@ -70,6 +72,10 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
   MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
+  PDF: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+  DOC: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100',
+  XLS: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+  PPT: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
 };
 
 const iconBtnBase =
@@ -112,6 +118,10 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
   const primaryFormat = currentAsset.formats[0];
   const isLinkAsset = Boolean(currentAsset.linkUrl);
   const isVideoAsset = currentAsset.formats.includes('MP4');
+  const isDocumentAsset = currentAsset.formats.some((f) => DOCUMENT_FORMATS.includes(f));
+  const LinkIcon = isVideoAsset ? Play : isDocumentAsset ? FileText : ExternalLink;
+  const linkActionLabel = isVideoAsset ? 'Play' : isDocumentAsset ? 'Open' : 'Visit';
+  const linkKindLabel = isVideoAsset ? 'Video' : isDocumentAsset ? 'Document' : 'Link';
 
   if (isDeleted) return null;
 
@@ -393,8 +403,8 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
                 <>
                   <span className="text-slate-300">•</span>
                   <span className="text-xs text-blue-600 font-medium flex items-center gap-0.5">
-                    {isVideoAsset ? <Play className="w-3 h-3" /> : <ExternalLink className="w-3 h-3" />}
-                    {isVideoAsset ? 'Video' : 'Link'}
+                    <LinkIcon className="w-3 h-3" />
+                    {linkKindLabel}
                   </span>
                 </>
               ) : currentAsset.formats.length > 0 && (
@@ -433,10 +443,10 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
                   className={cn(iconBtnBase, 'h-7 px-2 text-xs font-semibold rounded-md bg-blue-50 text-blue-700 border border-blue-200 hover:bg-blue-100')}
                   onClick={() => window.open(currentAsset.linkUrl, '_blank', 'noopener,noreferrer')}
                 >
-                  {isVideoAsset ? <Play className="h-3 w-3 mr-1" /> : <ExternalLink className="h-3 w-3 mr-1" />}
-                  {isVideoAsset ? 'Play' : 'Visit'}
+                  <LinkIcon className="h-3 w-3 mr-1" />
+                  {linkActionLabel}
                 </TooltipTrigger>
-                <TooltipContent>{isVideoAsset ? 'Play video' : 'Open link'}</TooltipContent>
+                <TooltipContent>{isVideoAsset ? 'Play video' : isDocumentAsset ? 'Open document' : 'Open link'}</TooltipContent>
               </Tooltip>
             ) : (
               currentAsset.formats.map((fmt) => (
@@ -515,8 +525,8 @@ export default function AssetCard({ asset, viewMode = 'grid', isAuthenticated = 
           <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2 pointer-events-none group-hover:pointer-events-auto">
             {isLinkAsset ? (
               <span className="h-9 px-4 text-xs font-semibold rounded-md flex items-center gap-1.5 bg-white text-slate-900 hover:bg-slate-100 transition-colors cursor-pointer">
-                {isVideoAsset ? <Play className="h-3.5 w-3.5" /> : <ExternalLink className="h-3.5 w-3.5" />}
-                {isVideoAsset ? 'Play Video' : 'Visit Link'}
+                <LinkIcon className="h-3.5 w-3.5" />
+                {isVideoAsset ? 'Play Video' : isDocumentAsset ? 'Open Document' : 'Visit Link'}
               </span>
             ) : (
               <>

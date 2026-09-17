@@ -98,6 +98,10 @@ const FORMAT_COLORS: Record<AssetFormat, string> = {
   PNG: 'bg-blue-50 text-blue-700 border-blue-200 hover:bg-blue-100',
   JPG: 'bg-emerald-50 text-emerald-700 border-emerald-200 hover:bg-emerald-100',
   MP4: 'bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100',
+  PDF: 'bg-red-50 text-red-700 border-red-200 hover:bg-red-100',
+  DOC: 'bg-sky-50 text-sky-700 border-sky-200 hover:bg-sky-100',
+  XLS: 'bg-green-50 text-green-700 border-green-200 hover:bg-green-100',
+  PPT: 'bg-orange-50 text-orange-700 border-orange-200 hover:bg-orange-100',
 };
 
 const FORMAT_BADGE: Record<AssetFormat, string> = {
@@ -105,6 +109,10 @@ const FORMAT_BADGE: Record<AssetFormat, string> = {
   PNG: 'border-blue-200 bg-blue-50 text-blue-700',
   JPG: 'border-emerald-200 bg-emerald-50 text-emerald-700',
   MP4: 'border-rose-200 bg-rose-50 text-rose-700',
+  PDF: 'border-red-200 bg-red-50 text-red-700',
+  DOC: 'border-sky-200 bg-sky-50 text-sky-700',
+  XLS: 'border-green-200 bg-green-50 text-green-700',
+  PPT: 'border-orange-200 bg-orange-50 text-orange-700',
 };
 
 const FORMAT_DOT: Record<AssetFormat, string> = {
@@ -112,6 +120,10 @@ const FORMAT_DOT: Record<AssetFormat, string> = {
   PNG: 'bg-blue-500',
   JPG: 'bg-emerald-500',
   MP4: 'bg-rose-500',
+  PDF: 'bg-red-500',
+  DOC: 'bg-sky-500',
+  XLS: 'bg-green-500',
+  PPT: 'bg-orange-500',
 };
 
 const FORMAT_ACCEPT: Record<AssetFormat, string> = {
@@ -119,6 +131,10 @@ const FORMAT_ACCEPT: Record<AssetFormat, string> = {
   PNG: '.png,image/png',
   JPG: '.jpg,.jpeg,image/jpeg',
   MP4: '.mp4,video/mp4',
+  PDF: '.pdf,application/pdf',
+  DOC: '.doc,.docx',
+  XLS: '.xls,.xlsx',
+  PPT: '.ppt,.pptx',
 };
 
 function CopyLinkButton({ value }: { value: string }) {
@@ -164,11 +180,19 @@ export default function AssetPreviewDialog({
   const pngInputRef = useRef<HTMLInputElement>(null);
   const jpgInputRef = useRef<HTMLInputElement>(null);
   const mp4InputRef = useRef<HTMLInputElement>(null);
+  const pdfInputRef = useRef<HTMLInputElement>(null);
+  const docInputRef = useRef<HTMLInputElement>(null);
+  const xlsInputRef = useRef<HTMLInputElement>(null);
+  const pptInputRef = useRef<HTMLInputElement>(null);
   const formatRefs: Record<AssetFormat, React.RefObject<HTMLInputElement | null>> = {
     SVG: svgInputRef,
     PNG: pngInputRef,
     JPG: jpgInputRef,
     MP4: mp4InputRef,
+    PDF: pdfInputRef,
+    DOC: docInputRef,
+    XLS: xlsInputRef,
+    PPT: pptInputRef,
   };
 
   useEffect(() => {
